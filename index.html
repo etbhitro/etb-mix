@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>etb.world</title>
+<meta name="description" content="etb — диджей. etb.world — его мир: клуб, live, магазины, агенты, партнёры.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;500;700&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#07060b; --ink-n:#ece7f4; --mute-n:#8e86a0; --glow:#b48cff; --hot:#ff5fa2; --amber:#ffb86b;
+  --day:#f7f2ea; --ink-d:#1f1a15; --mute-d:#8a7e70; --bronze:#a47148;
+  --bg:var(--night); --ink:var(--ink-n); --mute:var(--mute-n); --line:rgba(255,255,255,.09); --card:rgba(255,255,255,.04);
+}
+body.day{ --bg:var(--day); --ink:var(--ink-d); --mute:var(--mute-d); --line:rgba(31,26,21,.1); --card:rgba(255,255,255,.6); }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.55 Onest,system-ui,sans-serif;transition:background 1.2s ease,color 1.2s ease;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.disp{font-family:Unbounded,Onest,sans-serif;font-weight:500;letter-spacing:-.02em;line-height:1.02}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.wrap{width:min(1180px,100% - 32px);margin:0 auto}
+section{position:relative;min-height:100vh;padding:120px 0;display:flex;align-items:center}
+.ch{font:500 12px/1 Unbounded,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);display:flex;gap:14px;align-items:center;margin-bottom:28px}
+.ch b{color:var(--glow);font-weight:500}
+body.day .ch b{color:var(--bronze)}
+.big{font-size:clamp(44px,8vw,112px)}
+.h2{font-size:clamp(34px,5.4vw,72px);margin-bottom:22px}
+.lead{font-size:clamp(18px,1.6vw,21px);color:var(--mute);max-width:520px;font-weight:300}
+.rv{opacity:0;transform:translateY(34px);transition:opacity 1s ease,transform 1s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;border:1px solid var(--line);background:var(--card);backdrop-filter:blur(14px);font-weight:500;transition:transform .3s,border-color .3s,background .3s}
+.pill:hover{transform:translateY(-2px);border-color:var(--glow)}
+body.day .pill:hover{border-color:var(--bronze)}
+.pill.solid{background:var(--ink);color:var(--bg);border-color:transparent}
+.glass{border:1px solid var(--line);background:var(--card);backdrop-filter:blur(18px);border-radius:28px}
+
+/* nav */
+nav{position:fixed;inset:0 0 auto;z-index:50;padding:18px 0;background:linear-gradient(var(--bg) 30%,transparent);transition:background 1.2s}
+nav .wrap{display:flex;justify-content:space-between;align-items:center}
+.logo{font:700 20px Unbounded,sans-serif;letter-spacing:-.04em;text-decoration:none}
+.logo i{font-style:normal;color:var(--glow);transition:color 1.2s}
+body.day .logo i{color:var(--bronze)}
+.dots{display:flex;gap:8px}
+.dots a{width:8px;height:8px;border-radius:50%;background:var(--line);transition:background .4s,transform .4s}
+.dots a.on{background:var(--ink);transform:scale(1.3)}
+.snd{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--mute)}
+.eq{display:flex;gap:2px;height:14px;align-items:flex-end}
+.eq span{width:3px;background:currentColor;height:3px;border-radius:2px;transition:height .1s}
+
+/* hero */
+#hero{padding:0;overflow:hidden}
+#viz{position:absolute;inset:0;width:100%;height:100%}
+.hero-in{position:relative;z-index:2;text-align:center;width:100%}
+.hero-in .big{font-size:clamp(84px,19vw,280px);font-weight:700;letter-spacing:-.07em;line-height:.9}
+.hero-in .big i{font-style:normal;padding-right:.08em;background:linear-gradient(120deg,var(--glow),var(--hot) 60%,var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-in p{margin:26px auto 40px;color:var(--mute);font-size:clamp(18px,2vw,22px);font-weight:300}
+.scroll-cue{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);z-index:2;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+.scroll-cue:after{content:"";display:block;width:1px;height:42px;margin:12px auto 0;background:linear-gradient(var(--mute),transparent);animation:cue 2s infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+/* club */
+.split{display:grid;grid-template-columns:1fr 1.1fr;gap:64px;align-items:center}
+.mixes{display:flex;flex-direction:column;gap:12px}
+.mix{display:grid;grid-template-columns:56px 1fr auto;gap:18px;align-items:center;padding:16px 20px 16px 16px;border-radius:22px;border:1px solid var(--line);background:var(--card);text-align:left;transition:border-color .3s,background .3s}
+.mix:hover{border-color:rgba(180,140,255,.4)}
+.mix.on{border-color:var(--glow);background:rgba(180,140,255,.08)}
+.cover{width:56px;height:56px;border-radius:16px;position:relative;overflow:hidden;display:grid;place-items:center}
+.cover:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.35),transparent 60%)}
+.cover svg{position:relative;z-index:1}
+.mix h3{font-size:16px;font-weight:500;letter-spacing:-.01em;margin-bottom:4px}
+.mix small{color:var(--mute);font-size:13px}
+.mix .t{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.mini{display:flex;gap:2px;height:18px;align-items:center}
+.mini span{width:2px;border-radius:2px;background:var(--glow);height:4px}
+.deck{aspect-ratio:1;max-width:480px;margin:0 auto;position:relative}
+.vinyl{position:absolute;inset:6%;border-radius:50%;background:repeating-radial-gradient(circle,#111 0 2px,#1a1822 2px 4px);box-shadow:0 40px 120px rgba(180,140,255,.18),inset 0 0 0 1px rgba(255,255,255,.06);animation:spin 1.8s linear infinite;animation-play-state:paused}
+.vinyl.on{animation-play-state:running}
+.vinyl:before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 20deg,transparent 0 40deg,rgba(255,255,255,.08) 60deg,transparent 80deg 220deg,rgba(255,255,255,.05) 240deg,transparent 260deg)}
+.label{position:absolute;inset:34%;border-radius:50%;display:grid;place-items:center;font:700 22px Unbounded;letter-spacing:-.04em;color:#fff;transition:background .6s}
+.label:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:var(--night)}
+.label span{transform:translateY(-26px);font-size:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.now{position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;font-size:13px;color:var(--mute)}
+
+/* live */
+.stage{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:48px}
+.screen{position:relative;aspect-ratio:16/10;border-radius:28px;overflow:hidden;background:radial-gradient(ellipse at 50% 120%,rgba(255,95,162,.35),transparent 60%),radial-gradient(ellipse at 50% -20%,rgba(180,140,255,.25),transparent 60%),#0c0a12;border:1px solid var(--line)}
+.screen svg.av{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:88%}
+.beams{position:absolute;inset:0;background:conic-gradient(from 180deg at 50% -10%,transparent 0 160deg,rgba(180,140,255,.18) 170deg,transparent 180deg,rgba(255,95,162,.14) 190deg,transparent 200deg 360deg);animation:sweep 6s ease-in-out infinite alternate;mix-blend-mode:screen}
+@keyframes sweep{from{transform:rotate(-14deg)}to{transform:rotate(14deg)}}
+.scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px);pointer-events:none}
+.badges{position:absolute;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.live{display:inline-flex;align-items:center;gap:8px;background:#ff3b5c;color:#fff;padding:6px 12px;border-radius:999px;font:500 11px Unbounded;letter-spacing:.12em}
+.live:before{content:"";width:7px;height:7px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+.viewers{background:rgba(0,0,0,.45);padding:6px 12px;border-radius:999px;backdrop-filter:blur(8px);font-variant-numeric:tabular-nums}
+.caption{position:absolute;left:18px;top:60px;right:18px;display:flex;justify-content:space-between;align-items:flex-end}
+.caption b{font:500 18px Unbounded;letter-spacing:-.02em;display:block}
+.caption small{color:var(--mute)}
+.chat{display:flex;flex-direction:column;padding:20px;height:100%;min-height:320px}
+.chat h4{font-weight:500;font-size:14px;color:var(--mute);margin-bottom:12px}
+.msgs{flex:1;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;mask-image:linear-gradient(transparent,#000 30%)}
+.m{font-size:14px;line-height:1.4;animation:pop .5s ease}
+.m b{font-weight:500;margin-right:6px}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}}
+.sched{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.sched span{font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--mute)}
+.sched span b{color:var(--ink);font-weight:500}
+
+/* dawn */
+#dawn{text-align:center;min-height:90vh;background:linear-gradient(var(--night),#2a1830 35%,#c96a5a 70%,#f2c48f 88%,var(--day))}
+#dawn .h2{color:#fff}
+#dawn .sun{width:180px;height:180px;border-radius:50%;margin:0 auto 40px;background:radial-gradient(circle,#ffe3b3,#ffb86b 55%,transparent 72%);filter:blur(1px);box-shadow:0 0 120px 40px rgba(255,184,107,.35)}
+#dawn p{color:rgba(255,255,255,.75);max-width:520px;margin:0 auto}
+
+/* city */
+#city{display:block;height:620vh;padding:0;min-height:0}
+.sticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden;background:linear-gradient(#f6e6d2,#f7f2ea 55%)}
+.city-head{position:absolute;left:0;right:0;top:92px;z-index:3;transition:opacity .4s}
+.city-head .h2{font-size:clamp(26px,3.6vw,48px)}
+.sky{position:absolute;inset:0}
+.sunb{position:absolute;right:12%;top:18%;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,#ffe7bf,#ffc27f 60%,transparent 72%);box-shadow:0 0 120px 40px rgba(255,194,127,.35)}
+.mount{position:absolute;left:0;width:200%;bottom:22vh;height:26vh}
+.m1{fill:#d9cbbb;opacity:.7}
+.m2{fill:#cdbba6;opacity:.6;bottom:21vh;height:16vh}
+.ground{position:absolute;left:0;right:0;bottom:0;height:22vh;background:linear-gradient(#e7dccd,#ddd0bf);border-top:1px solid rgba(31,26,21,.12)}
+.ground:after{content:"";position:absolute;left:0;right:0;top:46%;height:3px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.9) 0 50px,transparent 50px 110px)}
+.track{position:absolute;left:0;bottom:22vh;height:62vh;will-change:transform}
+.bld{position:absolute;bottom:0;cursor:pointer;transition:transform .5s cubic-bezier(.2,.7,.2,1);transform-origin:bottom center}
+.bld:hover,.bld.near{transform:translateY(-6px)}
+.fac{position:absolute;inset:0;border-radius:14px 14px 0 0;overflow:hidden;box-shadow:0 30px 60px -30px rgba(60,40,20,.35)}
+.win{position:absolute;left:10%;right:10%;top:24%;bottom:30%;background:repeating-linear-gradient(90deg,transparent 0 6%,var(--wc,rgba(255,255,255,.55)) 6% 26%,transparent 26% 34%),transparent;-webkit-mask:repeating-linear-gradient(transparent 0 10%,#000 10% 34%,transparent 34% 40%);mask:repeating-linear-gradient(transparent 0 10%,#000 10% 34%,transparent 34% 40%)}
+.door{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:22%;height:24%;border-radius:10px 10px 0 0;background:rgba(0,0,0,.28)}
+.sign{position:absolute;left:50%;top:7%;transform:translateX(-50%);white-space:nowrap;padding:8px 16px;border-radius:12px;font:600 clamp(12px,1.2vw,16px) Unbounded;letter-spacing:-.02em}
+.awn{position:absolute;left:4%;right:4%;top:66%;height:8%;border-radius:0 0 12px 12px}
+.agent{position:absolute;left:50%;bottom:calc(100% + 12px);transform:translateX(-50%);white-space:nowrap;font-size:12px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.85);border:1px solid var(--line);display:flex;gap:6px;align-items:center;box-shadow:0 8px 20px rgba(60,40,20,.08)}
+.agent:before{content:"";width:7px;height:7px;border-radius:50%;background:#3dbd7d;animation:blink 1.6s infinite}
+.bubble{position:absolute;left:50%;bottom:calc(100% + 50px);transform:translate(-50%,10px);opacity:0;pointer-events:none;transition:all .4s;white-space:nowrap;background:var(--ink-d);color:var(--day);padding:10px 16px;border-radius:16px;font-size:14px}
+.bubble b{font-weight:500}
+.bld.near .bubble{opacity:1;transform:translate(-50%,0)}
+.board{position:absolute;bottom:0;cursor:pointer}
+.board .pole{position:absolute;left:50%;bottom:0;width:8px;height:40%;background:#8c7b6a;transform:translateX(-50%)}
+.board .face{position:absolute;left:0;right:0;top:0;height:60%;border-radius:12px;border:6px solid #3a2f26;background:repeating-linear-gradient(135deg,#fff 0 14px,#f3ece2 14px 28px);display:grid;place-items:center;text-align:center;padding:10px;font-size:13px;color:var(--ink-d)}
+.board .face b{display:block;font:600 15px Unbounded;letter-spacing:-.02em;margin-bottom:4px}
+.board.screen-b .face{background:linear-gradient(120deg,#1b1030,#4a1d4f,#b48cff,#ff5fa2,#1b1030);background-size:400% 100%;animation:scr 8s linear infinite;color:#fff;overflow:hidden}
+@keyframes scr{to{background-position:400% 0}}
+.tree{position:absolute;bottom:0;width:60px;height:150px}
+.tree:before{content:"";position:absolute;left:50%;bottom:0;width:6px;height:60px;background:#8c7b6a;transform:translateX(-50%)}
+.tree:after{content:"";position:absolute;left:0;right:0;top:0;height:110px;border-radius:50% 50% 45% 45%;background:#b9c39a;opacity:.85}
+.walker{position:absolute;left:50%;bottom:calc(22vh - 18px);transform:translateX(-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--mute-d)}
+.walker-b{width:30px;height:30px;border-radius:50%;background:var(--ink-d);display:grid;place-items:center;box-shadow:0 0 0 8px rgba(31,26,21,.08)}
+.walker-b i{width:10px;height:10px;border-radius:50%;background:var(--amber)}
+.walker.walk .walker-b{animation:bob .4s infinite alternate}
+@keyframes bob{to{transform:translateY(-5px)}}
+.hintbar{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);font-size:13px;color:var(--mute-d);z-index:4;white-space:nowrap}
+
+/* sheet */
+.veil{position:fixed;inset:0;z-index:80;background:rgba(31,26,21,.28);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .35s}
+.veil.on{opacity:1;pointer-events:auto}
+.sheet{width:min(560px,100%);max-height:88vh;overflow:auto;background:rgba(251,248,243,.94);color:var(--ink-d);padding:28px;border-radius:30px;transform:translateY(20px);transition:transform .45s cubic-bezier(.2,.7,.2,1);position:relative}
+.veil.on .sheet{transform:none}
+.x{position:absolute;right:18px;top:18px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:#fff}
+.sheet h3{font-size:26px;margin:4px 0 6px;padding-right:44px}
+.sheet .sub{color:var(--mute-d);font-size:15px;margin-bottom:18px}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:rgba(31,26,21,.06);margin-bottom:18px;gap:2px;flex-wrap:wrap}
+.seg button{padding:9px 16px;border-radius:999px;font-size:14px;color:var(--mute-d)}
+.seg button.on{background:#fff;color:var(--ink-d);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.menu{display:flex;flex-direction:column;gap:8px}
+.it{display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:center;padding:10px;border-radius:18px;background:#fff;border:1px solid var(--line)}
+.it .ph{width:48px;height:48px;border-radius:14px}
+.it b{font-weight:500;display:block;font-size:15px}
+.it small{color:var(--mute-d);font-size:13px}
+.qty{display:flex;align-items:center;gap:10px}
+.qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--day);font-size:18px;line-height:1}
+.qty span{min-width:14px;text-align:center;font-variant-numeric:tabular-nums}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:12px}
+.foot .tot{font:300 26px Unbounded;letter-spacing:-.03em}
+.agentmsg{margin-top:18px;display:flex;flex-direction:column;gap:8px}
+.tour{position:relative;height:300px;border-radius:22px;overflow:hidden;perspective:260px;background:#2a211b;cursor:grab;touch-action:none}
+.tour:active{cursor:grabbing}
+.room3d{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d}
+.wall{position:absolute;width:600px;height:340px;left:-300px;top:-170px;backface-visibility:hidden;background:linear-gradient(#efe2cf,#e2cfb4 70%,#b88b5e 70%,#a47148);overflow:hidden}
+.wall .w{position:absolute;top:40px;height:120px;width:110px;border-radius:60px 60px 6px 6px;background:linear-gradient(#bfe0f0,#f6dcb3);box-shadow:inset 0 0 0 6px #8a6a4c}
+.wall .tb{position:absolute;bottom:40px;width:90px;height:30px;border-radius:50%;background:#7a5536;box-shadow:0 10px 0 -6px #5a3c24}
+.wall .lab{position:absolute;left:50%;top:14px;transform:translateX(-50%);font:600 13px Unbounded;color:#6b4d33;letter-spacing:.1em}
+.wall .lamp{position:absolute;top:0;width:2px;height:60px;background:#6b4d33}
+.wall .lamp:after{content:"";position:absolute;left:-10px;bottom:-10px;width:22px;height:14px;border-radius:12px 12px 4px 4px;background:#ffc27f;box-shadow:0 10px 30px 10px rgba(255,194,127,.5)}
+.floor3d{position:absolute;width:600px;height:600px;left:-300px;top:-300px;background:repeating-linear-gradient(90deg,#8a6446 0 40px,#7d5a3e 40px 80px)}
+.floor3d.ceil{background:radial-gradient(circle,#fff3df,#e9d6bb 70%)}
+.tourhint{position:absolute;left:14px;bottom:12px;font-size:12px;color:rgba(255,255,255,.8);background:rgba(0,0,0,.35);padding:6px 10px;border-radius:999px}
+
+/* shops */
+.shops{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:52px}
+.shop{padding:26px;display:flex;flex-direction:column;gap:18px;min-height:380px}
+.shop-h{display:flex;align-items:center;gap:12px}
+.ava{width:44px;height:44px;border-radius:50%;padding:2px;background:linear-gradient(45deg,#f9b34a,#e1306c,#8a3ab9)}
+.ava div{width:100%;height:100%;border-radius:50%;background:var(--day);display:grid;place-items:center;font:700 11px Unbounded;letter-spacing:-.02em}
+.shop-h b{display:block;font-weight:500}
+.shop-h small{color:var(--mute);font-size:13px}
+.import{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:8px}
+.bar{flex:1;height:3px;border-radius:3px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--bronze);transition:width 2.2s ease}
+.goods{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g{border-radius:16px;padding:12px;background:rgba(255,255,255,.7);border:1px solid var(--line);opacity:0;transform:scale(.94);transition:opacity .5s,transform .5s}
+.g.in{opacity:1;transform:none}
+.g .ph{height:58px;border-radius:10px;margin-bottom:10px}
+.g b{display:block;font-size:13px;font-weight:500;line-height:1.25}
+.g span{font-size:12px;color:var(--mute)}
+.shop.add{align-items:center;justify-content:center;text-align:center;border-style:dashed;background:transparent}
+.shop.add .plus{width:64px;height:64px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:28px;font-weight:300;color:var(--bronze)}
+
+/* seller */
+.sell{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:52px}
+.phone{padding:22px;min-height:470px;display:flex;flex-direction:column}
+.phone-h{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.bot{width:40px;height:40px;border-radius:14px;background:var(--ink);color:var(--day);display:grid;place-items:center}
+.phone-h b{display:block;font-weight:500;font-size:15px}
+.phone-h small{font-size:12px;color:var(--bronze)}
+.thread{flex:1;display:flex;flex-direction:column;gap:10px;justify-content:flex-end}
+.b{max-width:82%;padding:11px 15px;border-radius:20px;font-size:15px;line-height:1.4;animation:pop .45s ease}
+.b.me{align-self:flex-end;background:var(--ink);color:var(--day);border-bottom-right-radius:6px}
+.b.ai{align-self:flex-start;background:#fff;border:1px solid var(--line);border-bottom-left-radius:6px}
+.chips{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.chips span{font-size:12px;padding:5px 10px;border-radius:999px;background:var(--day);border:1px solid var(--line)}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;border-radius:20px;background:#fff;border:1px solid var(--line)}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--mute);animation:ty 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes ty{50%{transform:translateY(-4px);opacity:.4}}
+.order{padding:30px;display:flex;flex-direction:column}
+.order .no{font:500 13px Unbounded;letter-spacing:.1em;color:var(--mute)}
+.order .sum{font:300 clamp(44px,5vw,64px) Unbounded;letter-spacing:-.04em;margin:14px 0 6px;font-variant-numeric:tabular-nums}
+.lines{margin:18px 0 26px;display:flex;flex-direction:column;gap:8px;min-height:64px}
+.lines div{display:flex;justify-content:space-between;font-size:15px;animation:pop .4s}
+.lines span{color:var(--mute)}
+.steps{display:flex;flex-direction:column;gap:0;margin-top:auto}
+.st{display:flex;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line);color:var(--mute);transition:color .4s}
+.st i{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px;font-style:normal;transition:all .4s}
+.st.on{color:var(--ink)}
+.st.on i{background:var(--bronze);border-color:var(--bronze);color:#fff}
+
+/* agents */
+.uni{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:center;margin-top:40px}
+.orbit{position:relative;aspect-ratio:1;max-width:560px;width:100%;margin:0 auto}
+.orbit #links{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:500;text-align:center}
+.node .c{width:58px;height:58px;border-radius:50%;background:#fff;border:1px solid var(--line);display:grid;place-items:center;box-shadow:0 10px 30px rgba(80,50,20,.08);transition:transform .35s,box-shadow .35s,border-color .35s}
+.node.hit .c{transform:scale(1.15);border-color:var(--bronze);box-shadow:0 0 0 8px rgba(164,113,72,.12),0 10px 30px rgba(80,50,20,.12)}
+.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:132px;height:132px;border-radius:50%;background:var(--ink);color:var(--day);display:grid;place-items:center;font:700 26px Unbounded;letter-spacing:-.05em;box-shadow:0 0 0 18px rgba(31,26,21,.04),0 0 0 40px rgba(31,26,21,.025)}
+.core i{font-style:normal;color:var(--amber)}
+.feed{display:flex;flex-direction:column;gap:10px}
+.fi{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 18px;border-radius:18px;background:rgba(255,255,255,.65);border:1px solid var(--line);animation:pop .5s ease}
+.fi .who{font-weight:500;font-size:14px}
+.fi .what{font-size:14px;color:var(--mute)}
+.fi time{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.dotc{width:8px;height:8px;border-radius:50%;background:var(--bronze)}
+
+/* partners */
+.pt{display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:center}
+.invite{display:flex;gap:10px;margin-top:30px;flex-wrap:wrap}
+.invite input{flex:1;min-width:200px;padding:15px 22px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.7);font:inherit;color:inherit;outline:none}
+.invite input:focus{border-color:var(--bronze)}
+.link{margin-top:18px;font-size:15px;color:var(--mute);min-height:24px}
+.link b{color:var(--ink);font-weight:500}
+.room{padding:16px;border-radius:30px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{aspect-ratio:4/3;border-radius:20px;position:relative;overflow:hidden;display:grid;place-items:center}
+.tile.a{background:radial-gradient(circle at 50% 110%,rgba(255,95,162,.4),transparent 60%),#15111c;color:#fff}
+.tile.b{background:radial-gradient(circle at 50% 110%,rgba(164,113,72,.35),transparent 60%),#e9e1d5}
+.tile .face{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font:700 18px Unbounded;letter-spacing:-.04em}
+.tile.a .face{background:rgba(255,255,255,.1);box-shadow:0 0 0 0 rgba(255,255,255,.3);animation:talk 1.6s infinite}
+.tile.b .face{background:rgba(31,26,21,.08)}
+@keyframes talk{50%{box-shadow:0 0 0 12px rgba(255,255,255,0)}}
+.tile small{position:absolute;left:12px;bottom:10px;font-size:12px;opacity:.8}
+.notes{padding:18px 8px 6px;display:flex;flex-direction:column;gap:10px}
+.notes h4{font-weight:500;font-size:13px;color:var(--mute);display:flex;justify-content:space-between}
+.notes h4 span{color:var(--bronze)}
+.nt{font-size:14px;display:flex;gap:10px;animation:pop .5s}
+.nt i{font-style:normal;color:var(--bronze)}
+
+/* end */
+#end{text-align:center;min-height:80vh}
+#end .big{font-size:clamp(56px,12vw,170px);font-weight:700;letter-spacing:-.06em}
+#end .big i{font-style:normal;color:var(--bronze)}
+.tabs{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:36px auto 0;max-width:760px}
+.tabs a{text-decoration:none;padding:12px 20px;border-radius:999px;border:1px solid var(--line);font-size:15px;background:var(--card);transition:border-color .3s}
+.tabs a:hover{border-color:var(--bronze)}
+footer{padding:40px 0;text-align:center;font-size:13px;color:var(--mute)}
+
+@media (max-width:900px){
+  section{padding:96px 0;min-height:auto}
+  #hero{min-height:100svh}
+  .split,.stage,.sell,.uni,.pt{grid-template-columns:1fr;gap:28px}
+  .shops{grid-template-columns:1fr}
+  .shop{min-height:0}
+  .deck{max-width:300px}
+  .dots{display:none}
+  .chat{min-height:260px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="logo" href="#hero">etb<i>.</i>world</a>
+  <div class="dots" id="dots"></div>
+  <button class="snd" id="sndBtn" aria-label="Звук"><span class="eq" id="navEq"><span></span><span></span><span></span><span></span></span><span id="sndTxt">звук</span></button>
+</div></nav>
+
+<!-- 0 · Вход -->
+<section id="hero" data-mode="night" data-name="Вход">
+  <canvas id="viz"></canvas>
+  <div class="hero-in">
+    <h1 class="big rv">etb<i>.</i></h1>
+    <p class="rv d1">Диджей. И это мой мир.</p>
+    <button class="pill solid rv d2" id="enter">
+      <svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11L12 7z" fill="currentColor"/></svg>
+      Войти со звуком
+    </button>
+  </div>
+  <div class="scroll-cue">листай</div>
+</section>
+
+<!-- 1 · Клуб -->
+<section id="club" data-mode="night" data-name="Клуб">
+  <div class="wrap split">
+    <div>
+      <div class="ch rv"><b>01</b> Ночь · клуб</div>
+      <h2 class="h2 rv d1">Здесь играет<br>моя музыка</h2>
+      <p class="lead rv d2">Сеты, миксы, эксклюзив. Каждую неделю новый.</p>
+      <div class="mixes rv d3" id="mixes" style="margin-top:36px"></div>
+    </div>
+    <div class="deck rv d2">
+      <div class="vinyl" id="vinyl"><div class="label" id="vlabel"><span>etb</span></div></div>
+      <div class="now" id="nowTxt">выбери сет</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Live -->
+<section id="live" data-mode="night" data-name="Live">
+  <div class="wrap">
+    <div class="ch rv"><b>02</b> Прямой эфир</div>
+    <h2 class="h2 rv d1">Я в эфире,<br>даже когда сплю</h2>
+    <p class="lead rv d2">AI-etb ведёт трансляции, отвечает залу и крутит сеты по расписанию.</p>
+    <div class="stage rv d3">
+      <div class="screen">
+        <div class="beams"></div>
+        <svg class="av" viewBox="0 0 400 360" fill="none" id="avatar">
+          <defs><linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b48cff"/><stop offset="1" stop-color="#ff5fa2"/></linearGradient></defs>
+          <g stroke="url(#gl)" stroke-width="2.2" stroke-linecap="round">
+            <path d="M200 52c-34 0-58 26-58 62 0 40 26 70 58 70s58-30 58-70c0-36-24-62-58-62z" fill="rgba(180,140,255,.06)"/>
+            <path d="M134 120c0-46 30-82 66-82s66 36 66 82"/>
+            <rect x="122" y="108" width="22" height="42" rx="10" fill="rgba(180,140,255,.25)"/>
+            <rect x="256" y="108" width="22" height="42" rx="10" fill="rgba(180,140,255,.25)"/>
+            <path d="M172 186v18c-48 8-88 34-100 80M228 186v18c48 8 88 34 100 80"/>
+            <path d="M130 250l40 36M270 250l-40 36" id="arms"/>
+          </g>
+          <rect x="70" y="286" width="260" height="74" rx="10" fill="#141019" stroke="rgba(255,255,255,.12)"/>
+          <circle cx="135" cy="320" r="24" stroke="rgba(255,255,255,.25)" fill="#0d0b12"/>
+          <circle cx="265" cy="320" r="24" stroke="rgba(255,255,255,.25)" fill="#0d0b12"/>
+          <g id="pads">
+            <rect x="182" y="300" width="14" height="14" rx="3" fill="#b48cff"/>
+            <rect x="204" y="300" width="14" height="14" rx="3" fill="#ff5fa2"/>
+            <rect x="182" y="322" width="14" height="14" rx="3" fill="#ff5fa2"/>
+            <rect x="204" y="322" width="14" height="14" rx="3" fill="#ffb86b"/>
+          </g>
+        </svg>
+        <div class="scan"></div>
+        <div class="badges"><span class="live">LIVE</span><span class="viewers" id="viewers">👁 1 284</span></div>
+        <div class="caption"><div><b>etb — Night Session</b><small>AI-трансляция · Бишкек</small></div></div>
+      </div>
+      <div class="glass chat"><h4>Чат эфира</h4><div class="msgs" id="msgs"></div></div>
+    </div>
+    <div class="sched rv"><span><b>Пт 22:00</b> · сет etb</span><span><b>Сб 23:00</b> · гость клуба</span><span><b>Вс 19:00</b> · закат на Иссык-Куле</span></div>
+  </div>
+</section>
+
+<!-- Рассвет -->
+<section id="dawn" data-mode="dawn" data-name="Утро">
+  <div class="wrap">
+    <div class="sun rv"></div>
+    <h2 class="h2 rv d1">Утро.<br>Мир работает</h2>
+    <p class="rv d2">Город просыпается. В каждой двери уже работает мой агент.</p>
+  </div>
+</section>
+
+<!-- 3 · Город -->
+<section id="city" data-mode="day" data-name="Город">
+  <div class="sticky">
+    <div class="city-head wrap">
+      <div class="ch"><b>03</b> Город</div>
+      <h2 class="h2">Иди по улице.<br>Всё, что встретишь, можно заказать</h2>
+    </div>
+    <div class="sky"><div class="sunb"></div></div>
+    <svg class="mount m1" viewBox="0 0 1600 200" preserveAspectRatio="none"><path d="M0 200L0 120 120 60 230 110 360 30 480 100 600 50 720 120 860 20 1000 100 1120 60 1260 120 1400 40 1520 100 1600 70V200z"/><path d="M340 44l20-14 22 18-12-2zM840 36l20-16 20 18-14-4zM1380 54l20-14 20 16z" fill="#fff" opacity=".8"/></svg>
+    <svg class="mount m2" viewBox="0 0 1600 200" preserveAspectRatio="none"><path d="M0 200V150l160-50 140 40 200-70 180 60 160-30 200 60 180-50 200 40 180-30V200z"/></svg>
+    <div class="track" id="track"></div>
+    <div class="ground"></div>
+    <div class="walker" id="me"><div class="walker-b"><i></i></div><span>ты</span></div>
+    <div class="hintbar" id="hint">листай — идёшь по улице</div>
+  </div>
+</section>
+
+<!-- Sheet -->
+<div class="veil" id="veil"><div class="sheet glass" id="sheet"></div></div>
+
+<!-- 4 · Продавец -->
+<section id="seller" data-mode="day" data-name="Продавец">
+  <div class="wrap">
+    <div class="ch rv"><b>04</b> Онлайн-продавец</div>
+    <h2 class="h2 rv d1">Робот принимает<br>и оформляет заказ</h2>
+    <p class="lead rv d2">Отвечает в Instagram, WhatsApp и Telegram. Днём и ночью.</p>
+    <div class="sell rv d3">
+      <div class="glass phone">
+        <div class="phone-h"><div class="bot"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="12" height="10" rx="3"/><path d="M9 2v3M6.5 10h.01M11.5 10h.01"/></svg></div><div><b>Продавец etb</b><small>● онлайн</small></div></div>
+        <div class="thread" id="thread"></div>
+      </div>
+      <div class="glass order">
+        <div class="no" id="ordNo">ЗАКАЗ —</div>
+        <div class="sum" id="ordSum">0 сом</div>
+        <div class="lines" id="ordLines"></div>
+        <div class="steps" id="ordSteps"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · Агенты -->
+<section id="agents" data-mode="day" data-name="Агенты">
+  <div class="wrap">
+    <div class="ch rv"><b>05</b> Вселенная</div>
+    <h2 class="h2 rv d1">Процессы ведут агенты</h2>
+    <p class="lead rv d2">Каждый знает своё дело и передаёт задачу следующему. Я задаю курс.</p>
+    <div class="uni">
+      <div class="orbit rv" id="orbit"><svg id="links"></svg><div class="core"><span>etb<i>.</i></span></div></div>
+      <div class="feed" id="feed"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · Партнёры -->
+<section id="partners" data-mode="day" data-name="Партнёры">
+  <div class="wrap pt">
+    <div>
+      <div class="ch rv"><b>06</b> Партнёрам</div>
+      <h2 class="h2 rv d1" style="font-size:clamp(32px,4.4vw,60px)">Личная ссылка<br>на разговор со мной</h2>
+      <p class="lead rv d2">Видеосвязь в моём мире. ИИ ведёт протокол, итоги приходят обеим сторонам.</p>
+      <form class="invite rv d3" id="inv"><input id="pname" placeholder="Имя партнёра" autocomplete="off"><button class="pill solid">Создать ссылку</button></form>
+      <div class="link" id="plink"></div>
+    </div>
+    <div class="glass room rv d2">
+      <div class="tiles">
+        <div class="tile a"><div class="face">etb</div><small>etb</small></div>
+        <div class="tile b"><div class="face" id="pface">П</div><small id="ptile">Партнёр</small></div>
+      </div>
+      <div class="notes"><h4>Протокол встречи <span>● ИИ пишет</span></h4><div id="notes"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Финал -->
+<section id="end" data-mode="day" data-name="Мир">
+  <div class="wrap">
+    <h2 class="big rv">etb<i>.</i>world</h2>
+    <p class="lead rv d1" style="margin:18px auto 0">Музыка собирает людей. Агенты держат мир.</p>
+    <div class="tabs rv d2">
+      <a href="#club">Клуб</a><a href="#live">Live</a><a href="#city">Город</a><a href="#seller">Продавец</a><a href="#agents">Агенты</a><a href="#partners">Партнёрам</a>
+    </div>
+  </div>
+</section>
+<footer>etb.world · 2026</footer>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const fmt=n=>n.toLocaleString('ru-RU').replace(/,/g,' ');
+
+/* ---------- reveal + chapter mode ---------- */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in')}),{threshold:.15});
+$$('.rv').forEach(el=>io.observe(el));
+const secs=$$('section');
+$('#dots').innerHTML=secs.map(s=>`<a href="#${s.id}" title="${s.dataset.name}"></a>`).join('');
+const dotEls=$$('#dots a');
+const visible=new Set();
+const modeIO=new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){
+      document.body.classList.toggle('day',e.target.dataset.mode==='day');
+      dotEls.forEach((d,i)=>d.classList.toggle('on',secs[i]===e.target));
+    }
+  });
+},{rootMargin:'-50% 0px -50% 0px'});
+secs.forEach(s=>modeIO.observe(s));
+const onView=(el,fn)=>{const o=new IntersectionObserver(es=>{const v=es[0].isIntersecting;if(v&&!el._started){el._started=1;fn()}},{threshold:.25});o.observe(el)};
+const inView=id=>visible.has(id);
+const visIO=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?visible.add(e.target.id):visible.delete(e.target.id)),{threshold:0});
+secs.forEach(s=>visIO.observe(s));
+
+/* ---------- audio engine (generated in the browser) ---------- */
+const MIXES=[
+  {t:'Issyk-Kul Sunset',g:'deep house',bpm:118,root:45,c:['#ff8a5b','#b48cff'],len:'1:02:14'},
+  {t:'Bishkek Night Drive',g:'melodic techno',bpm:124,root:43,c:['#5b6cff','#ff5fa2'],len:'58:40'},
+  {t:'Tunduk Afterhours',g:'afro house',bpm:121,root:47,c:['#ffb86b','#4ad1a5'],len:'1:14:05'},
+];
+let ac,master,an,data,timer,step=0,nextT=0,cur=-1,playing=false;
+function initAudio(){
+  if(ac)return;
+  ac=new (window.AudioContext||window.webkitAudioContext)();
+  master=ac.createGain();master.gain.value=.55;
+  an=ac.createAnalyser();an.fftSize=256;data=new Uint8Array(an.frequencyBinCount);
+  master.connect(an);an.connect(ac.destination);
+}
+const noiseBuf=()=>{const b=ac.createBuffer(1,ac.sampleRate*.5,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b};
+let NB;
+const hz=m=>440*Math.pow(2,(m-69)/12);
+function kick(t){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(150,t);o.frequency.exponentialRampToValueAtTime(42,t+.12);g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(.001,t+.42);o.connect(g);g.connect(master);o.start(t);o.stop(t+.45)}
+function hat(t,v,open){const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=NB;f.type='highpass';f.frequency.value=8000;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+(open?.22:.05));s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.3)}
+function clap(t){const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();s.buffer=NB;f.type='bandpass';f.frequency.value=1500;g.gain.setValueAtTime(.35,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.2)}
+function bass(t,m,d){const o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=hz(m);f.type='lowpass';f.frequency.setValueAtTime(900,t);f.frequency.exponentialRampToValueAtTime(160,t+d);f.Q.value=6;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.32,t+.01);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)}
+function pad(t,notes,d){notes.forEach(n=>{[0,7].forEach(det=>{const o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=hz(n);o.detune.value=det;f.type='lowpass';f.frequency.value=1200;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.025,t+d*.4);g.gain.linearRampToValueAtTime(.0001,t+d);o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+d+.05)})})}
+const PROG=[[0,3,7,10],[-4,0,3,7],[-2,2,5,9],[-5,-1,2,5]];
+function schedule(){
+  const m=MIXES[cur],sp=60/m.bpm/4;
+  while(nextT<ac.currentTime+.12){
+    const s=step%16,bar=Math.floor(step/16)%4,r=m.root;
+    if(s%4===0)kick(nextT);
+    if(s%4===2)hat(nextT,.16,true);else if(cur!==0||s%2)hat(nextT,.05,false);
+    if(s===4||s===12)clap(nextT);
+    const bl=[0,0,12,0,0,7,0,10];
+    if(s%2===1||cur===2&&s%3===0)bass(nextT,r+PROG[bar][0]+(bl[(s>>1)%8]===12?12:0),sp*1.6);
+    if(s===0)pad(nextT,PROG[bar].map(x=>r+24+x),sp*16);
+    step++;nextT+=sp;
+  }
+}
+function play(i){
+  initAudio();ac.resume();NB=NB||noiseBuf();
+  if(cur===i&&playing){stop();return}
+  cur=i;playing=true;step=0;nextT=ac.currentTime+.06;
+  clearInterval(timer);timer=setInterval(schedule,25);
+  renderMixes();
+}
+function stop(){playing=false;clearInterval(timer);renderMixes()}
+function level(){if(!an||!playing)return 0;an.getByteFrequencyData(data);let s=0;for(let i=0;i<24;i++)s+=data[i];return s/24/255}
+
+/* ---------- club ---------- */
+const coverSvg='<svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="#fff" stroke-width="1.6"><circle cx="11" cy="11" r="8"/><circle cx="11" cy="11" r="2"/></svg>';
+function renderMixes(){
+  $('#mixes').innerHTML=MIXES.map((m,i)=>`<button class="mix ${i===cur&&playing?'on':''}" data-i="${i}">
+    <div class="cover" style="background:linear-gradient(135deg,${m.c[0]},${m.c[1]})">${i===cur&&playing?'<div class="mini">'+'<span></span>'.repeat(5)+'</div>':coverSvg}</div>
+    <div><h3>${m.t}</h3><small>${m.g} · ${m.bpm} bpm</small></div><span class="t">${m.len}</span></button>`).join('');
+  $$('.mix').forEach(b=>b.onclick=()=>play(+b.dataset.i));
+  const on=playing&&cur>=0;
+  $('#vinyl').classList.toggle('on',on);
+  if(cur>=0)$('#vlabel').style.background=`linear-gradient(135deg,${MIXES[cur].c[0]},${MIXES[cur].c[1]})`;
+  $('#nowTxt').textContent=on?`сейчас играет · ${MIXES[cur].t}`:'выбери сет';
+  $('#sndTxt').textContent=on?'выкл':'звук';
+}
+renderMixes();
+$('#enter').onclick=()=>{play(0);$('#club').scrollIntoView()};
+$('#sndBtn').onclick=()=>playing?stop():play(cur<0?0:cur);
+
+/* ---------- hero visualizer ---------- */
+const cv=$('#viz'),cx=cv.getContext('2d');let W,H,DPR=Math.min(devicePixelRatio||1,2);
+function rs(){W=cv.width=cv.offsetWidth*DPR;H=cv.height=cv.offsetHeight*DPR}
+addEventListener('resize',rs);rs();
+let tt=0,lv=0;
+function frame(){
+  tt+=.006;const L=level();lv+=(L-lv)*.2;
+  // visualizer
+  if(inView('hero')||!cv._drawn){
+    cv._drawn=1;cx.clearRect(0,0,W,H);
+    const rings=7;
+    for(let k=0;k<rings;k++){
+      cx.beginPath();
+      const base=Math.min(W,H)*(.16+k*.06)*(1+lv*.25);
+      for(let a=0;a<=Math.PI*2+.01;a+=.03){
+        const n=Math.sin(a*3+tt*2+k)*.04+Math.sin(a*5-tt*1.4+k*.7)*.03+(data&&playing?data[(Math.floor(a*6)+k*3)%60]/255*.12:0);
+        const r=base*(1+n);const x=W/2+Math.cos(a)*r,y=H/2+Math.sin(a)*r;a?cx.lineTo(x,y):cx.moveTo(x,y);
+      }
+      const g=cx.createLinearGradient(0,0,W,H);g.addColorStop(0,'rgba(180,140,255,'+(.32-k*.035)+')');g.addColorStop(.6,'rgba(255,95,162,'+(.26-k*.03)+')');g.addColorStop(1,'rgba(255,184,107,'+(.2-k*.025)+')');
+      cx.strokeStyle=g;cx.lineWidth=1.2*DPR;cx.stroke();
+    }
+  }
+  // nav eq + mini bars + avatar pads
+  const bars=[...$$('#navEq span'),...$$('.mini span')];
+  bars.forEach((b,i)=>{const v=playing&&data?data[(i*5+2)%40]/255:0;b.style.height=(3+v*15)+'px'});
+  if(inView('live')){
+    const p=$('#pads');p.style.opacity=.5+.5*(playing?lv*2:(Math.sin(tt*20)>0?1:.3));
+    $('#avatar').style.transform=`translateX(-50%) translateY(${Math.sin(tt*(playing?MIXES[cur].bpm/60*3.3:8))*3}px)`;
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---------- live chat ---------- */
+const CHAT=[['aidana','🔥🔥🔥'],['timur.kg','etb, привет из Оша!'],['AI-etb','Ош, вижу вас! Следующий трек — для вас 🖤'],['nurik','что за трек сейчас?'],['AI-etb','Bishkek Night Drive, 124 bpm. Полный сет — во вкладке «Клуб»'],['dana_m','когда офлайн вечеринка?'],['AI-etb','Ignite 2027, Иссык-Куль. Анонс скоро'],['erlan','донат за следующий трек 🎧'],['asel.s','вайб 💜'],['AI-etb','Спасибо, Эрлан! Заказ принят — ставлю после этого'],['bek','из Алматы смотрим'],['AI-etb','Алматы, салам! 🙌']];
+let ci=0,vc=1284;
+setInterval(()=>{
+  if(!inView('live'))return;
+  const [n,t]=CHAT[ci++%CHAT.length],ai=n==='AI-etb';
+  const d=document.createElement('div');d.className='m';
+  d.innerHTML=`<b style="color:${ai?'var(--glow)':'var(--ink)'}">${n}</b>${t}`;
+  const box=$('#msgs');box.append(d);while(box.children.length>9)box.firstChild.remove();
+  vc+=Math.round(Math.random()*14-4);$('#viewers').textContent='👁 '+fmt(vc);
+},1500);
+
+/* ---------- city ---------- */
+const PLACES=[
+  {k:'tree',x:110},
+  {k:'club',x:240,w:330,h:46,bg:'#17121f',wc:'rgba(180,140,255,.55)',sign:'etb club',ss:'color:#ff8cc0;text-shadow:0 0 12px #ff5fa2,0 0 30px #ff5fa2;border:1px solid rgba(255,95,162,.5)',agent:'Диджей-бот в эфире',bubble:'Сегодня <b>22:00</b> · сет etb'},
+  {k:'ad',x:660,w:250,h:30,title:'Рекламное место',txt:'свободно · ваш бренд здесь'},
+  {k:'shop',id:'kazan',x:1000,w:420,h:38,bg:'#c7744f',wc:'rgba(255,236,210,.6)',awn:'repeating-linear-gradient(90deg,#fff6ea 0 22px,#a8553a 22px 44px)',sign:'KAZAN · кухня Азии',ss:'background:#fff6ea;color:#7a3b25',agent:'Продавец принимает заказы',bubble:'Доставка · на вынос · <b>3D-тур</b>',
+    title:'Kazan',sub:'Кухня Азии · Бишкек',modes:['Доставка','На вынос','3D-тур'],menu:[['Лагман',450],['Плов',420],['Манты, 5 шт',380],['Шашлык из баранины',520],['Чай с чабрецом',150]],c:['#e6a46d','#a8553a']},
+  {k:'tree',x:1460},
+  {k:'shop',id:'ndws',x:1580,w:320,h:42,bg:'#12160c',wc:'rgba(156,196,32,.35)',sign:'NDWS',ss:'color:#c8f04a;border:1px solid rgba(156,196,32,.6);letter-spacing:.1em',agent:'Продавец онлайн',bubble:'Creatine — <b>1 700 сом</b>',
+    title:'NDWS',sub:'Спортивное питание · No day without sport',modes:['Доставка','Самовывоз'],menu:[['Creatine',1700],['Omega-3',2100],['D3 + K2',1950],['Ashwagandha',2800],['Collagen + C',3400],['Whey + Collagen',3200]],c:['#9cc420','#2b3a10']},
+  {k:'ad',x:1980,w:300,h:34,screen:1,title:'Экран на улице',txt:'ваш ролик · 24/7'},
+  {k:'shop',id:'talkan',x:2360,w:340,h:34,bg:'#efe0c8',wc:'rgba(164,113,72,.25)',awn:'repeating-linear-gradient(90deg,#a47148 0 22px,#efe0c8 22px 44px)',sign:'Супара Талкан',ss:'background:#5a3a22;color:#f6e6d2',agent:'Продавец онлайн',bubble:'Подарочный набор к празднику',
+    title:'Супара Талкан',sub:'Сладости ручной работы',modes:['Доставка','Самовывоз'],menu:[['Талкан классический',null],['Талкан с орехами',null],['Подарочный набор',null],['Курут',null]],c:['#c9925a','#5a3a22']},
+  {k:'shop',id:'coffee',x:2780,w:220,h:24,bg:'#3a2f26',wc:'rgba(255,194,127,.5)',sign:'Кофе с собой',ss:'background:#ffc27f;color:#3a2f26',agent:'Бариста-бот',bubble:'Капучино за <b>5 минут</b>',
+    title:'Кофе с собой',sub:'Кофейня на углу',modes:['На вынос'],menu:[['Капучино',220],['Латте',240],['Американо',180],['Круассан',200]],c:['#c89b6d','#5a3a22']},
+  {k:'tree',x:3060},
+  {k:'link',x:3180,w:300,h:56,bg:'linear-gradient(160deg,#9fb2c4,#6f8295)',wc:'rgba(255,255,255,.6)',sign:'etb.ai',ss:'background:#1f1a15;color:#fff',agent:'Агенты на смене',bubble:'Офис агентов — <b>зайти</b>',to:'#agents'},
+  {k:'link',x:3560,w:300,h:40,bg:'#f3ebdf',wc:'rgba(164,113,72,.22)',sign:'Переговорная',ss:'background:#a47148;color:#fff',agent:'Протоколист готов',bubble:'Личная ссылка для партнёров',to:'#partners'},
+  {k:'ad',x:3940,w:260,h:30,title:'Место для бренда',txt:'щит · экран · эфир клуба'},
+];
+const TRACK_W=4420;
+const track=$('#track');track.style.width=TRACK_W+'px';
+track.innerHTML=PLACES.map((p,i)=>{
+  if(p.k==='tree')return `<div class="tree" style="left:${p.x}px"></div>`;
+  if(p.k==='ad')return `<div class="board ${p.screen?'screen-b':''}" data-i="${i}" style="left:${p.x}px;width:${p.w}px;height:${p.h}vh"><div class="face"><div><b>${p.title}</b>${p.txt}</div></div><div class="pole"></div><div class="bubble">Рекламное место · <b>свободно</b></div></div>`;
+  return `<div class="bld" data-i="${i}" style="left:${p.x}px;width:${p.w}px;height:${p.h}vh">
+    <div class="fac" style="background:${p.bg};--wc:${p.wc}"><div class="win"></div>${p.awn?`<div class="awn" style="background:${p.awn}"></div>`:''}<div class="door"></div></div>
+    <div class="sign" style="${p.ss}">${p.sign}</div><div class="agent">${p.agent}</div><div class="bubble">${p.bubble}</div></div>`;
+}).join('');
+const nearEls=$$('#track [data-i]');
+nearEls.forEach(el=>el.onclick=()=>openPlace(PLACES[+el.dataset.i]));
+const city=$('#city');let walkT;
+function cityScroll(){
+  const r=city.getBoundingClientRect(),vw=innerWidth,span=city.offsetHeight-innerHeight;
+  const p=Math.min(1,Math.max(0,-r.top/span));
+  track.style.transform=`translateX(${vw/2-80-p*(TRACK_W-160)}px)`;$('.city-head').style.opacity=Math.max(0,1-p*12);
+  $('.m1').style.transform=`translateX(${-p*30}%)`;$('.m2').style.transform=`translateX(${-p*16}%)`;
+  let any=false;
+  nearEls.forEach(el=>{const b=el.getBoundingClientRect(),c=b.left+b.width/2,n=Math.abs(c-vw/2)<Math.max(140,b.width/2);el.classList.toggle('near',n);any=any||n});
+  $('#hint').textContent=any?'нажми, чтобы зайти':'листай — идёшь по улице';
+  if(r.top<0&&r.bottom>innerHeight){$('#me').classList.add('walk');clearTimeout(walkT);walkT=setTimeout(()=>$('#me').classList.remove('walk'),180)}
+}
+addEventListener('scroll',cityScroll,{passive:true});addEventListener('resize',cityScroll);cityScroll();
+
+/* ---------- sheet ---------- */
+let orderNo=2050;
+const veil=$('#veil'),sheet=$('#sheet');
+const closeSheet=()=>{veil.classList.remove('on');tourStop&&tourStop()};
+veil.onclick=e=>{if(e.target===veil)closeSheet()};
+addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+const X='<button class="x" aria-label="Закрыть" onclick="closeSheet()"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
+async function agentSay(box,text){
+  const ty=document.createElement('div');ty.className='typing';ty.innerHTML='<i></i><i></i><i></i>';box.append(ty);sheet.scrollTo({top:sheet.scrollHeight,behavior:'smooth'});
+  await sleep(1100);ty.remove();box.insertAdjacentHTML('beforeend',`<div class="b ai">${text}</div>`);sheet.scrollTo({top:sheet.scrollHeight,behavior:'smooth'});
+}
+function openPlace(p){
+  if(p.k==='link'){document.querySelector(p.to).scrollIntoView();return}
+  veil.classList.add('on');
+  if(p.k==='club')return clubSheet();
+  if(p.k==='ad')return adSheet(p);
+  shopSheet(p);
+}
+function shopSheet(p){
+  const q=p.menu.map(()=>0);let mode=p.modes[0];
+  sheet.innerHTML=`${X}<div class="ch" style="margin-bottom:10px"><b>●</b> продавец онлайн</div><h3>${p.title}</h3><div class="sub">${p.sub}</div>
+    <div class="seg">${p.modes.map(m=>`<button data-m="${m}" class="${m===mode?'on':''}">${m}</button>`).join('')}</div><div id="sbody"></div>`;
+  const body=$('#sbody');
+  const total=()=>p.menu.reduce((s,[,pr],i)=>s+(pr||0)*q[i],0),count=()=>q.reduce((a,b)=>a+b,0);
+  function renderMenu(){
+    body.innerHTML=`<div class="menu">${p.menu.map(([n,pr],i)=>`<div class="it"><div class="ph" style="background:linear-gradient(${120+i*35}deg,${p.c[0]},${p.c[1]})"></div><div><b>${n}</b><small>${pr?fmt(pr)+' сом':'цену назовёт продавец'}</small></div><div class="qty"><button data-d="-1" data-i="${i}">−</button><span>${q[i]}</span><button data-d="1" data-i="${i}">+</button></div></div>`).join('')}</div>
+      <div class="foot"><div class="tot">${count()?(total()?fmt(total())+' сом':count()+' шт'):'—'}</div><button class="pill solid" id="checkout" ${count()?'':'disabled style="opacity:.4"'}>Оформить</button></div><div class="agentmsg" id="amsg"></div>`;
+    body.querySelectorAll('.qty button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;q[i]=Math.max(0,q[i]+ +b.dataset.d);renderMenu()});
+    const co=$('#checkout');co&&(co.onclick=async()=>{
+      co.disabled=true;co.style.opacity=.4;const no=++orderNo,box=$('#amsg');
+      const what=p.menu.map(([n],i)=>q[i]?`${n} × ${q[i]}`:'').filter(Boolean).join(', ');
+      box.innerHTML=`<div class="b me">${what}, ${mode.toLowerCase()}</div>`;
+      const sum=total()?` — ${fmt(total())} сом`:', цену подтвержу в сообщении';
+      await agentSay(box,mode==='Доставка'?`Заказ №${no} принят ✓${sum}. Курьер будет примерно через 40 минут, оплата по QR.`:`Заказ №${no} принят ✓${sum}. Будет готов через 15 минут — назовите номер на кассе.`);
+    });
+  }
+  function renderTour(){
+    body.innerHTML=`<div class="tour" id="tour"><div class="room3d" id="room"></div><div class="tourhint">потяни, чтобы осмотреться</div></div><p class="sub" style="margin-top:14px">Зал на 60 гостей, терраса, бар. Бронь стола — у того же продавца.</p>`;
+    const labs=['ЗАЛ','БАР','ТЕРРАСА','ВХОД'];
+    $('#room').innerHTML=labs.map((l,i)=>`<div class="wall" style="transform:rotateY(${i*90}deg) translateZ(-300px)"><div class="lab">${l}</div>${[90,245,400].map(x=>`<div class="w" style="left:${x}px"></div>`).join('')}${[60,250,440].map(x=>`<div class="tb" style="left:${x}px"></div>`).join('')}${[150,450].map(x=>`<div class="lamp" style="left:${x}px"></div>`).join('')}</div>`).join('')+`<div class="floor3d" style="transform:rotateX(90deg) translateZ(-170px)"></div><div class="floor3d ceil" style="transform:rotateX(-90deg) translateZ(-170px)"></div>`;
+    let yaw=0,drag=null,auto=true,raf;
+    const room=$('#room'),tour=$('#tour');
+    const draw=()=>{if(auto)yaw+=.08;room.style.transform=`translateZ(260px) rotateY(${yaw}deg)`;raf=requestAnimationFrame(draw)};draw();
+    tour.onpointerdown=e=>{drag=e.clientX;auto=false;tour.setPointerCapture(e.pointerId)};
+    tour.onpointermove=e=>{if(drag==null)return;yaw+=(e.clientX-drag)*.3;drag=e.clientX};
+    tour.onpointerup=()=>drag=null;
+    tourStop=()=>cancelAnimationFrame(raf);
+  }
+  sheet.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+    tourStop&&tourStop();mode=b.dataset.m;sheet.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));
+    mode==='3D-тур'?renderTour():renderMenu();
+  });
+  renderMenu();
+}
+let tourStop=null;
+function clubSheet(){
+  sheet.innerHTML=`${X}<div class="ch" style="margin-bottom:10px"><b>●</b> сегодня</div><h3>etb club</h3><div class="sub">Вход по гостевому списку. Эфир — для всех.</div>
+    <div class="menu">${MIXES.map((m,i)=>`<div class="it"><div class="ph" style="background:linear-gradient(135deg,${m.c[0]},${m.c[1]})"></div><div><b>${m.t}</b><small>${['22:00','00:00','02:00'][i]} · ${m.g}</small></div><button class="pill" data-p="${i}" style="padding:9px 16px">▶</button></div>`).join('')}</div>
+    <div class="foot"><span class="sub" style="margin:0">Пт · Бишкек</span><button class="pill solid" id="gl">В гостевой список</button></div><div class="agentmsg" id="amsg"></div>`;
+  sheet.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>play(+b.dataset.p));
+  $('#gl').onclick=async e=>{e.target.disabled=true;e.target.style.opacity=.4;await agentSay($('#amsg'),'Ты в списке ✓ Напомню за час до начала и пришлю ссылку на эфир.')};
+}
+function adSheet(p){
+  sheet.innerHTML=`${X}<div class="ch" style="margin-bottom:10px"><b>●</b> свободно</div><h3>${p.title}</h3><div class="sub">Реклама внутри мира etb: на улице, на экранах и в эфире клуба.</div>
+    <div class="seg"><button class="on">Щит на улице</button><button>Экран</button><button>Эфир клуба</button></div>
+    <form class="invite" id="adf" style="margin-top:0"><input placeholder="Компания или Instagram" required><button class="pill solid">Узнать условия</button></form><div class="agentmsg" id="amsg"></div>`;
+  sheet.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>sheet.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b)));
+  $('#adf').onsubmit=async e=>{e.preventDefault();e.target.querySelector('button').disabled=true;await agentSay($('#amsg'),'Принято ✓ Маркетолог пришлёт свободные даты, охват и цену в Telegram.')};
+}
+
+/* ---------- seller ---------- */
+const STEPS=['Принят','Собран','Оплачен','В доставке'];
+const ORDERS=[
+  {no:2048,script:[['me','Привет! Нужны креатин и омега, доставка по Бишкеку'],['ai','Привет! Я продавец etb. Есть оба:',['Creatine ·&nbsp;1&nbsp;700','Omega-3 · 2&nbsp;100']],['me','Беру. Токтогула 125, после 18:00'],['ai','Готово ✓ Заказ №2048 — 3&nbsp;800 сом. Курьер будет с 18:00 до 19:00. QR для оплаты ниже']],lines:[['Creatine','1 700'],['Omega-3','2 100']],sum:3800},
+  {no:2049,script:[['me','Здравствуйте, есть подарочный набор талкана?'],['ai','Есть. Добавить открытку с подписью?',['Подарочный набор','Открытка']],['me','Да, «Маме с любовью». Заберу сам'],['ai','Оформил ✓ Заказ №2049. Самовывоз завтра с 10:00, оплата при получении']],lines:[['Подарочный набор','1'],['Открытка','1']],sum:null},
+];
+$('#ordSteps').innerHTML=STEPS.map((s,i)=>`<div class="st"><i>${i+1}</i>${s}</div>`).join('');
+async function sellLoop(){
+  for(let k=0;;k++){
+    const o=ORDERS[k%ORDERS.length],th=$('#thread');th.innerHTML='';$('#ordLines').innerHTML='';
+    $('#ordNo').textContent='ЗАКАЗ —';$('#ordSum').textContent='—';$$('.st').forEach(s=>s.classList.remove('on'));
+    while(!inView('seller'))await sleep(400);
+    for(let j=0;j<o.script.length;j++){
+      const [who,txt,chips]=o.script[j];
+      if(who==='ai'){const ty=document.createElement('div');ty.className='typing';ty.innerHTML='<i></i><i></i><i></i>';th.append(ty);await sleep(1100);ty.remove()}
+      const b=document.createElement('div');b.className='b '+who;b.innerHTML=txt+(chips?`<div class="chips">${chips.map(c=>`<span>${c}</span>`).join('')}</div>`:'');th.append(b);
+      if(j===1){for(const [n,p] of o.lines){await sleep(300);$('#ordLines').insertAdjacentHTML('beforeend',`<div><span>${n}</span><b>${o.sum?p+' сом':'× '+p}</b></div>`)}}
+      await sleep(who==='me'?1400:1700);
+    }
+    $('#ordNo').textContent='ЗАКАЗ №'+o.no;
+    if(o.sum){let v=0;const tgt=o.sum;while(v<tgt){v=Math.min(tgt,v+Math.ceil(tgt/24));$('#ordSum').textContent=fmt(v)+' сом';await sleep(30)}}
+    else $('#ordSum').textContent='самовывоз';
+    for(const s of $$('.st')){s.classList.add('on');await sleep(900)}
+    await sleep(3200);
+  }
+}
+onView($('#seller'),sellLoop);
+
+/* ---------- agents ---------- */
+const AG=[
+  {n:'Продавец',i:'M4 6h16l-1.5 9H5.5zM8 20h.01M16 20h.01'},
+  {n:'Маркетолог',i:'M4 14V10l12-5v14L4 14zM16 9a3 3 0 010 6'},
+  {n:'Диджей-бот',i:'M12 3a9 9 0 100 18 9 9 0 000-18zM12 10a2 2 0 100 4 2 2 0 000-4z'},
+  {n:'Координатор',i:'M12 4v4M12 16v4M4 12h4M16 12h4M12 9a3 3 0 100 6 3 3 0 000-6z'},
+  {n:'РОП',i:'M5 18l4-6 4 3 6-9'},
+  {n:'Парсер',i:'M10 4a6 6 0 100 12 6 6 0 000-12zM15 15l5 5'},
+];
+const FEED=[[0,'оформил заказ №2048 · NDWS'],[1,'анонс пятничного сета готов'],[2,'поставил Night Drive в эфир'],[5,'нашёл 3 магазина в Instagram'],[4,'написал магазинам, 2 ответили'],[3,'отправил партнёру личную ссылку'],[0,'напомнил об оплате заказа №2049'],[1,'собрал рилс из эфира'],[3,'утренняя сводка ушла etb'],[4,'назначил демо на четверг'],[2,'ответил залу в чате эфира'],[5,'обновил цены на витрине Супары']];
+const orb=$('#orbit');
+AG.forEach((a,i)=>{const ang=-Math.PI/2+i*Math.PI*2/AG.length,x=50+Math.cos(ang)*40,y=50+Math.sin(ang)*40;a.x=x;a.y=y;
+  orb.insertAdjacentHTML('beforeend',`<div class="node" id="n${i}" style="left:${x}%;top:${y}%"><div class="c"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="${a.i}"/></svg></div>${a.n}</div>`)});
+$('#links').setAttribute('viewBox','0 0 100 100');
+$('#links').innerHTML='<circle cx="50" cy="50" r="40" fill="none" stroke="rgba(31,26,21,.08)" stroke-width=".25" stroke-dasharray="1 1.4"/>'+AG.map((a,i)=>`<line x1="50" y1="50" x2="${a.x}" y2="${a.y}" stroke="rgba(31,26,21,.07)" stroke-width=".25"/><circle id="p${i}" r=".9" fill="#a47148" opacity="0"/>`).join('');
+let fi=0;
+function pulse(a,b){const p=$('#p'+a),A=AG[a],B=b==null?{x:50,y:50}:AG[b];p.setAttribute('opacity',1);let t0=performance.now();
+  (function mv(t){const k=Math.min(1,(t-t0)/900);p.setAttribute('cx',A.x+(B.x-A.x)*k);p.setAttribute('cy',A.y+(B.y-A.y)*k);if(k<1)requestAnimationFrame(mv);else p.setAttribute('opacity',0)})(t0)}
+setInterval(()=>{
+  if(!inView('agents'))return;
+  const [a,txt]=FEED[fi++%FEED.length];
+  const n=$('#n'+a);n.classList.add('hit');setTimeout(()=>n.classList.remove('hit'),900);pulse(a);
+  const d=new Date(),tm=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  $('#feed').insertAdjacentHTML('afterbegin',`<div class="fi"><span class="dotc"></span><div><div class="who">${AG[a].n}</div><div class="what">${txt}</div></div><time>${tm}</time></div>`);
+  const f=$('#feed');while(f.children.length>6)f.lastChild.remove();
+},1700);
+
+/* ---------- partners ---------- */
+const NOTES=['Цель встречи — витрина партнёра в etb.world','Партнёр даёт товар и аудиторию, etb — мир и агентов','Старт — подключить Instagram-магазин','Следующий шаг — созвон в четверг, 15:00'];
+let ni=0;
+setInterval(()=>{if(!inView('partners'))return;const box=$('#notes');if(ni%NOTES.length===0)box.innerHTML='';
+  box.insertAdjacentHTML('beforeend',`<div class="nt"><i>—</i>${NOTES[ni++%NOTES.length]}</div>`)},2200);
+const slug=s=>{const m={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sh',ы:'y',э:'e',ю:'yu',я:'ya',ү:'u',ө:'o',ң:'n'};return s.toLowerCase().split('').map(c=>m[c]??c).join('').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'partner'};
+$('#inv').onsubmit=e=>{e.preventDefault();const n=$('#pname').value.trim()||'Партнёр';
+  const code=slug(n)+'-'+Math.random().toString(36).slice(2,6);const url='etb.world/meet/'+code;
+  $('#plink').innerHTML=`Готово: <b>${url}</b> — скопировано`;
+  navigator.clipboard?.writeText('https://'+url).catch(()=>{});
+  $('#pface').textContent=n[0].toUpperCase();$('#ptile').textContent=n;
+};
+</script>
+</body>
+</html>
