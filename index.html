@@ -141,6 +141,7 @@ body.panel-open .pad,body.panel-open .map,body.inside .pad,body.inside .map,body
   body.panel-open .place{opacity:0}
 }
 body.panel-open .look{opacity:0}
+.it.svc{cursor:pointer;transition:box-shadow .25s,transform .25s}.it.svc.on{box-shadow:0 0 0 2px #1f1a15 inset}.it.svc:hover{transform:translateY(-1px)}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 </head>
@@ -238,6 +239,36 @@ const PLACES=[
     qlabel:{'Бронь номера':'ноч.'},c:['#c9925a','#5a3a22'],furn:'tables',free:'цену назовёт администратор'},
   {st:0,u:196,s:-1,k:'shop',name:'Кийим',line:'одежда · локальные бренды',hours:[600,1260],wall:'#efece6',sign:['КИЙИМ','#111111','#ffffff'],inside:'#f4f1ec',acc:'#111111',agent:'Стилист-бот',
     modes:['Доставка','Примерка в магазине'],menu:[['Худи oversize',3900],['Футболка basic',1400],['Джинсы straight',4200],['Куртка-бомбер',7800],['Кепка',1200]],c:['#d9d4cc','#2a2a2a'],furn:'racks'},
+  // --- services (booking: pick a service → agent asks time → confirms)
+  {st:0,u:15,s:1,k:'svc',name:'Белек такси',line:'такси по Бишкеку и Иссык-Кулю',hours:null,wall:'#f2c230',sign:['БЕЛЕК ТАКСИ','#1a1a1a','#f2c230'],inside:'#f6efd8',acc:'#1a1a1a',agent:'Диспетчер-бот',furn:'desks',
+    svc:[['Эконом','по городу'],['Комфорт','по городу'],['Минивэн','до 6 человек'],['На Иссык-Куль','Балыкчы, Чолпон-Ата, Каракол']],ask:'Куда и когда подать машину?',slots:['Сейчас','Через 30 минут','Ко времени'],cta:'Вызвать',
+    done:'Заказ №{n} ✓ {s}, {t}. Пришлю номер машины и имя водителя, цену покажу до посадки.'},
+  {st:0,u:73,s:1,k:'shop',name:'Аптека «Дару»',line:'аптека у дома',hours:[480,1380],wall:'#e9f2ee',sign:['ДАРУ · АПТЕКА','#1f8a5b','#ffffff'],inside:'#eef6f2',acc:'#1f8a5b',agent:'Фармацевт онлайн',
+    modes:['Доставка','Самовывоз'],menu:[['Витамин D3',650],['Витамин C',320],['Термометр',450],['Маски, 10 шт',120],['Пластырь',90]],c:['#9fd8bd','#1f8a5b'],furn:'shelves'},
+  {st:0,u:185,s:1,k:'svc',name:'Gabri Car Garage',line:'автосалон · подбор и тест-драйв',hours:[600,1200],wall:'#15171c',sign:['GABRI CAR','#15171c','#e7e9ee'],inside:'#d9dce2',acc:'#c9302c',agent:'Менеджер-бот',furn:'car',
+    svc:[['Подобрать авто','под бюджет и задачи'],['Тест-драйв','любая машина в наличии'],['Trade-in','оценим вашу машину'],['Кредит и лизинг','расчёт за 10 минут']],ask:'Когда удобно приехать в салон?',slots:['Сегодня','Завтра','На выходных'],cta:'Записаться',
+    done:'Записал ✓ {s}, {t}. Менеджер подготовит машины и напишет в Telegram.'},
+  {st:1,u:18,s:1,k:'svc',name:'Класс',line:'ИИ-уроки и онлайн-школа',hours:null,wall:'#2b3a67',sign:['КЛАСС','#2b3a67','#ffffff'],inside:'#eef0f7',acc:'#5b6cff',agent:'ИИ-учитель на связи',furn:'desks',
+    svc:[['Пробный урок','бесплатно, 20 минут'],['Английский','видеоуроки с ИИ-учителем'],['Подготовка к ОРТ','разбор заданий'],['ИИ-собеседование','тренировка перед работой']],ask:'Когда начнём?',slots:['Прямо сейчас','Сегодня вечером','Завтра'],cta:'Начать',
+    done:'Готово ✓ {s}, {t}. Ссылку на урок пришлю в Telegram, учитель подключится сам.'},
+  {st:1,u:200,s:1,k:'svc',name:'Барбершоп «Чач»',line:'стрижки и борода',hours:[600,1260],wall:'#2a211c',sign:['ЧАЧ · BARBER','#2a211c','#e8d5b0'],inside:'#d8c8b2',acc:'#8a5a3a',agent:'Администратор-бот',furn:'barber',
+    svc:[['Стрижка','45 минут'],['Борода','30 минут'],['Стрижка + борода','75 минут'],['Детская стрижка','до 12 лет']],ask:'На какое время записать?',slots:['Сегодня 17:00','Сегодня 19:30','Завтра 12:00'],cta:'Записаться',
+    done:'Записал ✓ {s}, {t}. Напомню за час, если что — перенесём в чате.'},
+  {st:1,u:222,s:-1,k:'shop',name:'Пекарня «Нан»',line:'тандыр и выпечка',hours:[420,1200],wall:'#c98a4b',sign:['НАН','#fff3e0','#8a4a1c'],inside:'#f3dcc0',acc:'#8a4a1c',agent:'Продавец онлайн',
+    modes:['Доставка','На вынос'],menu:[['Лепёшка тандыр',40],['Самса с мясом',90],['Боорсок, 300 г',150],['Круассан',120],['Чак-чак',260]],c:['#e3b07a','#8a4a1c'],furn:'shelves'},
+  {st:2,u:20,s:-1,k:'svc',name:'Фитнес «Тоо»',line:'зал, групповые и тренер',hours:[360,1380],wall:'#1b1d22',sign:['ТОО FITNESS','#1b1d22','#c8f04a'],inside:'#2a2d33',acc:'#c8f04a',agent:'Администратор-бот',furn:'gym',
+    svc:[['Разовое посещение','зал на весь день'],['Абонемент на месяц','безлимит'],['Персональный тренер','60 минут'],['Групповая','функционал, йога, бокс']],ask:'Когда придёте?',slots:['Утром','Днём','Вечером'],cta:'Записаться',
+    done:'Готово ✓ {s}, {t}. QR для входа пришлю в Telegram, цену назовёт администратор.'},
+  {st:2,u:68,s:-1,k:'svc',name:'Белек Авто',line:'автосервис',hours:[540,1140],wall:'#0E1B2C',sign:['БЕЛЕК АВТО','#0E1B2C','#E63323'],inside:'#cfd3d9',acc:'#E63323',agent:'Мастер-приёмщик онлайн',furn:'car',
+    svc:[['ТО и замена масла','1–2 часа'],['Шиномонтаж','сезонная замена'],['Диагностика','компьютерная'],['Кузов и покраска','оценка по фото']],ask:'Когда пригоните машину?',slots:['Сегодня','Завтра утром','На выходных'],cta:'Записаться',
+    done:'Записал ✓ {s}, {t}. Цену назовёт мастер после осмотра, напомню накануне.'},
+  {st:2,u:175,s:-1,k:'shop',name:'Цветы «Гүл»',line:'букеты с доставкой',hours:[480,1320],wall:'#f2e4e6',sign:['ГҮЛ','#ffffff','#b03a5b'],inside:'#f7eef0',acc:'#b03a5b',agent:'Флорист-бот',
+    modes:['Доставка','Самовывоз'],menu:[['Розы, 15 шт',2500],['Тюльпаны, 25 шт',2200],['Букет флориста',3000],['Открытка',150]],c:['#f0a3b8','#b03a5b'],furn:'shelves'},
+  {st:2,u:200,s:1,k:'svc',name:'Стоматология «Ак тиш»',line:'клиника',hours:[540,1200],wall:'#eef4f8',sign:['АК ТИШ','#ffffff','#2a7ab8'],inside:'#f2f7fb',acc:'#2a7ab8',agent:'Регистратура онлайн',furn:'desks',
+    svc:[['Консультация','осмотр и план'],['Чистка','профгигиена'],['Лечение','кариес, пломба'],['Детский приём','с 3 лет']],ask:'Когда удобно прийти?',slots:['Сегодня','Завтра','На неделе'],cta:'Записаться',
+    done:'Записал ✓ {s}, {t}. Врач и цена — в сообщении, напомню за час.'},
+  {st:2,u:225,s:-1,k:'shop',name:'Продукты 24/7',line:'магазин у дома',hours:null,wall:'#3a6b3a',sign:['ПРОДУКТЫ 24/7','#3a6b3a','#ffffff'],inside:'#eef2e6',acc:'#3a6b3a',agent:'Продавец онлайн',
+    modes:['Доставка','Самовывоз'],menu:[['Молоко 1 л',95],['Хлеб',45],['Яйца, 10 шт',160],['Сыр, 300 г',420],['Вода 5 л',90]],c:['#b8d39a','#3a6b3a'],furn:'shelves'},
 ];
 PLACES.forEach((p,i)=>{p.i=i;p.z=-p.u});
 function openState(p,m){
@@ -455,7 +486,7 @@ function shopBuilding(p){
   const ix=s*(FRONT+D/2);
   const add=(geo,mat,x,y,zz)=>{const m=new THREE.Mesh(geo,mat);m.position.set(ix+s*x,y,z+zz);grp.add(m);return m};
   const acc=new THREE.MeshStandardMaterial({color:p.acc,roughness:.5}),wood=new THREE.MeshStandardMaterial({color:0x7a5536,roughness:.6}),dark=new THREE.MeshStandardMaterial({color:0x2a2622,roughness:.4,metalness:.5});
-  if(!isLease)add(new THREE.BoxGeometry(1,1.05,W-3.4),acc,3.7,.53,0);
+  if(!isLease&&!['barber','car','gym'].includes(p.furn))add(new THREE.BoxGeometry(1,1.05,W-3.4),acc,3.7,.53,0);
   if(p.furn==='tables'){for(const [x,zz] of [[-2.6,-3.2],[-2.6,0],[-2.6,3.2],[.1,-1.6],[.1,1.6]]){add(new THREE.CylinderGeometry(.55,.55,.05,24),wood,x,.78,zz);add(new THREE.CylinderGeometry(.05,.05,.76,8),dark,x,.39,zz);for(const a of [0,Math.PI])add(new THREE.CylinderGeometry(.2,.2,.05,16),dark,x+Math.cos(a)*.8,.46,zz+Math.sin(a)*.8)}}
   if(p.furn==='shelves'){for(const zz of [-3.6,0,3.6]){add(new THREE.BoxGeometry(.5,2.7,2.8),wood,4.5,1.35,zz);for(let r=0;r<4;r++)for(let c=0;c<4;c++)add(new THREE.BoxGeometry(.28,.36,.38),new THREE.MeshStandardMaterial({color:(r+c)%2?p.c[0]:p.c[1],roughness:.4}),4.15,.45+r*.62,zz-1.05+c*.7)}add(new THREE.BoxGeometry(1.4,.9,1.4),acc,-.8,.45,0)}
   if(p.furn==='desks'){for(const [x,zz] of [[-2.2,-3],[-2.2,0],[-2.2,3],[.8,-3],[.8,0],[.8,3]]){add(new THREE.BoxGeometry(1.2,.05,1.8),new THREE.MeshStandardMaterial({color:0xf4f4f2,roughness:.4}),x,.76,zz);add(new THREE.BoxGeometry(.04,.62,1.05),new THREE.MeshBasicMaterial({color:0x8ccaff,toneMapped:false}),x+.5,1.12,zz)}}
@@ -466,6 +497,17 @@ function shopBuilding(p){
     for(let k=0;k<4;k++)add(new THREE.BoxGeometry(.9,.06,.6),new THREE.MeshStandardMaterial({color:cols[k],roughness:.85}),-.6,.83+k*.065,-.6+k*.35);
     const skin=new THREE.MeshStandardMaterial({color:0xf2f0ec,roughness:.5});
     for(const zz of [-1.2,1.2]){add(new THREE.CylinderGeometry(.03,.03,1.1,8),chrome,1.6,.55,zz);add(new THREE.CylinderGeometry(.2,.17,.75,16),new THREE.MeshStandardMaterial({color:zz>0?'#b5544a':'#1c1c1c',roughness:.8}),1.6,1.45,zz);add(new THREE.SphereGeometry(.12,16,12),skin,1.6,1.98,zz)}}
+  if(p.furn==='barber'){const leather=new THREE.MeshStandardMaterial({color:0x2a1c14,roughness:.45}),chrome=new THREE.MeshStandardMaterial({color:0xcfcfcf,roughness:.2,metalness:.9}),mirror=new THREE.MeshStandardMaterial({color:0xdfe7ee,roughness:.05,metalness:.9});
+    for(const zz of [-3.2,0,3.2]){add(new THREE.BoxGeometry(.06,1.5,1.3),mirror,4.7,1.7,zz);add(new THREE.CylinderGeometry(.06,.25,.5,12),chrome,3.3,.25,zz);add(new THREE.BoxGeometry(.75,.18,.7),leather,3.3,.6,zz);add(new THREE.BoxGeometry(.15,.8,.7),leather,3.7,1.05,zz);add(new THREE.BoxGeometry(.5,.08,1.1),wood,4.4,.95,zz)}}
+  if(p.furn==='car'){const body=new THREE.MeshStandardMaterial({color:p.acc,roughness:.25,metalness:.6}),glassC=new THREE.MeshStandardMaterial({color:0x1d2633,roughness:.1,metalness:.5}),tyre=new THREE.MeshStandardMaterial({color:0x111111,roughness:.8});
+    add(new THREE.BoxGeometry(1.9,.55,4.4),body,.6,.58,0);add(new THREE.BoxGeometry(1.86,.12,4.2),body,.6,.9,0);add(new THREE.BoxGeometry(1.6,.5,2.1),glassC,.6,1.21,-.15);add(new THREE.BoxGeometry(1.62,.06,1.9),body,.6,1.48,-.15);for(const e of [-1,1]){add(new THREE.BoxGeometry(.3,.12,.05),new THREE.MeshBasicMaterial({color:0xfff4d6,toneMapped:false}),.6+e*.6,.7,-2.21);add(new THREE.BoxGeometry(.3,.1,.05),new THREE.MeshBasicMaterial({color:0xff2a2a,toneMapped:false}),.6+e*.65,.75,2.21)}
+    for(const [a,b] of [[-.9,-1.4],[.9,-1.4],[-.9,1.4],[.9,1.4]]){const w=add(new THREE.CylinderGeometry(.34,.34,.25,20),tyre,.6+a,.34,b);w.rotation.z=Math.PI/2}
+    add(new THREE.BoxGeometry(.9,1,1.6),dark,3.9,.5,3.3)}
+  if(p.furn==='gym'){const iron=new THREE.MeshStandardMaterial({color:0x222222,roughness:.4,metalness:.7}),pad=new THREE.MeshStandardMaterial({color:p.acc,roughness:.6});
+    for(const zz of [-3.2,0,3.2]){add(new THREE.BoxGeometry(.5,.12,1.3),pad,-.4,.5,zz);add(new THREE.BoxGeometry(.3,.45,.3),iron,-.4,.22,zz)}
+    add(new THREE.BoxGeometry(.4,2.2,.1),iron,3.8,1.1,-1.5);add(new THREE.BoxGeometry(.4,2.2,.1),iron,3.8,1.1,1.5);const bar=add(new THREE.CylinderGeometry(.03,.03,3.6,8),iron,3.6,1.5,0);bar.rotation.x=Math.PI/2;
+    for(const e of [-1,1]){const pl=add(new THREE.CylinderGeometry(.3,.3,.08,20),iron,3.6,1.5,e*1.25);pl.rotation.x=Math.PI/2}
+    for(let k=0;k<6;k++)add(new THREE.BoxGeometry(.25,.25,.35),iron,4.6,.15+(k%2)*.3,-2+k*.7)}
   if(p.furn==='meet'){add(new THREE.BoxGeometry(1.7,.07,6.2),wood,-.6,.78,0);add(new THREE.BoxGeometry(.06,1.9,3.4),new THREE.MeshBasicMaterial({color:0x2f3550}),4.75,1.95,0);for(let k=-2;k<=2;k++)for(const e of [-1,1])add(new THREE.BoxGeometry(.5,.08,.5),dark,-.6+e*1.3,.48,k*1.3)}
   const pend=[];
   for(const zz of (isLease?[0]:[-3.2,0,3.2])){const b=add(new THREE.SphereGeometry(isLease?.09:.15,16,10),new THREE.MeshBasicMaterial({color:0xffe1a8,toneMapped:false}),-.6,H1-(isLease?.7:1),zz);add(new THREE.CylinderGeometry(.008,.008,isLease?.55:.85,4),dark,-.6,H1-(isLease?.4:.5),zz);pend.push(b)}
@@ -771,7 +813,7 @@ function updateHud(m){
   else{cr.classList.remove('on');$('#kL').classList.remove('hint');$('#kR').classList.remove('hint')}
   paintMap(m);
 }
-function openNow(m){const shops=PLACES.filter(p=>p.k==='shop'||p.k==='office'||p.k==='meet'||p.k==='corp');const o=shops.filter(p=>openState(p,m).open).length;return `открыто ${o} из ${shops.length}`}
+function openNow(m){const shops=PLACES.filter(p=>p.k==='shop'||p.k==='office'||p.k==='meet'||p.k==='corp'||p.k==='svc');const o=shops.filter(p=>openState(p,m).open).length;return `открыто ${o} из ${shops.length}`}
 
 /* ================= panel ================= */
 let orderNo=2050;
@@ -779,7 +821,7 @@ const panel=$('#panel');
 function openPanel(p){
   if(cur!==p||mode!=='focus')return;
   document.body.classList.add('panel-open');panel.scrollTop=0;
-  if(p.k==='ad')adPanel(p);else if(p.k==='office')officePanel(p);else if(p.k==='corp')corpPanel(p);else if(p.k==='meet')meetPanel(p);else if(p.k==='lease')leasePanel(p);else shopPanel(p);
+  if(p.k==='ad')adPanel(p);else if(p.k==='office')officePanel(p);else if(p.k==='corp')corpPanel(p);else if(p.k==='svc')svcPanel(p);else if(p.k==='meet')meetPanel(p);else if(p.k==='lease')leasePanel(p);else shopPanel(p);
   requestAnimationFrame(()=>panel.classList.add('on'));
 }
 function closePanel(){panel.classList.remove('on');document.body.classList.remove('panel-open')}
@@ -851,11 +893,28 @@ function adPanel(p){
 }
 function officePanel(p){
   const m=minutesNow(),lines=[];
-  PLACES.filter(x=>x.k==='shop').forEach((x,i)=>{const s=openState(x,m);lines.push([`Продавец · ${x.name}`,s.open?`принял заказ №${2040+i}`:`записал предзаказ на ${s.opens}`])});
+  PLACES.filter(x=>x.k==='shop'||x.k==='svc').forEach((x,i)=>{const s=openState(x,m);lines.push([`Продавец · ${x.name}`,s.open?`принял заказ №${2040+i}`:`записал предзаказ на ${s.opens}`])});
   lines.push(['Агент etb.biz','записал показ помещения 86 м²'],['Маркетолог','ответил на заявку на рекламное место'],['Координатор','сводка по городу готова'],['Протоколист','итоги встречи отправлены обеим сторонам']);
   panel.innerHTML=`${X}${kick('','24/7')}<h3>etb.ai</h3><div class="sub">Офис агентов. Работают во всех заведениях города, даже когда те закрыты.</div><div class="row"><button class="pill" id="gi">Зайти внутрь →</button></div><div class="feed" id="feed"></div>`;
   bindX();
   (async()=>{await sleep(700);for(const [i,[w,t]] of lines.entries()){if(!panel.classList.contains('on')||!$('#feed'))return;$('#feed').insertAdjacentHTML('beforeend',`<div class="fi"><div><b>${w}</b><span>${t}</span></div><time>${hhmm(m-i*3)}</time></div>`);await sleep(300)}})();
+}
+function svcPanel(p){
+  const st=openState(p,minutesNow());let sel=-1;
+  panel.innerHTML=`${X}${kick(st.open?'':'off',st.open?(st.closes?`открыто до ${st.closes}`:'открыто 24/7'):`закрыто · откроется в ${st.opens}`)}<h3>${p.name}</h3><div class="sub">${p.line} · ${STREETS[p.st].short}${st.open?'':' · агент запишет заранее'}</div>
+    <div class="row"><button class="pill" id="gi">Зайти внутрь →</button></div><div class="menu" id="svl"></div>
+    <div class="foot"><div class="tot" id="svt">—</div><button class="pill solid" id="checkout" disabled style="opacity:.4">${p.cta}</button></div><div class="msgs" id="amsg"></div>`;
+  bindX();
+  const list=$('#svl');
+  const render=()=>{list.innerHTML=p.svc.map(([n,d],i)=>`<div class="it svc${i===sel?' on':''}" data-i="${i}"><div class="ph" style="background:linear-gradient(${120+i*35}deg,${p.acc},${p.wall})"></div><div><b>${n}</b><small>${d}</small></div><div class="qty"><span>${i===sel?'✓':''}</span></div></div>`).join('');
+    list.querySelectorAll('.it').forEach(el=>el.onclick=()=>{sel=+el.dataset.i;render();$('#svt').textContent=p.svc[sel][0];const co=$('#checkout');if(!co.dataset.done){co.disabled=false;co.style.opacity=1}})};
+  render();
+  $('#checkout').onclick=async e=>{const co=e.target;co.disabled=true;co.style.opacity=.4;co.dataset.done=1;const no=++orderNo,box=$('#amsg'),sv=p.svc[sel][0];
+    box.innerHTML=`<div class="b mine">${sv}</div>`;
+    const msg=await agentSay(box,`${p.agent}${st.open?'':' (сейчас закрыто, но запись веду)'}. ${p.ask}<div class="row">${p.slots.map(t=>`<button>${t}</button>`).join('')}</div>`);
+    msg.querySelectorAll('button').forEach(b=>b.onclick=async()=>{msg.querySelector('.row').remove();box.insertAdjacentHTML('beforeend',`<div class="b mine">${b.textContent}</div>`);
+      await agentSay(box,p.done.replace('{n}',no).replace('{s}',sv).replace('{t}',b.textContent.toLowerCase()))});
+  };
 }
 function corpPanel(p){
   const st=openState(p,minutesNow());
