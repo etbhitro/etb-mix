@@ -232,6 +232,12 @@ const PLACES=[
   {st:2,u:95,s:-1,k:'shop',name:'Бар «Луна»',line:'коктейли до 4 утра',hours:[1080,1680],wall:'#22243a',sign:['ЛУНА','#22243a','#ffd9a0'],inside:'#3a3358',acc:'#7a6cff',agent:'Бармен-бот',
     modes:['Бронь','На вынос'],menu:[['Столик на двоих',null],['Столик на компанию',null],['Лимонад с собой',350],['Сет закусок',890]],c:['#7a6cff','#22243a'],furn:'tables'},
   {st:2,u:150,s:1,k:'ad',name:'Место для бренда',line:'щит · экран · витрина'},
+  {st:1,u:40,s:-1,k:'corp',name:'Улут-Баатыры',line:'офис холдинга',hours:[540,1080],wall:'#0E2D52',sign:['УЛУТ-БААТЫРЫ','#0E2D52','#C3922E'],inside:'#e4e9f0',acc:'#C3922E',agent:'Координатор на связи',furn:'desks',tall:24},
+  {st:2,u:45,s:1,k:'shop',name:'Супара Чункурчак',line:'этно-комплекс в горах',hours:null,wall:'#6b4a2e',sign:['СУПАРА ЧУНКУРЧАК','#f3e4cc','#5a3a22'],inside:'#f0dfc4',acc:'#a47148',agent:'Администратор онлайн',
+    modes:['Бронь номера','Блюда к заезду'],menus:{'Бронь номера':[['Юрта',null],['Коттедж',null],['Номер в шале',null]],'Блюда к заезду':[['Бешбармак',null],['Куурдак',null],['Шорпо',null],['Боорсок с каймаком',null],['Чай из самовара',null]]},
+    qlabel:{'Бронь номера':'ноч.'},c:['#c9925a','#5a3a22'],furn:'tables',free:'цену назовёт администратор'},
+  {st:0,u:196,s:-1,k:'shop',name:'Кийим',line:'одежда · локальные бренды',hours:[600,1260],wall:'#efece6',sign:['КИЙИМ','#111111','#ffffff'],inside:'#f4f1ec',acc:'#111111',agent:'Стилист-бот',
+    modes:['Доставка','Примерка в магазине'],menu:[['Худи oversize',3900],['Футболка basic',1400],['Джинсы straight',4200],['Куртка-бомбер',7800],['Кепка',1200]],c:['#d9d4cc','#2a2a2a'],furn:'racks'},
 ];
 PLACES.forEach((p,i)=>{p.i=i;p.z=-p.u});
 function openState(p,m){
@@ -453,6 +459,13 @@ function shopBuilding(p){
   if(p.furn==='tables'){for(const [x,zz] of [[-2.6,-3.2],[-2.6,0],[-2.6,3.2],[.1,-1.6],[.1,1.6]]){add(new THREE.CylinderGeometry(.55,.55,.05,24),wood,x,.78,zz);add(new THREE.CylinderGeometry(.05,.05,.76,8),dark,x,.39,zz);for(const a of [0,Math.PI])add(new THREE.CylinderGeometry(.2,.2,.05,16),dark,x+Math.cos(a)*.8,.46,zz+Math.sin(a)*.8)}}
   if(p.furn==='shelves'){for(const zz of [-3.6,0,3.6]){add(new THREE.BoxGeometry(.5,2.7,2.8),wood,4.5,1.35,zz);for(let r=0;r<4;r++)for(let c=0;c<4;c++)add(new THREE.BoxGeometry(.28,.36,.38),new THREE.MeshStandardMaterial({color:(r+c)%2?p.c[0]:p.c[1],roughness:.4}),4.15,.45+r*.62,zz-1.05+c*.7)}add(new THREE.BoxGeometry(1.4,.9,1.4),acc,-.8,.45,0)}
   if(p.furn==='desks'){for(const [x,zz] of [[-2.2,-3],[-2.2,0],[-2.2,3],[.8,-3],[.8,0],[.8,3]]){add(new THREE.BoxGeometry(1.2,.05,1.8),new THREE.MeshStandardMaterial({color:0xf4f4f2,roughness:.4}),x,.76,zz);add(new THREE.BoxGeometry(.04,.62,1.05),new THREE.MeshBasicMaterial({color:0x8ccaff,toneMapped:false}),x+.5,1.12,zz)}}
+  if(p.furn==='racks'){const chrome=new THREE.MeshStandardMaterial({color:0xcfcfcf,roughness:.2,metalness:.9});const cols=['#1c1c1c','#e8e4dc','#8a9a7b','#b5544a','#3d4a63','#d9c7a8'];
+    for(const zz of [-3.3,3.3]){add(new THREE.BoxGeometry(.04,.04,3.2),chrome,3.9,1.75,zz);for(const e of [-1,1])add(new THREE.CylinderGeometry(.025,.025,1.75,8),chrome,3.9,.88,zz+e*1.6);
+      for(let k=0;k<9;k++)add(new THREE.BoxGeometry(.5,.95,.07),new THREE.MeshStandardMaterial({color:cols[(k+(zz>0?3:0))%6],roughness:.85}),3.9,1.2,zz-1.4+k*.35)}
+    add(new THREE.BoxGeometry(1.6,.8,2.4),new THREE.MeshStandardMaterial({color:0xe7e2da,roughness:.6}),-.6,.4,0);
+    for(let k=0;k<4;k++)add(new THREE.BoxGeometry(.9,.06,.6),new THREE.MeshStandardMaterial({color:cols[k],roughness:.85}),-.6,.83+k*.065,-.6+k*.35);
+    const skin=new THREE.MeshStandardMaterial({color:0xf2f0ec,roughness:.5});
+    for(const zz of [-1.2,1.2]){add(new THREE.CylinderGeometry(.03,.03,1.1,8),chrome,1.6,.55,zz);add(new THREE.CylinderGeometry(.2,.17,.75,16),new THREE.MeshStandardMaterial({color:zz>0?'#b5544a':'#1c1c1c',roughness:.8}),1.6,1.45,zz);add(new THREE.SphereGeometry(.12,16,12),skin,1.6,1.98,zz)}}
   if(p.furn==='meet'){add(new THREE.BoxGeometry(1.7,.07,6.2),wood,-.6,.78,0);add(new THREE.BoxGeometry(.06,1.9,3.4),new THREE.MeshBasicMaterial({color:0x2f3550}),4.75,1.95,0);for(let k=-2;k<=2;k++)for(const e of [-1,1])add(new THREE.BoxGeometry(.5,.08,.5),dark,-.6+e*1.3,.48,k*1.3)}
   const pend=[];
   for(const zz of (isLease?[0]:[-3.2,0,3.2])){const b=add(new THREE.SphereGeometry(isLease?.09:.15,16,10),new THREE.MeshBasicMaterial({color:0xffe1a8,toneMapped:false}),-.6,H1-(isLease?.7:1),zz);add(new THREE.CylinderGeometry(.008,.008,isLease?.55:.85,4),dark,-.6,H1-(isLease?.4:.5),zz);pend.push(b)}
@@ -594,18 +607,28 @@ function applyEnvironment(m,dt){
 
 /* ================= navigation ================= */
 // walking happens along a street; turns happen at intersections
-const nav={st:0,u:-2,tu:-2,vu:0,head:1,pending:null};
+const nav={st:0,u:-2,tu:-2,vu:0,au:0,head:1,pending:null};
+const yawF={y:0,v:0,a:0,init:false};let bobPh=0;
 let mode='intro',cur=null;
 const cam={x:0,y:70,z:80,yaw:0,pitch:-.75,fov:62};
 const vel={y:0,yaw:0,pitch:0,x:0,z:0};
 const tgt={y:1.72,yaw:0,pitch:0,x:0,z:0};
 let tween=null,walkYaw=0;
 function sd(obj,key,target,v,vk,smooth,dt){const om=2/smooth,x=om*dt,ex=1/(1+x+.48*x*x+.235*x*x*x),ch=obj[key]-target,tmp=(v[vk]+om*ch)*dt;v[vk]=(v[vk]-om*tmp)*ex;obj[key]=target+(ch+tmp)*ex}
+// smooth follower: limited acceleration, cruise speed, soft braking, eased accel (no kick on start)
+function follow(o,k,vk,ak,target,dt,A,VMAX){
+  const d=target-o[k];
+  if(Math.abs(d)<.004&&Math.abs(o[vk])<.01){o[k]=target;o[vk]=0;o[ak]=0;return}
+  const vs=Math.sign(d)*Math.min(VMAX,Math.sqrt(2*A*.7*Math.abs(d)));
+  const as=clamp((vs-o[vk])*3.2,-A,A);
+  o[ak]+=(as-o[ak])*(1-Math.exp(-dt*5));
+  o[vk]+=o[ak]*dt;o[k]+=o[vk]*dt;
+}
 const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
 function angleTo(a,b){let d=b-a;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return a+d}
 function tweenTo(to,dur,{arc=.6,fovMid=null,done}={}){
   const from={...cam};to={fov:56,...to};to.yaw=angleTo(from.yaw,to.yaw);
-  tween={from,to,t0:performance.now(),dur,arc,fovMid,done};for(const k in vel)vel[k]=0;
+  tween={from,to,t0:performance.now(),dur,arc,fovMid,done};for(const k in vel)vel[k]=0;nav.vu=nav.au=0;yawF.init=false;
 }
 function stepTween(now){
   if(!tween)return false;
@@ -635,7 +658,7 @@ function doTurn(it,side){
   const S=S0(),f=[S.dir[0]*nav.head,S.dir[1]*nav.head];
   const nf=side>0?[-f[1],f[0]]:[f[1],-f[0]];
   const O=STREETS[it.other];const head=Math.sign(nf[0]*O.dir[0]+nf[1]*O.dir[1])||1;
-  nav.st=O.i;nav.u=nav.tu=it.ou;nav.vu=0;nav.head=head;nav.pending=null;
+  nav.st=O.i;nav.u=nav.tu=it.ou;nav.vu=nav.au=0;nav.head=head;nav.pending=null;
   toast(O.name);
 }
 function aroundStreet(){if(mode!=='walk'||tween)return;nav.head*=-1;nav.pending=null}
@@ -736,7 +759,7 @@ function updateHud(m){
   if(key!==hudKey){
     hudKey=key;const box=$('#place');box.classList.add('out');
     setTimeout(()=>{
-      $('#plN').innerHTML=`<span>${p?`${String(p.i+1).padStart(2,'0')} / ${String(PLACES.length).padStart(2,'0')} · ${S.short} · ${p.k==='lease'?'недвижимость':p.line}`:'Бишкек · etb.world'}</span>`;
+      $('#plN').innerHTML=`<span>${p?`${String(p.i+1).padStart(2,'0')} / ${String(PLACES.length).padStart(2,'0')} · ${STREETS[p.st].short} · ${p.k==='lease'?'недвижимость':p.line}`:'Бишкек · etb.world'}</span>`;
       const nm=p?p.name:S.name;$('#plT').innerHTML=split(nm);$('#plT').classList.toggle('long',nm.length>10);$('#plS').innerHTML=status;
       requestAnimationFrame(()=>requestAnimationFrame(()=>box.classList.remove('out')));
     },420);
@@ -748,7 +771,7 @@ function updateHud(m){
   else{cr.classList.remove('on');$('#kL').classList.remove('hint');$('#kR').classList.remove('hint')}
   paintMap(m);
 }
-function openNow(m){const shops=PLACES.filter(p=>p.k==='shop'||p.k==='office'||p.k==='meet');const o=shops.filter(p=>openState(p,m).open).length;return `открыто ${o} из ${shops.length}`}
+function openNow(m){const shops=PLACES.filter(p=>p.k==='shop'||p.k==='office'||p.k==='meet'||p.k==='corp');const o=shops.filter(p=>openState(p,m).open).length;return `открыто ${o} из ${shops.length}`}
 
 /* ================= panel ================= */
 let orderNo=2050;
@@ -756,7 +779,7 @@ const panel=$('#panel');
 function openPanel(p){
   if(cur!==p||mode!=='focus')return;
   document.body.classList.add('panel-open');panel.scrollTop=0;
-  if(p.k==='ad')adPanel(p);else if(p.k==='office')officePanel(p);else if(p.k==='meet')meetPanel(p);else if(p.k==='lease')leasePanel(p);else shopPanel(p);
+  if(p.k==='ad')adPanel(p);else if(p.k==='office')officePanel(p);else if(p.k==='corp')corpPanel(p);else if(p.k==='meet')meetPanel(p);else if(p.k==='lease')leasePanel(p);else shopPanel(p);
   requestAnimationFrame(()=>panel.classList.add('on'));
 }
 function closePanel(){panel.classList.remove('on');document.body.classList.remove('panel-open')}
@@ -770,31 +793,39 @@ async function agentSay(box,text){
 }
 function shopPanel(p){
   const st=openState(p,minutesNow());
-  const q=p.menu.map(()=>0);let md=p.modes[0];
-  panel.innerHTML=`${X}${kick(st.open?'':'off',st.open?`открыто до ${st.closes}`:`закрыто · откроется в ${st.opens}`)}<h3>${p.name}</h3><div class="sub">${p.line} · ${STREETS[p.st].short}${st.open?'':' · агент примет предзаказ'}</div>
+  let md=p.modes[0];const items=()=>p.menus?p.menus[md]:p.menu;let q=items().map(()=>0);
+  panel.innerHTML=`${X}${kick(st.open?'':'off',st.open?(st.closes?`открыто до ${st.closes}`:'открыто 24/7'):`закрыто · откроется в ${st.opens}`)}<h3>${p.name}</h3><div class="sub">${p.line} · ${STREETS[p.st].short}${st.open?'':' · агент примет предзаказ'}</div>
     <div class="row"><button class="pill" id="gi">Зайти внутрь →</button></div>
     <div class="seg">${p.modes.map(m=>`<button data-m="${m}" class="${m===md?'on':''}">${m}</button>`).join('')}</div><div id="sbody"></div>`;
   bindX();
   const body=$('#sbody');
-  const total=()=>p.menu.reduce((s,[,pr],i)=>s+(pr||0)*q[i],0),count=()=>q.reduce((a,b)=>a+b,0);
+  const total=()=>items().reduce((s,[,pr],i)=>s+(pr||0)*q[i],0),count=()=>q.reduce((a,b)=>a+b,0),ql=()=>p.qlabel?.[md]||'';
   function render(){
-    body.innerHTML=`<div class="menu">${p.menu.map(([n,pr],i)=>`<div class="it"><div class="ph" style="background:linear-gradient(${120+i*35}deg,${p.c[0]},${p.c[1]})"></div><div><b>${n}</b><small>${pr?fmt(pr)+' сом':'цену назовёт продавец'}</small></div><div class="qty"><button data-d="-1" data-i="${i}">−</button><span>${q[i]}</span><button data-d="1" data-i="${i}">+</button></div></div>`).join('')}</div>
-      <div class="foot"><div class="tot">${count()?(total()?fmt(total())+' сом':count()+' шт'):'—'}</div><button class="pill solid" id="checkout" ${count()?'':'disabled style="opacity:.4"'}>${st.open?'Оформить':'Предзаказ'}</button></div><div class="msgs" id="amsg"></div>`;
+    body.innerHTML=`<div class="menu">${items().map(([n,pr],i)=>`<div class="it"><div class="ph" style="background:linear-gradient(${120+i*35}deg,${p.c[0]},${p.c[1]})"></div><div><b>${n}</b><small>${pr?fmt(pr)+' сом':p.free||'цену назовёт продавец'}</small></div><div class="qty"><button data-d="-1" data-i="${i}">−</button><span>${q[i]}${q[i]&&ql()?' '+ql():''}</span><button data-d="1" data-i="${i}">+</button></div></div>`).join('')}</div>
+      <div class="foot"><div class="tot">${count()?(total()?fmt(total())+' сом':count()+' '+(ql()||'шт')):'—'}</div><button class="pill solid" id="checkout" ${count()?'':'disabled style="opacity:.4"'}>${md==='Бронь номера'?'Забронировать':md==='Блюда к заезду'?'Предзаказ':st.open?'Оформить':'Предзаказ'}</button></div><div class="msgs" id="amsg"></div>`;
     body.querySelectorAll('.qty button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;q[i]=Math.max(0,q[i]+ +b.dataset.d);render()});
     const co=$('#checkout');co&&(co.onclick=async()=>{
       co.disabled=true;co.style.opacity=.4;const no=++orderNo,box=$('#amsg');
-      const what=p.menu.map(([n],i)=>q[i]?`${n} × ${q[i]}`:'').filter(Boolean).join(', ');
+      const what=items().map(([n],i)=>q[i]?`${n} × ${q[i]}${ql()?' '+ql():''}`:'').filter(Boolean).join(', ');
       box.innerHTML=`<div class="b mine">${what}, ${md.toLowerCase()}</div>`;
       const sum=total()?` — ${fmt(total())} сом`:', цену подтвержу в сообщении';
       let reply;
-      if(!st.open)reply=`Мы закрыты, но заказ №${no} записал ✓${sum}. Откроемся в ${st.opens} — ваш будет первым.`;
+      if(md==='Бронь номера'){
+        const msg=await agentSay(box,`Администратор на связи. На какие даты?<div class="row"><button>Эти выходные</button><button>Следующие выходные</button><button>Другие даты</button></div>`);
+        msg.querySelectorAll('button').forEach(b=>b.onclick=async()=>{msg.querySelector('.row').remove();box.insertAdjacentHTML('beforeend',`<div class="b mine">${b.textContent}</div>`);
+          await agentSay(box,`Бронь №${no} ✓ ${what}, ${b.textContent.toLowerCase()}. Цену и предоплату пришлю в Telegram. Блюда к заезду можно заказать во второй вкладке.`)});
+        return;
+      }
+      if(md==='Блюда к заезду')reply=`Предзаказ №${no} ✓ ${what}. Кухня приготовит к вашему приезду, цену подтвержу в сообщении.`;
+      else if(md==='Примерка в магазине')reply=`Отложил ✓ ${what}. Вещи ждут вас в примерочной 2 дня, размеры уточню в сообщении.`;
+      else if(!st.open)reply=`Мы закрыты, но заказ №${no} записал ✓${sum}. Откроемся в ${st.opens} — ваш будет первым.`;
       else if(md==='Доставка')reply=`Заказ №${no} принят ✓${sum}. Курьер будет примерно через 40 минут, оплата по QR.`;
       else if(md==='Бронь')reply=`Бронь №${no} ✓ Столик ждёт вас. Напомню за час.`;
       else reply=`Заказ №${no} принят ✓${sum}. Будет готов через 15 минут — назовите номер на кассе.`;
       await agentSay(box,reply);
     });
   }
-  panel.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{md=b.dataset.m;panel.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));render()});
+  panel.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{md=b.dataset.m;q=items().map(()=>0);panel.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));render()});
   render();
 }
 function leasePanel(p){
@@ -825,6 +856,18 @@ function officePanel(p){
   panel.innerHTML=`${X}${kick('','24/7')}<h3>etb.ai</h3><div class="sub">Офис агентов. Работают во всех заведениях города, даже когда те закрыты.</div><div class="row"><button class="pill" id="gi">Зайти внутрь →</button></div><div class="feed" id="feed"></div>`;
   bindX();
   (async()=>{await sleep(700);for(const [i,[w,t]] of lines.entries()){if(!panel.classList.contains('on')||!$('#feed'))return;$('#feed').insertAdjacentHTML('beforeend',`<div class="fi"><div><b>${w}</b><span>${t}</span></div><time>${hhmm(m-i*3)}</time></div>`);await sleep(300)}})();
+}
+function corpPanel(p){
+  const st=openState(p,minutesNow());
+  panel.innerHTML=`${X}${kick(st.open?'':'off',st.open?(st.closes?`открыто до ${st.closes}`:'открыто 24/7'):`закрыто · откроется в ${st.opens}`)}<h3>Улут-Баатыры</h3><div class="sub">Офис холдинга «Герои нации» · ${STREETS[p.st].short}</div>
+    <div class="feed"><div class="fi"><div><b>Туризм</b><span>комплекс, агротуризм, туры под ключ, недвижимость и земли</span></div></div><div class="fi"><div><b>Патриотическое направление</b><span>лагерь на смены, слёты, состязания, встречи с наставниками</span></div></div></div>
+    <div class="row"><button class="pill" id="gi">Зайти внутрь →</button><button class="pill solid" id="view">Записаться на встречу</button></div><div class="msgs" id="amsg"></div>`;
+  bindX();
+  $('#view').onclick=async e=>{e.target.disabled=true;e.target.style.opacity=.4;const box=$('#amsg');
+    box.innerHTML=`<div class="b mine">Хочу встречу в офисе</div>`;
+    const msg=await agentSay(box,`Координатор на связи${st.open?'':' (офис закрыт, но запись веду)'}. По какому вопросу?<div class="row"><button>Туризм</button><button>Патриотический лагерь</button><button>Партнёрство</button></div>`);
+    msg.querySelectorAll('button').forEach(b=>b.onclick=async()=>{msg.querySelector('.row').remove();box.insertAdjacentHTML('beforeend',`<div class="b mine">${b.textContent}</div>`);await agentSay(box,`Записал: ${b.textContent.toLowerCase()} ✓ Ближайшее окно — завтра в 11:00. Пришлю точку на карте и напомню за час.`)});
+  };
 }
 function meetPanel(p){
   panel.innerHTML=`${X}${kick('','24/7')}<h3>Переговорная</h3><div class="sub">Личная ссылка на видеовстречу. ИИ ведёт протокол, итоги приходят обеим сторонам.</div>
@@ -866,22 +909,25 @@ function loop(t){
   const P=applyEnvironment(m,dt);
   if(!stepTween(t)){
     if(mode==='walk'){
-      sd(nav,'u',nav.tu,nav,'vu',.9,dt);
-      if(nav.pending&&Math.abs(nav.u-nav.pending.it.u)<.6){const pd=nav.pending;nav.pending=null;doTurn(pd.it,pd.side)}
+      follow(nav,'u','vu','au',nav.tu,dt,2.4,drag?9:5.2);
+      if(nav.pending&&Math.abs(nav.u-nav.pending.it.u)<.25&&Math.abs(nav.vu)<.5){const pd=nav.pending;nav.pending=null;doTurn(pd.it,pd.side)}
       const [x,z]=streetPt(nav.st,nav.u);cam.x=x;cam.z=z;
       sd(cam,'y',1.72,vel,'y',.6,dt);
-      lookBiasS=lerp(lookBiasS,lookBias,.03);
-      sd(cam,'yaw',angleTo(cam.yaw,streetYaw(nav.st,nav.head)+lookBiasS),vel,'yaw',.75,dt);
+      lookBiasS=lerp(lookBiasS,lookBias,1-Math.exp(-dt*1.4));
+      if(!yawF.init){yawF.y=cam.yaw;yawF.v=0;yawF.a=0;yawF.init=true}
+      follow(yawF,'y','v','a',angleTo(yawF.y,streetYaw(nav.st,nav.head)+lookBiasS),dt,2.2,1.5);
+      cam.yaw=yawF.y;vel.yaw=yawF.v*.35;
       sd(cam,'pitch',0,vel,'pitch',.5,dt);
-      cam.fov=lerp(cam.fov,56,.04);
-    }else if(mode==='inside'){
+      cam.fov=lerp(cam.fov,56,1-Math.exp(-dt*2));
+    }else{yawF.init=false;}
+    if(mode==='inside'){
       sd(cam,'yaw',angleTo(cam.yaw,tgt.yaw),vel,'yaw',.35,dt);sd(cam,'pitch',tgt.pitch,vel,'pitch',.35,dt);cam.fov=lerp(cam.fov,66,.04);
     }
     grade.uniforms.amount.value=lerp(grade.uniforms.amount.value,.35,.05);
   }
   lookS.x=lerp(lookS.x,mode==='walk'&&!drag&&!tween&&!MOBILE?look.x:0,.04);lookS.y=lerp(lookS.y,mode==='walk'&&!drag&&!tween&&!MOBILE?look.y:0,.04);
   const speed=Math.abs(nav.vu);
-  const bob=mode==='walk'?Math.sin(t*.009)*Math.min(.035,speed*.012):0;
+  bobPh+=speed*dt*2.3;const bob=mode==='walk'?Math.sin(bobPh)*Math.min(.03,speed*.008):0;
   camera.position.set(cam.x,cam.y+bob,cam.z);
   camera.rotation.set(cam.pitch-lookS.y*.08,cam.yaw-lookS.x*.2,mode==='walk'?-vel.yaw*.02:0);
   if(Math.abs(camera.fov-cam.fov)>.01){camera.fov=cam.fov;camera.updateProjectionMatrix()}
