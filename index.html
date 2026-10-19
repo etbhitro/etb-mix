@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#08080a">
-<title>etb — ИИ-диджей</title>
-<meta name="description" content="etb — ИИ-артист из Бишкека. Играет онлайн 24/7, приезжает живьём по броням.">
+<title>etb</title>
+<meta name="description" content="etb — миксы, онлайн-тусовки, букинг.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
@@ -17,7 +17,18 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 body{font:400 16px/1.45 Onest,system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;height:100dvh}
 button,input{font:inherit;color:inherit;border:0;background:none;-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}
-canvas#orb{position:fixed;inset:0;width:100%;height:100%;display:block}
+/* the deck: a vinyl that spins with the music */
+#deck{--ds:min(74vh,50vw);--dx:66vw;--dy:47vh;position:fixed;z-index:1;width:var(--ds);height:var(--ds);left:var(--dx);top:var(--dy);transform:translate(-50%,-50%);transition:left 1s var(--ease),top 1s var(--ease),width 1s var(--ease),height 1s var(--ease)}
+body.pop #deck{--dx:calc((100vw - 430px)*.62)}
+.glow{position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,var(--c1,#ffb86b) 0,var(--c2,#b48cff) 30%,transparent 62%);filter:blur(50px);opacity:.18}
+.disc{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,transparent 31%,rgba(255,255,255,.05) 31.4%,transparent 32.4%,transparent 47%,rgba(255,255,255,.04) 47.5%,transparent 48.5%,transparent 66%,rgba(255,255,255,.04) 66.4%,transparent 67.4%,transparent 95%,#1d1d21 95.5%,#0b0b0d 97%),repeating-radial-gradient(circle,#0c0c0e 0 2px,#151518 2px 3px);box-shadow:0 50px 120px -30px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.05)}
+.label{position:absolute;inset:32%;border-radius:50%;background:var(--lab,#222);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16%;text-align:center;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.label b{font:700 calc(var(--ds)*.075)/1 Unbounded,sans-serif;letter-spacing:-.05em}
+.label span{font-size:calc(var(--ds)*.022);text-transform:uppercase;letter-spacing:.12em;opacity:.85;max-width:70%;line-height:1.3}
+.label::after{content:"";position:absolute;width:5%;height:5%;border-radius:50%;background:#0a0a0c;top:47.5%;left:47.5%}
+.sheen{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:conic-gradient(from 20deg,transparent 0 6%,rgba(255,255,255,.09) 11%,transparent 17% 52%,rgba(255,255,255,.07) 61%,transparent 67%);-webkit-mask:radial-gradient(circle,transparent 32%,#000 33%);mask:radial-gradient(circle,transparent 32%,#000 33%)}
+.arm{position:absolute;right:-7%;top:-6%;width:12%;height:78%;transform-origin:50% 7%;transform:rotate(-5deg);transition:transform 1.4s var(--ease);filter:drop-shadow(0 10px 14px rgba(0,0,0,.6))}
+body.playing .arm{transform:rotate(13deg)}
 .glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
 
 /* top */
@@ -39,7 +50,6 @@ canvas#orb{position:fixed;inset:0;width:100%;height:100%;display:block}
 .kick{font-size:13px;color:var(--mute);letter-spacing:.02em;display:flex;gap:10px;align-items:center}
 .kick em{font-style:normal;color:var(--acc)}
 .hero h1{font:700 clamp(40px,8.4vw,112px)/.92 Unbounded,sans-serif;letter-spacing:-.055em;text-transform:uppercase;margin-top:12px;text-wrap:balance}
-.hero p{margin-top:16px;color:rgba(255,255,255,.72);max-width:44ch;font-size:16px}
 .hero .cta{display:flex;gap:8px;margin-top:22px;pointer-events:auto}
 .btn{height:50px;padding:0 24px;border-radius:99px;font-weight:500;font-size:15px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .3s}
 .btn:active{transform:scale(.97)}
@@ -133,49 +143,49 @@ body.pop .panel{opacity:1;transform:none;pointer-events:auto}
 .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
 
 @media (max-width:760px){
+  #deck{--ds:80vw;--dx:47vw;--dy:40dvh}
+  body.pop #deck{--ds:36vw;--dx:48vw;--dy:22dvh}
   .top{flex-wrap:wrap;gap:12px;padding:14px 16px 0;padding-top:max(14px,env(safe-area-inset-top))}
   .logo span{display:none}
   .nav{order:3;margin:0;width:100%;justify-content:space-between}
   .nav button{flex:1;padding:9px 6px;font-size:13.5px}
   .live{margin-left:auto}
   .hero{left:16px;bottom:100px}
-  .hero p{font-size:15px}
-  .player{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));height:64px}
+    .player{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));height:64px}
   .player .tm,.player .eq{display:none}
   .panel{left:0;right:0;top:auto;bottom:0;width:auto;height:66dvh;border-radius:26px 26px 0 0;transform:translateY(40px);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
   .panel .pf{padding-bottom:6px}
   .ph{padding:18px 18px 0}.pb{padding:12px 18px 16px}
   .cd{gap:6px;margin-top:8px}.cd div{padding:6px 8px;border-radius:12px;display:flex;align-items:baseline;gap:4px}.cd b{font-size:15px}
 }
-@media (max-height:700px) and (max-width:760px){.hero p{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
 <body>
-<canvas id="orb"></canvas>
+<div id="deck"><div class="glow" id="glow"></div><div class="disc" id="disc"><div class="label"><b>etb</b><span id="lblT"></span></div></div><div class="sheen"></div>
+  <svg class="arm" viewBox="0 0 40 300" preserveAspectRatio="none" aria-hidden="true"><circle cx="20" cy="20" r="15" fill="#2a2a2f" stroke="#55555c"/><circle cx="20" cy="20" r="5" fill="#8a8a92"/><path d="M20 20 L20 240 L8 270" fill="none" stroke="#c9c9cf" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><rect x="0" y="262" width="18" height="30" rx="3" fill="#2a2a2f" stroke="#55555c" transform="rotate(25 9 277)"/></svg></div>
 
 <header class="top">
-  <a class="logo" href="#"><b>etb<i>.</i></b><span>ИИ-диджей · Бишкек</span></a>
+  <a class="logo" href="#"><b>etb<i>.</i></b></a>
   <nav class="nav glass" id="nav">
     <button data-p="mixes">Миксы</button>
-    <button data-p="party">Онлайн-тусовка</button>
+    <button data-p="party">Тусовка</button>
     <button data-p="book">Букинг</button>
   </nav>
-  <button class="live glass" data-p="party"><i></i><span id="lis">в эфире</span></button>
+  <button class="live glass" data-p="party"><i></i><span id="lis">live</span></button>
 </header>
 
 <section class="hero" id="hero">
-  <div class="kick"><em id="hk">ИИ-артист</em><span id="hk2">играет 24/7 онлайн</span></div>
+  <div class="kick"><em id="hk"></em><span id="hk2"></span></div>
   <h1 id="ht">etb</h1>
-  <p id="hp">Сеты 24/7 онлайн, тусовки в эфире по пятницам. Живые выступления — по брони.</p>
-  <div class="cta"><button class="btn solid" id="heroPlay"></button><button class="btn ghost" data-p="book">Пригласить etb</button></div>
+  <div class="cta"><button class="btn solid" id="heroPlay"></button></div>
 </section>
 
 <aside class="panel glass" id="panel"></aside>
 
 <footer class="player glass">
   <button class="pp" id="pp" aria-label="Играть"></button>
-  <div class="np"><b id="npT">etb · онлайн</b><small id="npS">выбери сет или нажми play</small></div>
+  <div class="np"><b id="npT">etb</b><small id="npS">6 миксов</small></div>
   <div class="eq" id="eq"><i></i><i></i><i></i><i></i><i></i></div>
   <div class="tm" id="tm">0:00</div>
   <button class="ic" id="prev" aria-label="Предыдущий"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg></button>
@@ -201,7 +211,7 @@ const MIXES=[
   {t:'Karakol Snow',g:'minimal',bpm:126,root:42,c:['#cfe3ff','#6c7bff'],st:{hat:'shuffle',bass:'afro',lead:null,perc:1,swing:.06}},
 ];
 // Пятничная онлайн-тусовка: день недели (5 = пятница), час по Бишкеку, длительность в часах
-const PARTY={day:5,hour:22,dur:4,name:'Пятничная тусовка etb'};
+const PARTY={day:5,hour:22,dur:4};
 
 /* ================= audio engine ================= */
 let ac,master,an,fdata,timer,step=0,nextT=0,cur=-1,playing=false,t0=0,elapsed=0,NB,padBus,sendR,sendD;
@@ -280,61 +290,35 @@ function bands(){
   return [avg(1,6),avg(6,40),avg(40,140)];
 }
 
-/* ================= the artist: audio-reactive orb ================= */
-const cv=$('#orb'),cx=cv.getContext('2d');
-let W,H,DPR;
-function size(){DPR=Math.min(devicePixelRatio,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}
-size();addEventListener('resize',size);
-const N=MOBILE?1100:1900,P=[];
-for(let i=0;i<N;i++){const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),th=i*2.399963;P.push({x:Math.cos(th)*r,y,z:Math.sin(th)*r,b:Math.floor((y+1)/2*60),ph:Math.random()*6.28})}
-let rotY=0,rotX=.35,pulse=0,ocx=0,ocy=0,lv=[0,0,0],col=['#ffb86b','#b48cff'],ccol=[[255,184,107],[180,140,255]];
-const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+/* ================= the deck ================= */
+const disc=$('#disc'),glow=$('#glow'),deck=$('#deck');
+let ang=0,spd=0,last=0,lv=0;
 function frame(t){
-  t/=1000;
-  const b=playing?bands():[0,0,0];
-  lv=lv.map((v,i)=>v+(b[i]-v)*(b[i]>v?.5:.12));
-  pulse=Math.max(pulse*.9,b[0]>.62?b[0]:0);
-  ccol=ccol.map((c,k)=>{const tg=hex(col[k]);return c.map((v,j)=>v+(tg[j]-v)*.03)});
-  const pOpen=document.body.classList.contains('pop');
-  const tx=pOpen&&!MOBILE?(W-430)/2+10:W/2,ty=pOpen&&MOBILE?H*.2:H*(MOBILE?.4:.45);
-  if(!ocx){ocx=tx;ocy=ty}ocx+=(tx-ocx)*.06;ocy+=(ty-ocy)*.06;
-  const R=Math.min(W,H)*(pOpen&&MOBILE?.15:MOBILE?.3:.26)*(1+lv[0]*.18+pulse*.06);
-  rotY+=.0025+lv[1]*.012;
-  cx.globalCompositeOperation='source-over';
-  cx.fillStyle='rgba(8,8,10,.34)';cx.fillRect(0,0,W,H);
-  const [r1,g1,b1]=ccol[0].map(Math.round),[r2,g2,b2]=ccol[1].map(Math.round);
-  const gl=cx.createRadialGradient(ocx,ocy,0,ocx,ocy,R*2.6);
-  gl.addColorStop(0,`rgba(${r1},${g1},${b1},${.1+lv[0]*.22})`);gl.addColorStop(.5,`rgba(${r2},${g2},${b2},${.04+lv[1]*.08})`);gl.addColorStop(1,'rgba(0,0,0,0)');
-  cx.fillStyle=gl;cx.fillRect(0,0,W,H);
-  cx.globalCompositeOperation='lighter';
-  const cy_=Math.cos(rotY),sy=Math.sin(rotY),cxr=Math.cos(rotX),sxr=Math.sin(rotX);
-  const spec=playing&&fdata?fdata:null;
-  for(const p of P){
-    const sv=spec?spec[2+p.b*2]/255:0;
-    const k=1+sv*.28+Math.sin(t*1.3+p.ph+p.y*4)*.025*(1+lv[2]*4);
-    const x=p.x*k,y=p.y*k,z=p.z*k;
-    const x1=x*cy_-z*sy,z1=x*sy+z*cy_;
-    const y2=y*cxr-z1*sxr,z2=y*sxr+z1*cxr;
-    const s=1/(1.9-z2*.6),px=ocx+x1*R*s*1.5,py=ocy+y2*R*s*1.5;
-    const a=(.18+(z2+1)*.32)*(.55+sv*.9),mx=(p.y+1)/2;
-    cx.fillStyle=`rgba(${r1+(r2-r1)*mx|0},${g1+(g2-g1)*mx|0},${b1+(b2-b1)*mx|0},${a})`;
-    const sz=(.7+(z2+1)*.7+sv*1.6)*(MOBILE?.9:1);
-    cx.fillRect(px-sz/2,py-sz/2,sz,sz);
-  }
+  const dt=Math.min(.05,(t-last)/1000||0);last=t;
+  spd+=((playing?200:0)-spd)*Math.min(1,dt*(playing?1.6:2.4)); // 33⅓ rpm ≈ 200°/s; spins up and slows down like a real deck
+  ang=(ang+spd*dt)%360;disc.style.transform=`rotate(${ang}deg)`;
+  const b=playing?bands():[0,0,0];lv+=(b[0]-lv)*(b[0]>lv?.5:.1);
+  glow.style.opacity=(.14+lv*.5).toFixed(3);deck.style.scale=(1+lv*.012).toFixed(4);
   if(playing&&fdata){document.querySelectorAll('#eq i').forEach((e,i)=>e.style.height=(4+fdata[3+i*14]/255*18)+'px');$('#tm').textContent=clock(ac.currentTime-t0)}
   requestAnimationFrame(frame);
 }
 const clock=s=>{s=Math.max(0,s|0);const h=s/3600|0,m=(s%3600)/60|0,ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
 requestAnimationFrame(frame);
+function paintDeck(m){
+  deck.style.setProperty('--lab',`radial-gradient(circle at 30% 25%,${m.c[0]},${m.c[1]} 75%)`);
+  deck.style.setProperty('--c1',m.c[0]);deck.style.setProperty('--c2',m.c[1]);$('#lblT').textContent=m.t;
+}
+paintDeck(MIXES[0]);
 
 /* ================= UI ================= */
 const PLAY='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9-5.5z"/></svg>',PAUSE='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5h3v11H3zM8 1.5h3v11H8z"/></svg>';
 function ui(){
   $('#pp').innerHTML=playing?PAUSE:PLAY;$('#pp').setAttribute('aria-label',playing?'Пауза':'Играть');
   $('#heroPlay').innerHTML=(playing?PAUSE:PLAY)+(playing?'Пауза':'Слушать');
-  if(cur>=0){const m=MIXES[cur];col=m.c;
-    $('#npT').textContent=m.t;$('#npS').textContent=`etb · ${m.g} · ${m.bpm} BPM`;
-    $('#ht').textContent=m.t;$('#hk').textContent=playing?'сейчас играет':'на паузе';$('#hk2').textContent=`${m.g} · ${m.bpm} BPM`;
+  document.body.classList.toggle('playing',playing);
+  if(cur>=0){const m=MIXES[cur];paintDeck(m);
+    $('#npT').textContent=m.t;$('#npS').textContent=`${m.g} · ${m.bpm}`;
+    $('#ht').textContent=m.t;$('#hk').textContent=playing?'играет':'пауза';$('#hk2').textContent=`${m.g} · ${m.bpm}`;
   }
   document.querySelectorAll('.mix').forEach((el,i)=>{el.classList.toggle('on',i===cur&&playing);el.querySelector('.pl').innerHTML=i===cur&&playing?PAUSE:PLAY});
   if(!playing)document.querySelectorAll('#eq i').forEach(e=>e.style.height='4px');
@@ -359,7 +343,7 @@ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openPanel(b.datas
 
 /* --- mixes --- */
 function mixesPanel(){
-  panel.innerHTML=`<div class="ph">${X}<h2>Миксы</h2><p>${MIXES.length} сетов · etb сводит в реальном времени</p></div>
+  panel.innerHTML=`<div class="ph">${X}<h2>Миксы</h2></div>
     <div class="pb"><div class="mixes">${MIXES.map((m,i)=>`<button class="mix" data-i="${i}"><div class="art" style="background:radial-gradient(circle at ${30+i*9}% ${70-i*7}%,${m.c[0]},transparent 60%),radial-gradient(circle at ${75-i*6}% ${25+i*8}%,${m.c[1]},transparent 62%),conic-gradient(from ${i*60}deg at 50% 50%,${m.c[1]},#0d0d12,${m.c[0]},#0d0d12,${m.c[1]})"></div><span class="n">${String(i+1).padStart(2,'0')}</span><span class="pl"></span><b>${m.t}</b><small>${m.g} · ${m.bpm}</small></button>`).join('')}</div></div>`;
   panel.querySelectorAll('.mix').forEach(b=>b.onclick=()=>play(+b.dataset.i));
   ui();
@@ -376,15 +360,15 @@ function partyState(){
   return {live:false,until:until*60-now.getUTCSeconds()};
 }
 const FANS=[['Айбек','Бишкек','#ffb86b'],['Нурай','Каракол','#ff8fb1'],['dana.kz','Алматы','#9fd8ff'],['Тимур','Ош','#b9f27c'],['Салтанат','Бишкек','#d1a8ff'],['Эрлан','Чолпон-Ата','#ffd27a'],['aru','Ташкент','#7fe0d0'],['Мирлан','Москва','#ffa98a'],['Бекжан','Токмок','#a8c8ff'],['Айпери','Бишкек','#ffb3d9']];
-const LINES=['🔥🔥🔥','этот дроп 😮‍💨','привет из {c}!','etb, давай погромче','это правда ИИ играет?','под закат идеально','кто в пятницу на тусовке?','бас качает','сохранила сет','🙌🙌','каждый вечер тут','etb, когда в {c} приедешь?','музыка для дороги на Иссык-Куль','включила на работе 🤫','вайб 💜'];
-const ETB=['Рад всех видеть. Дальше — немного глубже.','Привет, {c}! Этот переход для вас.','Да, я ИИ. Но танцуете вы по-настоящему.','Следующий трек — заказ из чата.','Пятница, 22:00 — главная тусовка недели. Не пропустите.','Хотите меня живьём? Вкладка «Букинг».'];
+const LINES=['🔥🔥🔥','этот дроп 😮‍💨','привет из {c}!','etb, давай погромче','под закат идеально','кто в пятницу на тусовке?','бас качает','сохранила сет','🙌🙌','каждый вечер тут','etb, когда в {c} приедешь?','музыка для дороги на Иссык-Куль','включила на работе 🤫','вайб 💜'];
+const ETB=['Рад всех видеть. Дальше — немного глубже.','Привет, {c}! Этот переход для вас.','Танцуем до утра.','Следующий трек — заказ из чата.','Пятница, 22:00. Не пропустите.','Живьём — через «Букинг».'];
 let listeners=280+Math.random()*120|0;
 function partyPanel(){
   const st=partyState();
-  panel.innerHTML=`<div class="ph">${X}<h2>Онлайн-тусовка</h2><p><span id="lc">${listeners}</span> слушают · etb в эфире 24/7</p>${st.live?`<p style="color:var(--acc)">Идёт ${PARTY.name.toLowerCase()} · до конца ${clock(st.left)}</p>`:`<p style="margin-top:10px;color:#fff">${PARTY.name} — пятница, 22:00</p><div class="cd" id="cd"></div>`}</div>
-    <div class="pb" id="pb"><div class="chat" id="chat"><div class="m sys">Вы в эфире</div></div></div>
+  panel.innerHTML=`<div class="ph">${X}<h2>Тусовка</h2><p><span id="lc">${listeners}</span> слушают</p>${st.live?`<p style="color:var(--acc)">Пятница идёт · ещё ${clock(st.left)}</p>`:`<p style="margin-top:10px;color:#fff">Пятница, 22:00</p><div class="cd" id="cd"></div>`}</div>
+    <div class="pb" id="pb"><div class="chat" id="chat"></div></div>
     <div class="pf"><div class="reacts" id="rx">${['🔥','💜','🙌','🎧','😮‍💨'].map(e=>`<button>${e}</button>`).join('')}</div>
-      <form class="say" id="say"><input id="sin" placeholder="Написать в чат или заказать трек" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
+      <form class="say" id="say"><input id="sin" placeholder="Сообщение или трек" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
   if(!playing)play(cur<0?1:cur);
   const chat=$('#chat'),pb=$('#pb');
   const add=html=>{chat.insertAdjacentHTML('beforeend',html);while(chat.children.length>60)chat.firstElementChild.remove();pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
@@ -392,7 +376,7 @@ function partyPanel(){
   const etb=t=>add(`<div class="m etb"><b>etb</b>${esc(t)}</div>`);
   for(let i=0;i<5;i++)fan();
   const loop=()=>{if(open!=='party')return;const c=fan();if(Math.random()<.18)later(()=>open==='party'&&etb(ETB[Math.random()*ETB.length|0].replace('{c}',c)),1400);
-    listeners=Math.max(150,listeners+(Math.random()*9-4|0));$('#lc').textContent=listeners;$('#lis').textContent=`в эфире · ${listeners}`;
+    listeners=Math.max(150,listeners+(Math.random()*9-4|0));$('#lc').textContent=listeners;$('#lis').textContent=`live · ${listeners}`;
     if(Math.random()<.35)flyFrom(null,['🔥','💜','🙌'][Math.random()*3|0]);
     later(loop,1400+Math.random()*2400)};
   later(loop,900);
@@ -407,8 +391,7 @@ function partyPanel(){
       if(open!=='party')return;
       if(/трек|постав|включи|заказ|песн/.test(low)){etb('Принял заказ 🎧 Сведу его в следующий переход.');later(()=>{if(open!=='party')return;skip(1);add(`<div class="m sys">etb сменил сет · ${MIXES[cur].t}</div>`)},3500)}
       else if(/привет|салам|хай|hello|hi\b/.test(low))etb('Привет! Рад, что ты с нами. Откуда слушаешь?');
-      else if(/при[её]д|выступ|концерт|живь|брон|букинг/.test(low))etb('Приезжаю живьём по брони — открой вкладку «Букинг», менеджер ответит за час.');
-      else if(/\bии\b|\bai\b|робот|нейро/.test(low))etb('Да, я ИИ-артист. Сеты свожу сам, а на сцену выхожу вместе с командой.');
+      else if(/при[её]д|выступ|концерт|живь|брон|букинг/.test(low))etb('Живьём — через «Букинг», отвечу за час.');
       else etb(['Слышу тебя 🙌','Держи следующий дроп — для тебя.','Лучший чат в городе.','💜'][Math.random()*4|0]);
     },1200+Math.random()*800);
   };
@@ -425,14 +408,13 @@ function bookPanel(){
   const sel={f:'Клуб',c:'Бишкек'};
   const opt=(k,arr)=>`<div class="opts" data-k="${k}">${arr.map(v=>`<button type="button" class="${sel[k]===v?'on':''}">${v}</button>`).join('')}</div>`;
   const min=new Date(Date.now()+BISH+86400e3).toISOString().slice(0,10);
-  panel.innerHTML=`<div class="ph">${X}<h2>Пригласить etb</h2><p>Живой сет и ИИ-визуал на экранах. Приезжаем с командой.</p></div>
+  panel.innerHTML=`<div class="ph">${X}<h2>Букинг</h2></div>
     <div class="pb"><form id="bf">
-      <div class="what"><div><b>Сет</b>2–4 часа</div><div><b>Визуал</b>etb на экранах</div><div><b>Команда</b>диджей + техник</div></div>
       <div class="lbl">Формат</div>${opt('f',['Клуб','Частное','Корпоратив','Фестиваль','Свадьба'])}
       <div class="lbl">Город</div>${opt('c',['Бишкек','Иссык-Куль','Алматы','Ташкент','Другой'])}
       <div class="lbl">Дата</div><input class="field" type="date" id="bd" min="${min}" required>
-      <div class="lbl">Как с вами связаться</div><input class="field" id="bc" placeholder="Telegram, WhatsApp или телефон" required autocomplete="off">
-      <button class="btn solid send" id="bs">Отправить заявку</button>
+      <div class="lbl">Контакт</div><input class="field" id="bc" placeholder="Telegram или телефон" required autocomplete="off">
+      <button class="btn solid send" id="bs">Отправить</button>
     </form><div class="bub" id="bub"></div></div>`;
   panel.querySelectorAll('.opts').forEach(o=>o.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel[o.dataset.k]=b.textContent;o.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))}));
   $('#bf').onsubmit=async e=>{e.preventDefault();$('#bs').disabled=true;
@@ -440,16 +422,16 @@ function bookPanel(){
     const say=async(t,cls='a')=>{if(cls==='a'){bub.insertAdjacentHTML('beforeend','<div class="a typing"><i></i><i></i><i></i></div>');pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'});await sleep(1100);bub.lastElementChild.remove()}
       bub.insertAdjacentHTML('beforeend',`<div class="${cls}">${t}</div>`);pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
     await say(esc(`${sel.f}, ${sel.c}, ${d}`),'u');
-    await say(`Менеджер etb на связи. ${d} — дата свободна ✓ Сколько будет гостей?<div class="opts" style="margin-top:10px" id="gq"><button>до 100</button><button>100–500</button><button>500+</button></div>`);
+    await say(`${d} — свободно ✓ Сколько гостей?<div class="opts" style="margin-top:10px" id="gq"><button>до 100</button><button>100–500</button><button>500+</button></div>`);
     $('#gq').querySelectorAll('button').forEach(b=>b.onclick=async()=>{$('#gq').remove();await say(esc(b.textContent),'u');
-      await say(`Заявка №E-${++reqNo} принята ✓ Райдер, гонорар и варианты сета пришлю на ${esc($('#bc').value)} в течение часа.`)});
+      await say(`Заявка №E-${++reqNo} ✓ Райдер и гонорар пришлю на ${esc($('#bc').value)} в течение часа.`)});
   };
 }
 
 /* boot */
 ui();
 const h=location.hash.slice(1);if(['mixes','party','book'].includes(h))openPanel(h);
-$('#lis').textContent=`в эфире · ${listeners}`;
+$('#lis').textContent=`live · ${listeners}`;
 window.__w={play,pause,openPanel,closePanel,get cur(){return cur},get playing(){return playing}};
 </script>
 </body>
