@@ -4,647 +4,453 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0c0c0e">
-<title>etb.world</title>
-<meta name="description" content="Компании Бишкека в одном свайпе. В каждой работает агент.">
+<meta name="theme-color" content="#08080a">
+<title>etb — ИИ-диджей</title>
+<meta name="description" content="etb — ИИ-артист из Бишкека. Играет онлайн 24/7, приезжает живьём по броням.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://images.unsplash.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0c0c0e;--ink:#1f1a15;--mute:#8a7e70;--bronze:#a47148;--paper:#f7f2ea;--paper2:#efe8dc;--line:rgba(31,26,21,.1);
-  --ok:#7fe0a8;--off:#ffb4a2;--cw:min(440px,calc(100vw - 48px));--ease:cubic-bezier(.22,1,.36,1);
-}
+:root{--bg:#08080a;--acc:#ffb86b;--acc2:#b48cff;--mute:rgba(255,255,255,.55);--line:rgba(255,255,255,.12);--glass:rgba(18,18,22,.62);--ease:cubic-bezier(.22,1,.36,1);--pw:410px}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg)}
-body{font:400 16px/1.45 Onest,system-ui,sans-serif;-webkit-font-smoothing:antialiased;color:#fff;display:flex;flex-direction:column;height:100dvh}
+body{font:400 16px/1.45 Onest,system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;height:100dvh}
 button,input{font:inherit;color:inherit;border:0;background:none;-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}
-img{display:block}
+canvas#orb{position:fixed;inset:0;width:100%;height:100%;display:block}
+.glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
 
-/* ambient backdrop: the active company's photo, blurred */
-#bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-#bg img{position:absolute;inset:-10%;width:120%;height:120%;object-fit:cover;filter:blur(70px) saturate(1.25);opacity:0;transition:opacity 1.2s ease}
-#bg img.on{opacity:.5}
-#bg::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 40%,transparent 30%,rgba(12,12,14,.85))}
+/* top */
+.top{position:fixed;left:0;right:0;top:0;z-index:10;display:flex;align-items:center;gap:16px;padding:18px 22px;padding-top:max(18px,env(safe-area-inset-top))}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none;color:#fff}
+.logo b{font:700 24px Unbounded,sans-serif;letter-spacing:-.05em}
+.logo b i{font-style:normal;color:var(--acc)}
+.logo span{font-size:13px;color:var(--mute)}
+.nav{display:flex;gap:4px;padding:4px;border-radius:99px;margin:0 auto}
+.nav button{padding:8px 16px;border-radius:99px;font-size:14px;color:rgba(255,255,255,.75);transition:.3s;white-space:nowrap}
+.nav button:hover{color:#fff}
+.nav button.on{background:#fff;color:#0a0a0c}
+.live{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 14px;border-radius:99px;white-space:nowrap}
+.live i{width:7px;height:7px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 12px #ff4d5e;animation:blink 1.4s infinite}
+@keyframes blink{50%{opacity:.3}}
 
-/* top bar */
-.top{position:relative;z-index:5;display:flex;align-items:center;gap:16px;padding:16px 20px 10px;padding-top:max(16px,env(safe-area-inset-top))}
-.logo{font:700 19px Unbounded,sans-serif;letter-spacing:-.04em;color:#fff;text-decoration:none;white-space:nowrap}
-.logo i{font-style:normal;color:#ffb86b}
-.cats{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;mask-image:linear-gradient(90deg,#000 88%,transparent)}
-.cats::-webkit-scrollbar{display:none}
-.cats button{flex:none;padding:7px 14px;border-radius:99px;font-size:14px;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.14);transition:.3s}
-.cats button:hover{color:#fff}
-.cats button.on{background:#fff;color:#111;border-color:#fff}
-.chips{display:flex;gap:6px;flex:none}
-.chip{padding:7px 12px;border-radius:99px;font-size:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);white-space:nowrap;font-variant-numeric:tabular-nums}
-.chip small{color:rgba(255,255,255,.55);font-size:inherit}
-
-/* carousel */
-.stage{position:relative;z-index:2;flex:1;min-height:0;display:flex}
-#track{flex:1;display:flex;gap:18px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;padding:8px calc((100vw - var(--cw))/2) 8px;align-items:stretch;touch-action:pan-x}
-#track::-webkit-scrollbar{display:none}
-.card{flex:0 0 var(--cw);scroll-snap-align:center;scroll-snap-stop:always;position:relative;opacity:0;transform:translateY(30px);animation:rise .9s var(--ease) forwards}
-@keyframes rise{to{opacity:1;transform:none}}
-.ci{position:absolute;inset:0;border-radius:30px;overflow:hidden;background:#1a1a1d;transform:scale(calc(1 - var(--d,0)*.07));opacity:calc(1 - var(--d,0)*.5);transition:transform .25s ease-out,opacity .25s ease-out;cursor:pointer;box-shadow:0 30px 80px -30px rgba(0,0,0,.7)}
-.ci>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.08);transition:transform 8s ease-out,opacity .8s;opacity:0}
-.ci>img.ld{opacity:1}
-.card.act .ci>img{transform:scale(1)}
-.ci .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.45) 0,transparent 22%,transparent 42%,rgba(0,0,0,.82) 100%)}
-.ctop{position:absolute;left:18px;right:18px;top:18px;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.tag{font-size:13px;padding:6px 12px;border-radius:99px;background:rgba(0,0,0,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.16);white-space:nowrap}
-.st{display:inline-flex;align-items:center;gap:7px}
-.st i{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok)}
-.st.off i{background:var(--off);box-shadow:none}
-.st.deal i{background:#ffd27a;box-shadow:0 0 10px #ffd27a}
-.cbot{position:absolute;left:0;right:0;bottom:0;padding:22px}
-.thumbs{display:flex;gap:6px;margin-bottom:14px}
-.thumbs button{width:52px;height:52px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.3);flex:none}
-.thumbs img{width:100%;height:100%;object-fit:cover}
-.thumbs span{display:flex;align-items:center;font-size:12px;color:rgba(255,255,255,.7);padding-left:4px;line-height:1.25}
-.card h2{font:600 clamp(30px,7.4vw,40px)/1 Unbounded,sans-serif;letter-spacing:-.035em;text-transform:uppercase;text-wrap:balance}
-.card h2.long{font-size:clamp(24px,6vw,31px)}
-.card .ln{color:rgba(255,255,255,.78);margin-top:8px;font-size:15px}
-.ag{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:rgba(255,255,255,.65)}
-.ag i{width:6px;height:6px;border-radius:50%;background:#ffb86b;animation:pulse 1.8s infinite}
-@keyframes pulse{50%{opacity:.25}}
-.acts{display:flex;gap:8px;margin-top:16px}
-.btn{flex:1;height:48px;border-radius:99px;font-weight:500;font-size:15px;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .2s,background .3s}
+/* hero */
+.hero{position:fixed;left:22px;bottom:110px;z-index:5;max-width:min(720px,calc(100vw - 44px));transition:opacity .5s,transform .6s var(--ease);pointer-events:none}
+.kick{font-size:13px;color:var(--mute);letter-spacing:.02em;display:flex;gap:10px;align-items:center}
+.kick em{font-style:normal;color:var(--acc)}
+.hero h1{font:700 clamp(40px,8.4vw,112px)/.92 Unbounded,sans-serif;letter-spacing:-.055em;text-transform:uppercase;margin-top:12px;text-wrap:balance}
+.hero p{margin-top:16px;color:rgba(255,255,255,.72);max-width:44ch;font-size:16px}
+.hero .cta{display:flex;gap:8px;margin-top:22px;pointer-events:auto}
+.btn{height:50px;padding:0 24px;border-radius:99px;font-weight:500;font-size:15px;display:inline-flex;align-items:center;gap:10px;transition:transform .2s,background .3s}
 .btn:active{transform:scale(.97)}
-.btn.ghost{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.btn.ghost:hover{background:rgba(255,255,255,.16)}
-.btn.solid{background:#fff;color:#111}
-.join .ci{background:linear-gradient(160deg,#2a2622,#14110f)}
-.join .ci>img{opacity:.35!important}
+.btn.solid{background:#fff;color:#0a0a0c}
+.btn.ghost{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.06);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.btn.ghost:hover{background:rgba(255,255,255,.14)}
+body.pop .hero{opacity:0;transform:translateY(20px)}
+@media (min-width:1100px){body.pop .hero{opacity:1;transform:none;max-width:calc(100vw - var(--pw) - 90px)}body.pop .hero .cta{display:none}}
 
-/* pager */
-.pager{position:relative;z-index:5;display:flex;align-items:center;justify-content:center;gap:18px;padding:10px 20px 18px;padding-bottom:max(18px,env(safe-area-inset-bottom))}
-.arrow{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:grid;place-items:center;transition:.3s}
-.arrow:hover{background:#fff;color:#111}
-.arrow:disabled{opacity:.25;pointer-events:none}
-.count{font:500 13px Onest;color:rgba(255,255,255,.6);min-width:150px;text-align:center;font-variant-numeric:tabular-nums}
-.count b{color:#fff;font-weight:500}
-.bar{height:2px;background:rgba(255,255,255,.14);border-radius:2px;margin-top:8px;overflow:hidden}
-.bar i{display:block;height:100%;background:#fff;width:0;transition:width .5s var(--ease)}
+/* player */
+.player{position:fixed;left:22px;right:22px;bottom:22px;bottom:max(22px,env(safe-area-inset-bottom));z-index:12;height:68px;border-radius:99px;display:flex;align-items:center;gap:14px;padding:0 10px 0 9px}
+.pp{width:50px;height:50px;border-radius:50%;background:#fff;color:#0a0a0c;display:grid;place-items:center;flex:none;transition:transform .2s}
+.pp:active{transform:scale(.94)}
+.np{flex:1;min-width:0}
+.np b{display:block;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np small{color:var(--mute);font-size:13px;white-space:nowrap}
+.eq{display:flex;gap:3px;align-items:flex-end;height:22px;flex:none}
+.eq i{width:3px;background:var(--acc);border-radius:2px;height:4px;transition:height .08s}
+.tm{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.ic{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:none;color:rgba(255,255,255,.8)}
+.ic:hover{background:rgba(255,255,255,.1);color:#fff}
 
-/* detail sheet */
-#sheet{position:fixed;inset:0;z-index:50;display:grid;place-items:center;visibility:hidden;color:var(--ink)}
-#sheet.on{visibility:visible}
-#sheet .scrim{position:absolute;inset:0;background:rgba(8,8,10,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .5s}
-#sheet.on .scrim{opacity:1}
-.box{position:relative;width:min(1160px,calc(100vw - 48px));height:min(740px,calc(100dvh - 48px));background:var(--paper);border-radius:30px;overflow:hidden;display:grid;grid-template-columns:1.12fr 1fr;transform:translateY(40px) scale(.97);opacity:0;transition:transform .6s var(--ease),opacity .4s}
-#sheet.on .box{transform:none;opacity:1}
-.gal{position:relative;background:#111;min-height:0}
-.gtrack{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
-.gtrack::-webkit-scrollbar{display:none}
-.gtrack figure{flex:0 0 100%;scroll-snap-align:center;position:relative}
-.gtrack img{width:100%;height:100%;object-fit:cover}
-.gcap{position:absolute;left:18px;bottom:18px;color:#fff;font-size:13px;display:flex;gap:6px;align-items:center}
-.gdots{position:absolute;right:18px;bottom:22px;display:flex;gap:5px}
-.gdots i{width:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.45);transition:.4s}
-.gdots i.on{width:20px;background:#fff}
-.gnav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.3);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;display:grid;place-items:center;border:1px solid rgba(255,255,255,.2)}
-.gnav.l{left:16px}.gnav.r{right:16px}
-.x{position:absolute;right:16px;top:16px;z-index:3;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.85);color:var(--ink);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.info{display:flex;flex-direction:column;min-height:0;padding:30px 34px 26px}
-.kick{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mute)}
-.kick i{width:7px;height:7px;border-radius:50%;background:#2fa866}
-.kick.off i{background:#d0674f}.kick.deal i{background:#d6a23a}
-.info h3{font:600 clamp(26px,3vw,36px)/1.05 Unbounded,sans-serif;letter-spacing:-.035em;text-transform:uppercase;margin-top:10px}
-.info .sub{color:var(--mute);margin-top:6px;font-size:15px}
-.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line);margin-top:20px;flex:none}
-.tabs button{padding:0 0 11px;font-size:15px;color:var(--mute);position:relative}
-.tabs button.on{color:var(--ink)}
-.tabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);border-radius:2px}
-.pane{flex:1;min-height:0;overflow:auto;padding-top:16px;scrollbar-width:thin}
-.foot{flex:none;display:flex;align-items:center;gap:12px;padding-top:14px;border-top:1px solid var(--line);margin-top:8px}
-.foot[hidden]{display:none}
-.foot .tot{flex:1;font:500 18px Onest;font-variant-numeric:tabular-nums}
-.foot .tot small{display:block;font-size:12px;color:var(--mute);font-weight:400}
-.pill{height:48px;padding:0 24px;border-radius:99px;border:1px solid var(--line);font-weight:500;font-size:15px;transition:.25s}
-.pill.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.pill:disabled{opacity:.35;pointer-events:none}
-.seg{display:inline-flex;background:var(--paper2);border-radius:99px;padding:4px;margin-bottom:12px}
-.seg button{padding:7px 16px;border-radius:99px;font-size:14px;color:var(--mute);transition:.25s}
-.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.it{display:flex;align-items:center;gap:14px;padding:13px 2px;border-bottom:1px solid var(--line)}
-.it:last-child{border-bottom:0}
-.it>div:first-child{flex:1;min-width:0}
-.it b{font-weight:500;display:block}
-.it small{color:var(--mute);font-size:13px}
-.qty{display:flex;align-items:center;gap:4px;flex:none}
-.qty button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);font-size:17px;line-height:1}
-.qty button:hover{background:#fff}
-.qty span{min-width:46px;text-align:center;font-variant-numeric:tabular-nums;font-size:14px}
-.it.pick{cursor:pointer;border-radius:14px;padding:13px 14px;border:1px solid var(--line);margin-bottom:8px;transition:.25s}
-.it.pick:hover{background:#fff}
-.it.pick.on{border-color:var(--ink);background:#fff}
-.it.pick .ck{width:22px;height:22px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:12px}
-.it.pick.on .ck{background:var(--ink);color:#fff;border-color:var(--ink)}
-.about p{font-size:16px;line-height:1.6;color:#3a332c;max-width:46ch}
-.facts{margin-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.facts div{background:var(--paper2);border-radius:16px;padding:12px 14px}
-.facts span{display:block;font-size:12px;color:var(--mute)}
-.facts b{font-weight:500;font-size:15px}
-.specs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.specs div{background:var(--paper2);border-radius:16px;padding:14px}
-.specs b{font:600 22px Unbounded,sans-serif;letter-spacing:-.03em;display:block}
-.specs span{font-size:13px;color:var(--mute)}
-.form{display:flex;gap:8px;flex-wrap:wrap}
-.form input{flex:1;min-width:180px;height:48px;border-radius:99px;border:1px solid var(--line);background:#fff;padding:0 20px;color:var(--ink);outline:none}
-.form input:focus{border-color:var(--ink)}
-/* agent chat */
-.msgs{display:flex;flex-direction:column;gap:8px}
-.back{font-size:14px;color:var(--mute);margin-bottom:12px;display:inline-flex;gap:6px;align-items:center}
-.who{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:14px}
-.who .av{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font:600 12px Unbounded}
-.who small{display:block;color:var(--mute);font-size:12px}
-.b{max-width:86%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.45;animation:pop .35s var(--ease)}
+/* side panel */
+.panel{position:fixed;z-index:11;right:22px;top:84px;bottom:106px;width:var(--pw);border-radius:28px;display:flex;flex-direction:column;overflow:hidden;opacity:0;transform:translateX(30px);pointer-events:none;transition:opacity .45s,transform .6s var(--ease)}
+body.pop .panel{opacity:1;transform:none;pointer-events:auto}
+.ph{padding:22px 22px 0;flex:none}
+.ph h2{font:600 24px Unbounded,sans-serif;letter-spacing:-.04em;text-transform:uppercase}
+.ph p{color:var(--mute);font-size:14px;margin-top:4px}
+.ph .x{position:absolute;right:14px;top:14px}
+.pb{flex:1;min-height:0;overflow:auto;padding:16px 22px 22px;scrollbar-width:none}
+.pb::-webkit-scrollbar{display:none}
+
+/* mixes */
+.mixes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mix{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;text-align:left;padding:14px;display:flex;flex-direction:column;justify-content:flex-end;isolation:isolate;transition:transform .3s var(--ease)}
+.mix:hover{transform:translateY(-2px)}
+.mix .art{position:absolute;inset:0;z-index:-1;transition:transform 1.2s var(--ease)}
+.mix:hover .art{transform:scale(1.06)}
+.mix::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(transparent 35%,rgba(0,0,0,.6))}
+.mix b{font:600 14px/1.15 Unbounded,sans-serif;letter-spacing:-.03em;text-transform:uppercase}
+.mix small{font-size:12px;color:rgba(255,255,255,.75);margin-top:4px}
+.mix .n{position:absolute;left:14px;top:12px;font:600 12px Unbounded;opacity:.8}
+.mix .pl{position:absolute;right:12px;top:12px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.35);display:grid;place-items:center}
+.mix.on{outline:2px solid #fff;outline-offset:-2px}
+.mix.on .pl{background:#fff;color:#0a0a0c}
+
+/* party */
+.cd{display:flex;gap:8px;margin-top:10px}
+.cd div{flex:1;border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.cd b{font:600 20px Unbounded;letter-spacing:-.03em;display:block;font-variant-numeric:tabular-nums}
+.cd span{font-size:11px;color:var(--mute)}
+.chat{display:flex;flex-direction:column;gap:9px;font-size:14px}
+.m{animation:pop .35s var(--ease);line-height:1.4}
+.m b{font-weight:500;color:var(--c,#fff);margin-right:6px}
+.m.etb{background:rgba(255,184,107,.12);border:1px solid rgba(255,184,107,.25);border-radius:14px;padding:8px 11px}
+.m.etb b{color:var(--acc)}
+.m.me b{color:#9fd8ff}
+.m.sys{color:var(--mute);font-size:12px;text-align:center}
 @keyframes pop{from{opacity:0;transform:translateY(6px)}}
-.b.ai{background:#fff;border-bottom-left-radius:6px;align-self:flex-start}
-.b.mine{background:var(--ink);color:var(--paper);border-bottom-right-radius:6px;align-self:flex-end}
-.b .row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.b .row button{padding:7px 14px;border-radius:99px;border:1px solid var(--line);font-size:14px;background:var(--paper)}
-.b .row button:hover{background:var(--ink);color:var(--paper)}
-.typing{align-self:flex-start;background:#fff;border-radius:18px;padding:13px 16px;display:flex;gap:4px}
-.typing i{width:6px;height:6px;border-radius:50%;background:var(--mute);animation:pulse 1s infinite}
-.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
-.feed .it time{font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.pf{flex:none;padding:12px 16px 16px;border-top:1px solid var(--line)}
+.reacts{display:flex;gap:6px;margin-bottom:10px}
+.reacts button{flex:1;height:38px;border-radius:12px;border:1px solid var(--line);font-size:18px;transition:.2s}
+.reacts button:hover{background:rgba(255,255,255,.08)}
+.reacts button:active{transform:scale(.9)}
+.say{display:flex;gap:8px}
+.say input{flex:1;min-width:0;height:44px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.05);padding:0 16px;outline:none}
+.say input:focus{border-color:rgba(255,255,255,.4)}
+.say button{width:44px;height:44px;border-radius:50%;background:#fff;color:#0a0a0c;display:grid;place-items:center;flex:none}
+.fly{position:fixed;z-index:30;pointer-events:none;font-size:26px;animation:fly 2.2s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),-340px) scale(1.3);opacity:0}}
 
-@media (max-width:820px){
-  .box{width:100vw;height:100dvh;border-radius:0;grid-template-columns:1fr;grid-template-rows:38dvh 1fr}
-  .info{padding:20px 20px max(16px,env(safe-area-inset-bottom))}
-  .tabs{margin-top:14px}
-  .gnav{display:none}
+/* booking */
+.lbl{font-size:12px;color:var(--mute);margin:14px 0 8px}
+.opts{display:flex;flex-wrap:wrap;gap:6px}
+.opts button{padding:8px 14px;border-radius:99px;border:1px solid var(--line);font-size:14px;transition:.25s}
+.opts button:hover{border-color:rgba(255,255,255,.35)}
+.opts button.on{background:#fff;color:#0a0a0c;border-color:#fff}
+.field{width:100%;height:46px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.05);padding:0 14px;outline:none;color-scheme:dark}
+.field:focus{border-color:rgba(255,255,255,.4)}
+.what{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:4px}
+.what div{border:1px solid var(--line);border-radius:14px;padding:10px;font-size:12px;color:var(--mute)}
+.what b{display:block;color:#fff;font-weight:500;font-size:13px;margin-bottom:2px}
+.send{width:100%;margin-top:16px;justify-content:center}
+.send:disabled{opacity:.35;pointer-events:none}
+.bub{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.bub>div{padding:10px 14px;border-radius:16px;font-size:14px;animation:pop .35s var(--ease);max-width:90%}
+.bub .a{background:rgba(255,255,255,.08);align-self:flex-start;border-bottom-left-radius:5px}
+.bub .u{background:#fff;color:#0a0a0c;align-self:flex-end;border-bottom-right-radius:5px}
+.typing{display:flex;gap:4px;padding:12px 14px!important}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--mute);animation:blink 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+
+@media (max-width:760px){
+  .top{flex-wrap:wrap;gap:12px;padding:14px 16px 0;padding-top:max(14px,env(safe-area-inset-top))}
+  .logo span{display:none}
+  .nav{order:3;margin:0;width:100%;justify-content:space-between}
+  .nav button{flex:1;padding:9px 6px;font-size:13.5px}
+  .live{margin-left:auto}
+  .hero{left:16px;bottom:100px}
+  .hero p{font-size:15px}
+  .player{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));height:64px}
+  .player .tm,.player .eq{display:none}
+  .panel{left:0;right:0;top:auto;bottom:0;width:auto;height:66dvh;border-radius:26px 26px 0 0;transform:translateY(40px);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .panel .pf{padding-bottom:6px}
+  .ph{padding:18px 18px 0}.pb{padding:12px 18px 16px}
+  .cd{gap:6px;margin-top:8px}.cd div{padding:6px 8px;border-radius:12px;display:flex;align-items:baseline;gap:4px}.cd b{font-size:15px}
 }
-@media (max-width:640px){
-  .top{flex-wrap:wrap;gap:10px 12px;padding:12px 16px 6px;padding-top:max(12px,env(safe-area-inset-top))}
-  .chips{margin-left:auto}
-  .cats{order:3;flex-basis:100%;mask-image:none}
-  :root{--cw:calc(100vw - 52px)}
-  #track{gap:10px}
-  .pager .arrow{display:none}
-  .pager{padding-top:6px}
-  .ci{border-radius:26px}
-  .cbot{padding:18px}
-  .thumbs button{width:46px;height:46px}
-}
-@media (max-height:640px){.thumbs{display:none}.card .ln{margin-top:4px}.ag{margin-top:6px}.acts{margin-top:10px}}
+@media (max-height:700px) and (max-width:760px){.hero p{display:none}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
 </style>
 </head>
 <body>
-<div id="bg"><img alt=""><img alt=""></div>
+<canvas id="orb"></canvas>
 
 <header class="top">
-  <a class="logo" href="#">etb<i>.</i>world</a>
-  <nav class="cats" id="cats"></nav>
-  <div class="chips"><button class="chip" id="clk" title="Время в Бишкеке"></button><span class="chip" id="wx"></span></div>
+  <a class="logo" href="#"><b>etb<i>.</i></b><span>ИИ-диджей · Бишкек</span></a>
+  <nav class="nav glass" id="nav">
+    <button data-p="mixes">Миксы</button>
+    <button data-p="party">Онлайн-тусовка</button>
+    <button data-p="book">Букинг</button>
+  </nav>
+  <button class="live glass" data-p="party"><i></i><span id="lis">в эфире</span></button>
 </header>
 
-<main class="stage"><div id="track"></div></main>
+<section class="hero" id="hero">
+  <div class="kick"><em id="hk">ИИ-артист</em><span id="hk2">играет 24/7 онлайн</span></div>
+  <h1 id="ht">etb</h1>
+  <p id="hp">Сеты 24/7 онлайн, тусовки в эфире по пятницам. Живые выступления — по брони.</p>
+  <div class="cta"><button class="btn solid" id="heroPlay"></button><button class="btn ghost" data-p="book">Пригласить etb</button></div>
+</section>
 
-<footer class="pager">
-  <button class="arrow" id="prev" aria-label="Назад"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3L5 8l5 5"/></svg></button>
-  <div class="count"><div id="cnt"></div><div class="bar"><i id="barI"></i></div></div>
-  <button class="arrow" id="next" aria-label="Вперёд"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3l5 5-5 5"/></svg></button>
+<aside class="panel glass" id="panel"></aside>
+
+<footer class="player glass">
+  <button class="pp" id="pp" aria-label="Играть"></button>
+  <div class="np"><b id="npT">etb · онлайн</b><small id="npS">выбери сет или нажми play</small></div>
+  <div class="eq" id="eq"><i></i><i></i><i></i><i></i><i></i></div>
+  <div class="tm" id="tm">0:00</div>
+  <button class="ic" id="prev" aria-label="Предыдущий"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg></button>
+  <button class="ic" id="next" aria-label="Следующий"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M11 2h2v12h-2zM2 2v12l8-6z"/></svg></button>
 </footer>
 
-<section id="sheet" aria-hidden="true"><div class="scrim"></div><div class="box" id="box"></div></section>
-
 <script>
-/* =====================================================================
-   КОМПАНИИ. Чтобы добавить новую — скопируйте любой блок и поменяйте поля.
-   id      — латиницей, станет ссылкой etb.world/#id
-   cat     — Еда · Магазины · Услуги · Авто · Отдых · Бизнес · Недвижимость
-   hours   — [открытие, закрытие] в минутах от полуночи (660 = 11:00), null = 24/7
-   photos  — [[unsplash-id или полный URL, подпись], ...], первое фото — обложка
-   kind    — order (меню/каталог) · book (запись на услугу) · lease · corp · meet · office
-   ===================================================================== */
-const COMPANIES=[
-  {id:'kazan',name:'Kazan',cat:'Еда',line:'кухня Азии · доставка и на вынос',hours:[660,1380],agent:'Продавец принимает заказы',kind:'order',
-    about:'Лагман, плов и шашлык на углях. Зал на 60 гостей, летняя терраса и доставка по городу за 40 минут.',city:'Бишкек',
-    photos:[['1517248135467-4c7edcad34c4','Зал'],['1555396273-367ea4eb4db5','Вид изнутри'],['1547573854-74d2a71d0826','Блюда'],['1600891964092-4316c288032e','Шашлык']],
-    modes:['Доставка','На вынос'],menu:[['Лагман',450],['Плов',420],['Манты, 5 шт',380],['Шашлык из баранины',520],['Чай с чабрецом',150]]},
-  {id:'ndws',name:'NDWS',cat:'Магазины',line:'спортивное питание',hours:[600,1200],agent:'Продавец онлайн',kind:'order',tab:'Каталог',
-    about:'Бренд спортивного питания: креатин, омега, витамины и протеин. Консультация по подбору — у агента в чате.',city:'Бишкек',
-    photos:[['1517836357463-d25dfeac3438','Тренировка'],['1593095948071-474c5cc2989d','Продукт'],['1534438327276-14e5300c3a48','Зал']],
-    modes:['Доставка','Самовывоз'],menu:[['Creatine',1700],['Omega-3',2100],['D3 + K2',1950],['Ashwagandha',2800],['Collagen + C',3400],['Whey + Collagen',3200]]},
-  {id:'supara-chunkurchak',name:'Супара Чункурчак',cat:'Отдых',line:'этно-комплекс в горах',hours:null,agent:'Администратор онлайн',kind:'order',tab:'Бронь',
-    about:'Юрты, коттеджи и шале в ущелье Чункурчак, 40 минут от Бишкека. Национальная кухня, горы и тишина.',city:'Чункурчак',
-    photos:[['1464822759023-fed622ff2c3b','Ущелье'],['1504280390367-361c6d9f38f4','Вид изнутри'],['1559339352-11d035aa65de','Терраса'],['1547573854-74d2a71d0826','Кухня']],
-    modes:['Бронь номера','Блюда к заезду'],menus:{'Бронь номера':[['Юрта',null],['Коттедж',null],['Номер в шале',null]],'Блюда к заезду':[['Бешбармак',null],['Куурдак',null],['Шорпо',null],['Боорсок с каймаком',null],['Чай из самовара',null]]},
-    qlabel:{'Бронь номера':'ноч.'},free:'цену назовёт администратор'},
-  {id:'luna',name:'Бар «Луна»',cat:'Еда',line:'коктейли до 4 утра',hours:[1080,1680],agent:'Бармен-бот',kind:'order',
-    about:'Барная стойка на 20 мест, авторские коктейли и диджей по пятницам. Столик бронирует агент.',city:'Бишкек',
-    photos:[['1572116469696-31de0f17cc34','Бар'],['1514933651103-005eec06c04b','Вид изнутри'],['1470337458703-46ad1756a187','Коктейли']],
-    modes:['Бронь','На вынос'],menu:[['Столик на двоих',null],['Столик на компанию',null],['Лимонад с собой',350],['Сет закусок',890]]},
-  {id:'coffee',name:'Кофе с собой',cat:'Еда',line:'кофейня на углу',hours:[480,1320],agent:'Бариста-бот',kind:'order',
-    about:'Зерно свежей обжарки, альтернатива и выпечка каждое утро. Закажите заранее — заберёте без очереди.',city:'Бишкек',
-    photos:[['1501339847302-ac426a4a7cbb','Кофейня'],['1509042239860-f550ce710b93','Капучино'],['1442512595331-e89e73853f31','Альтернатива'],['1495474472287-4d71bcdd2085','С собой']],
-    modes:['На вынос'],menu:[['Капучино',220],['Латте',240],['Американо',180],['Круассан',200]]},
-  {id:'gabri',name:'Gabri Car Garage',cat:'Авто',line:'автосалон · подбор и тест-драйв',hours:[600,1200],agent:'Менеджер-бот',kind:'book',
-    about:'Подберём машину под бюджет, проверим историю и организуем тест-драйв. Trade-in и кредит на месте.',city:'Бишкек',
-    photos:[['1492144534655-ae79c964c9d7','Шоурум'],['1503376780353-7e6692767b70','На дороге'],['1520340356584-f9917d1eea6f','Подготовка']],
-    svc:[['Подобрать авто','под бюджет и задачи'],['Тест-драйв','любая машина в наличии'],['Trade-in','оценим вашу машину'],['Кредит и лизинг','расчёт за 10 минут']],ask:'Когда удобно приехать в салон?',slots:['Сегодня','Завтра','На выходных'],cta:'Записаться',
-    done:'Записал ✓ {s}, {t}. Менеджер подготовит машины и напишет в Telegram.'},
-  {id:'chach',name:'Барбершоп «Чач»',cat:'Услуги',line:'стрижки и борода',hours:[600,1260],agent:'Администратор-бот',kind:'book',
-    about:'Четыре кресла, мастера с опытом от пяти лет. Кофе пока ждёте, напоминание за час до записи.',city:'Бишкек',
-    photos:[['1585747860715-2ba37e788b70','Зал'],['1503951914875-452162b0f3f1','Бритьё'],['1580618672591-eb180b1a973f','Укладка']],
-    svc:[['Стрижка','45 минут'],['Борода','30 минут'],['Стрижка + борода','75 минут'],['Детская стрижка','до 12 лет']],ask:'На какое время записать?',slots:['Сегодня 17:00','Сегодня 19:30','Завтра 12:00'],cta:'Записаться',
-    done:'Записал ✓ {s}, {t}. Напомню за час, если что — перенесём в чате.'},
-  {id:'ulut-baatyry',name:'Улут-Баатыры',cat:'Бизнес',line:'офис холдинга «Герои нации»',hours:[540,1080],agent:'Координатор на связи',kind:'corp',
-    about:'Туризм и патриотическое воспитание: комплекс и туры под ключ, лагерь на смены, слёты и встречи с наставниками.',city:'Бишкек',
-    photos:[['1506905925346-21bda4d32df4','Горы'],['1497366754035-f200968a6e72','Офис'],['1524758631624-e2822e304c36','Переговорная']],
-    dirs:[['Туризм','комплекс, агротуризм, туры под ключ, недвижимость и земли'],['Патриотическое направление','лагерь на смены, слёты, состязания, встречи с наставниками']]},
-  {id:'belek-taxi',name:'Белек такси',cat:'Услуги',line:'такси по Бишкеку и Иссык-Кулю',hours:null,agent:'Диспетчер-бот',kind:'book',
-    about:'Город и трассы на Иссык-Куль: Балыкчы, Чолпон-Ата, Каракол. Цену видно до посадки.',city:'Бишкек и Иссык-Куль',
-    photos:[['1449965408869-eaa3f722e40d','В пути'],['1503376780353-7e6692767b70','Комфорт']],
-    svc:[['Эконом','по городу'],['Комфорт','по городу'],['Минивэн','до 6 человек'],['На Иссык-Куль','Балыкчы, Чолпон-Ата, Каракол']],ask:'Куда и когда подать машину?',slots:['Сейчас','Через 30 минут','Ко времени'],cta:'Вызвать',
-    done:'Заказ №{n} ✓ {s}, {t}. Пришлю номер машины и имя водителя, цену покажу до посадки.'},
-  {id:'too-fitness',name:'Фитнес «Тоо»',cat:'Услуги',line:'зал, групповые и тренер',hours:[360,1380],agent:'Администратор-бот',kind:'book',
-    about:'Зал 800 м², свободные веса и кардио, групповые тренировки каждый день. Вход по QR из чата.',city:'Бишкек',
-    photos:[['1534438327276-14e5300c3a48','Зал'],['1517836357463-d25dfeac3438','Свободные веса'],['1571019613454-1cb2f99b2d8b','Групповые']],
-    svc:[['Разовое посещение','зал на весь день'],['Абонемент на месяц','безлимит'],['Персональный тренер','60 минут'],['Групповая','функционал, йога, бокс']],ask:'Когда придёте?',slots:['Утром','Днём','Вечером'],cta:'Записаться',
-    done:'Готово ✓ {s}, {t}. QR для входа пришлю в Telegram, цену назовёт администратор.'},
-  {id:'kiyim',name:'Кийим',cat:'Магазины',line:'одежда · локальные бренды',hours:[600,1260],agent:'Стилист-бот',kind:'order',tab:'Каталог',
-    about:'Одежда кыргызстанских дизайнеров. Стилист-бот подберёт размер и отложит вещи на примерку.',city:'Бишкек',
-    photos:[['1441986300917-64674bd600d8','Магазин'],['1567401893414-76b7b1e5a7a5','Новая коллекция']],
-    modes:['Доставка','Примерка в магазине'],menu:[['Худи oversize',3900],['Футболка basic',1400],['Джинсы straight',4200],['Куртка-бомбер',7800],['Кепка',1200]]},
-  {id:'nan',name:'Пекарня «Нан»',cat:'Еда',line:'тандыр и выпечка',hours:[420,1200],agent:'Продавец онлайн',kind:'order',
-    about:'Лепёшки из тандыра с семи утра, самса и боорсок. Тёплый хлеб к завтраку — с доставкой.',city:'Бишкек',
-    photos:[['1509440159596-0249088772ff','Хлеб'],['1555507036-ab1f4038808a','Выпечка']],
-    modes:['Доставка','На вынос'],menu:[['Лепёшка тандыр',40],['Самса с мясом',90],['Боорсок, 300 г',150],['Круассан',120],['Чак-чак',260]]},
-  {id:'klass',name:'Класс',cat:'Услуги',line:'ИИ-уроки и онлайн-школа',hours:null,agent:'ИИ-учитель на связи',kind:'book',
-    about:'Видеоуроки с ИИ-учителем и тренировка собеседований. Учиться можно в любое время, хоть ночью.',city:'онлайн',
-    photos:[['1524178232363-1fb2b075b655','Занятие'],['1501504905252-473c47e087f8','Дома']],
-    svc:[['Пробный урок','бесплатно, 20 минут'],['Английский','видеоуроки с ИИ-учителем'],['Подготовка к ОРТ','разбор заданий'],['ИИ-собеседование','тренировка перед работой']],ask:'Когда начнём?',slots:['Прямо сейчас','Сегодня вечером','Завтра'],cta:'Начать',
-    done:'Готово ✓ {s}, {t}. Ссылку на урок пришлю в Telegram, учитель подключится сам.'},
-  {id:'supara-talkan',name:'Супара Талкан',cat:'Еда',line:'сладости ручной работы',hours:[540,1260],agent:'Продавец онлайн',kind:'order',
-    about:'Талкан, курут и подарочные наборы по семейным рецептам. Хорошо берут в подарок и в дорогу.',city:'Бишкек',
-    photos:[['1554118811-1e0d58224f24','Лавка'],['1563729784474-d77dbb933a9e','Сладости']],
-    modes:['Доставка','Самовывоз'],menu:[['Талкан классический',null],['Талкан с орехами',null],['Подарочный набор',null],['Курут',null]]},
-  {id:'daru',name:'Аптека «Дару»',cat:'Магазины',line:'аптека у дома',hours:[480,1380],agent:'Фармацевт онлайн',kind:'order',tab:'Каталог',
-    about:'Лекарства, витамины и уход. Фармацевт отвечает в чате, доставка в течение часа.',city:'Бишкек',
-    photos:[['1576602976047-174e57a47881','Аптека'],['1587854692152-cbe660dbde88','Витамины'],['1584308666744-24d5c474f2ae','Лекарства']],
-    modes:['Доставка','Самовывоз'],menu:[['Витамин D3',650],['Витамин C',320],['Термометр',450],['Маски, 10 шт',120],['Пластырь',90]]},
-  {id:'belek-avto',name:'Белек Авто',cat:'Авто',line:'автосервис',hours:[540,1140],agent:'Мастер-приёмщик онлайн',kind:'book',
-    about:'ТО, диагностика, шиномонтаж и кузов. Мастер присылает фото и смету до начала работ.',city:'Бишкек',
-    photos:[['1625047509248-ec889cbff17f','Ремонтная зона'],['1486262715619-67b85e0b08d3','Двигатель'],['1520340356584-f9917d1eea6f','Мойка']],
-    svc:[['ТО и замена масла','1–2 часа'],['Шиномонтаж','сезонная замена'],['Диагностика','компьютерная'],['Кузов и покраска','оценка по фото']],ask:'Когда пригоните машину?',slots:['Сегодня','Завтра утром','На выходных'],cta:'Записаться',
-    done:'Записал ✓ {s}, {t}. Цену назовёт мастер после осмотра, напомню накануне.'},
-  {id:'gul',name:'Цветы «Гүл»',cat:'Магазины',line:'букеты с доставкой',hours:[480,1320],agent:'Флорист-бот',kind:'order',tab:'Каталог',
-    about:'Свежие поставки каждый день. Флорист соберёт букет под повод и пришлёт фото перед доставкой.',city:'Бишкек',
-    photos:[['1487530811176-3780de880c2d','Букеты'],['1490750967868-88aa4486c946','Сезонные']],
-    modes:['Доставка','Самовывоз'],menu:[['Розы, 15 шт',2500],['Тюльпаны, 25 шт',2200],['Букет флориста',3000],['Открытка',150]]},
-  {id:'ak-tish',name:'Стоматология «Ак тиш»',cat:'Услуги',line:'клиника',hours:[540,1200],agent:'Регистратура онлайн',kind:'book',
-    about:'Терапия, гигиена и детский приём. План лечения и цену видно до начала работ.',city:'Бишкек',
-    photos:[['1629909613654-28e377c37b09','Кабинет'],['1606811971618-4486d14f3f99','Приём']],
-    svc:[['Консультация','осмотр и план'],['Чистка','профгигиена'],['Лечение','кариес, пломба'],['Детский приём','с 3 лет']],ask:'Когда удобно прийти?',slots:['Сегодня','Завтра','На неделе'],cta:'Записаться',
-    done:'Записал ✓ {s}, {t}. Врач и цена — в сообщении, напомню за час.'},
-  {id:'produkty',name:'Продукты 24/7',cat:'Магазины',line:'магазин у дома',hours:null,agent:'Продавец онлайн',kind:'order',tab:'Каталог',
-    about:'Всё к столу круглосуточно. Соберём заказ за 10 минут и привезём за полчаса.',city:'Бишкек',
-    photos:[['1604719312566-8912e9227c6a','Зал'],['1542838132-92c53300491e','Овощи и фрукты']],
-    modes:['Доставка','Самовывоз'],menu:[['Молоко 1 л',95],['Хлеб',45],['Яйца, 10 шт',160],['Сыр, 300 г',420],['Вода 5 л',90]]},
-  {id:'etb-ai',name:'etb.ai',cat:'Бизнес',line:'офис агентов · 24/7',hours:null,agent:'Агенты на смене',kind:'office',
-    about:'Агенты, которые работают во всех компаниях etb.world: принимают заказы, записывают, ведут встречи — даже когда заведение закрыто.',city:'онлайн',
-    photos:[['1519389950473-47ba0277781c','Команда'],['1522071820081-009f0129c71c','Работа'],['1531973576160-7125cd663d86','Офис']]},
-  {id:'meet',name:'Переговорная',cat:'Бизнес',line:'личная ссылка для партнёров',hours:null,agent:'Протоколист готов',kind:'meet',
-    about:'Видеовстреча по личной ссылке. ИИ ведёт протокол, итоги приходят обеим сторонам.',city:'онлайн',
-    photos:[['1600880292203-757bb62b4baf','Встреча'],['1524758631624-e2822e304c36','Переговорная']]},
-  {id:'rent-86',name:'Сдаётся 86 м²',cat:'Недвижимость',line:'помещение · первый этаж, своя витрина',agent:'агент etb.biz на связи',kind:'lease',deal:'rent',area:86,front:11,ceil:'4,2',
-    about:'Первый этаж с отдельным входом с улицы и витриной 11 м. Подойдёт под кафе, шоурум или магазин.',city:'Бишкек',
-    photos:[['1497366811353-6870744d04b2','Помещение'],['1497366216548-37526070297c','Вид изнутри']]},
-  {id:'sale-140',name:'Продаётся 140 м²',cat:'Недвижимость',line:'помещение свободного назначения',agent:'агент etb.biz на связи',kind:'lease',deal:'sale',area:140,front:11,ceil:'4,2',
-    about:'Помещение свободного назначения в собственность. Документы готовы, показ в удобное время.',city:'Бишкек',
-    photos:[['1560518883-ce09059eeffa','Ключи'],['1497366754035-f200968a6e72','Вид изнутри']]},
-];
-const JOIN={id:'join',name:'Ваша компания',cat:'*',line:'фото, меню, сервис и агент, который продаёт за вас',agent:'Маркетолог на связи',kind:'join',
-  about:'Разместим вашу компанию в etb.world: карточка с фото, вид изнутри, меню или услуги. Заказы и записи принимает агент 24/7. Есть рекламные места.',city:'Бишкек',
-  photos:[['1521017432531-fbd92d768814','Ваша витрина']]};
-const CATS=['Все','Еда','Магазины','Услуги','Авто','Отдых','Бизнес','Недвижимость'];
-
-/* ================= helpers ================= */
 const $=s=>document.querySelector(s);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const fmt=n=>n.toLocaleString('ru-RU');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const img=(src,w)=>/^https?:/.test(src)?src:`https://images.unsplash.com/photo-${src}?auto=format&fit=crop&w=${w}&q=72`;
-const srcset=src=>/^https?:/.test(src)?'':[600,900,1300].map(w=>`${img(src,w)} ${w}w`).join(',');
-const TZ='Asia/Bishkek';
-let simOffset=0;
-function minutesNow(){
-  const p=new Intl.DateTimeFormat('en-GB',{timeZone:TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(Date.now()+simOffset));
-  return +p.find(x=>x.type==='hour').value*60+ +p.find(x=>x.type==='minute').value;
-}
-const hhmm=m=>{m=((Math.round(m)%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
-function openState(c,m=minutesNow()){
-  if(c.kind==='lease')return {cls:'deal',txt:c.deal==='rent'?'сдаётся':'продаётся'};
-  if(c.kind==='join')return {cls:'deal',txt:'свободное место'};
-  if(!c.hours)return {open:true,cls:'',txt:'открыто 24/7'};
-  const [o,cl]=c.hours,inside=x=>x>=o&&x<cl,open=inside(m)||inside(m+1440);
-  return {open,opens:hhmm(o),cls:open?'':'off',txt:open?`открыто до ${hhmm(cl)}`:`закрыто · откроется в ${hhmm(o)}`};
-}
-const CTA={order:c=>c.modes[0].startsWith('Бронь')?'Забронировать':'Заказать',book:c=>c.cta,corp:()=>'Записаться на встречу',meet:()=>'Создать ссылку',office:()=>'Лента агентов',lease:()=>'Записаться на показ',join:()=>'Разместить'};
-const TAB={order:c=>c.tab||'Меню',book:()=>'Услуги',corp:()=>'Направления',meet:()=>'Встреча',office:()=>'Лента',lease:()=>'Помещение',join:()=>'Заявка'};
+const MOBILE=matchMedia('(max-width:760px)').matches;
 
-/* ================= top: time & weather ================= */
-function paintClock(){
-  $('#clk').innerHTML=`Бишкек <span>${hhmm(minutesNow())}</span>`;
-}
-let lapse=null;
-$('#clk').onclick=()=>{ // demo: 24 hours in 40 seconds — shops open and close
-  if(lapse){cancelAnimationFrame(lapse);lapse=null;simOffset=0;refreshStatus();return}
-  const t0=performance.now(),step=t=>{const k=(t-t0)/40000;if(k>=1){lapse=null;simOffset=0;refreshStatus();return}simOffset=k*86400000;refreshStatus();lapse=requestAnimationFrame(step)};
-  lapse=requestAnimationFrame(step);
-};
-const WXI=c=>c===0?'☀️':c<=2?'🌤':c===3?'☁️':c===45||c===48?'🌫':(c>=51&&c<=67)||(c>=80&&c<=82)?'🌧':(c>=71&&c<=77)||c===85||c===86?'🌨':c>=95?'⛈':'☁️';
-async function loadWeather(){
-  try{
-    const j=await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=42.87&longitude=74.59&current=temperature_2m,weather_code,is_day&timezone=Asia%2FBishkek')).json();
-    const t=Math.round(j.current.temperature_2m),c=j.current.weather_code;
-    $('#wx').textContent=`${c===0&&!j.current.is_day?'🌙':WXI(c)} ${t>0?'+':''}${t}°`;$('#wx').style.display='';
-  }catch(e){$('#wx').style.display='none'}
-}
+/* ====================================================================
+   СЕТЫ etb. Сейчас каждый сет сводит движок в браузере (бесконечно,
+   по параметрам ниже). Настоящие миксы подключим сюда же.
+   ==================================================================== */
+const MIXES=[
+  {t:'Issyk-Kul Sunset',g:'deep house',bpm:118,root:45,c:['#ff8a5b','#b48cff'],st:{hat:'off',bass:'deep',lead:'pluck',perc:0,swing:.08}},
+  {t:'Bishkek Night Drive',g:'melodic techno',bpm:124,root:43,c:['#5b6cff','#ff5fa2'],st:{hat:'16',bass:'roll',lead:'arp',perc:0,swing:0}},
+  {t:'Tunduk Afterhours',g:'afro house',bpm:121,root:47,c:['#ffb86b','#2fc3a0'],st:{hat:'shuffle',bass:'afro',lead:'pluck',perc:1,swing:.12}},
+  {t:'Ala-Too Sunrise',g:'progressive',bpm:122,root:44,c:['#ffd27a','#ff6b6b'],st:{hat:'16',bass:'roll',lead:'arp',perc:0,swing:.03}},
+  {t:'Chunkurchak Echo',g:'organic house',bpm:114,root:46,c:['#7fd18b','#3a6bd9'],st:{hat:'off',bass:'deep',lead:'pluck',perc:1,swing:.1}},
+  {t:'Karakol Snow',g:'minimal',bpm:126,root:42,c:['#cfe3ff','#6c7bff'],st:{hat:'shuffle',bass:'afro',lead:null,perc:1,swing:.06}},
+];
+// Пятничная онлайн-тусовка: день недели (5 = пятница), час по Бишкеку, длительность в часах
+const PARTY={day:5,hour:22,dur:4,name:'Пятничная тусовка etb'};
 
-/* ================= carousel ================= */
-const track=$('#track');
-let list=[],cards=[],idx=0,cat='Все';
-function cardHTML(c,i){
-  const st=openState(c),cover=c.photos[0][0],long=c.name.length>12;
-  const thumbs=c.photos.slice(1,4).map((p,k)=>`<button data-ph="${k+1}" aria-label="${esc(p[1])}"><img src="${img(p[0],200)}" alt="" loading="lazy"></button>`).join('');
-  return `<article class="card${c.kind==='join'?' join':''}" data-i="${i}" style="animation-delay:${Math.min(i,3)*.08}s">
-    <div class="ci">
-      <img src="${img(cover,900)}" srcset="${srcset(cover)}" sizes="(max-width:640px) 92vw, 440px" alt="${esc(c.name)}" ${i>2?'loading="lazy"':''} onload="this.classList.add('ld')">
-      <div class="shade"></div>
-      <div class="ctop"><span class="tag">${c.kind==='join'?'для бизнеса':c.cat}</span><span class="tag st ${st.cls}" data-st><i></i><span>${st.txt}</span></span></div>
-      <div class="cbot">
-        ${thumbs?`<div class="thumbs">${thumbs}<span>${c.photos.length>1?'вид изнутри,<br>фото':''}</span></div>`:''}
-        <h2 class="${long?'long':''}">${esc(c.name)}</h2>
-        <p class="ln">${esc(c.line)}</p>
-        <div class="ag"><i></i>${esc(c.agent)}</div>
-        <div class="acts"><button class="btn ghost" data-open="about">Подробнее</button><button class="btn solid" data-open="act">${CTA[c.kind](c)}</button></div>
-      </div>
-    </div>
-  </article>`;
+/* ================= audio engine ================= */
+let ac,master,an,fdata,timer,step=0,nextT=0,cur=-1,playing=false,t0=0,elapsed=0,NB,padBus,sendR,sendD;
+function initAudio(){
+  if(ac)return;
+  ac=new (window.AudioContext||window.webkitAudioContext)();
+  const comp=ac.createDynamicsCompressor();comp.threshold.value=-14;comp.ratio.value=4;
+  master=ac.createGain();master.gain.value=.7;
+  an=ac.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=.78;fdata=new Uint8Array(an.frequencyBinCount);
+  master.connect(comp);comp.connect(an);an.connect(ac.destination);
+  NB=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const nd=NB.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
+  // reverb from a generated impulse
+  const L=ac.sampleRate*2.6|0,ir=ac.createBuffer(2,L,ac.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.6)}
+  const rev=ac.createConvolver();rev.buffer=ir;const rg=ac.createGain();rg.gain.value=.5;rev.connect(rg);rg.connect(master);
+  sendR=ac.createGain();sendR.connect(rev);
+  // feedback delay
+  const dly=ac.createDelay(1.5);dly.delayTime.value=.37;const fb=ac.createGain();fb.gain.value=.38;const df=ac.createBiquadFilter();df.type='lowpass';df.frequency.value=2600;
+  dly.connect(df);df.connect(fb);fb.connect(dly);const dg=ac.createGain();dg.gain.value=.4;df.connect(dg);dg.connect(master);
+  sendD=ac.createGain();sendD.connect(dly);
+  // pad bus, ducked by the kick
+  padBus=ac.createGain();padBus.connect(master);padBus.connect(sendR);
 }
-function build(){
-  list=(cat==='Все'?COMPANIES:COMPANIES.filter(c=>c.cat===cat)).concat(JOIN);
-  track.innerHTML=list.map(cardHTML).join('');
-  cards=[...track.children];
-  cards.forEach((el,i)=>el.querySelector('.ci').onclick=e=>{
-    if(i!==idx){go(i);return}
-    const b=e.target.closest('[data-open],[data-ph]');
-    openSheet(list[i],b?.dataset.open==='act'?'act':'about',b?.dataset.ph?+b.dataset.ph:0);
-  });
-  track.scrollLeft=0;idx=-1;onScroll();
-}
-function posOf(i){const el=cards[i];return el.offsetLeft-(track.clientWidth-el.offsetWidth)/2}
-function go(i,instant){i=Math.max(0,Math.min(cards.length-1,i));track.scrollTo({left:posOf(i),behavior:instant?'instant':'smooth'})}
-let raf=0;
-function onScroll(){
-  cancelAnimationFrame(raf);
-  raf=requestAnimationFrame(()=>{
-    const mid=track.scrollLeft+track.clientWidth/2,w=cards[0]?.offsetWidth||1;let best=0,bd=1e9;
-    cards.forEach((el,i)=>{const c=el.offsetLeft+el.offsetWidth/2,d=Math.abs(c-mid)/w;el.style.setProperty('--d',Math.min(d,1).toFixed(3));if(d<bd){bd=d;best=i}});
-    if(best!==idx)setActive(best);
-  });
-}
-function setActive(i){
-  idx=i;cards.forEach((el,k)=>el.classList.toggle('act',k===i));
-  const c=list[i];
-  $('#cnt').innerHTML=`<b>${String(i+1).padStart(2,'0')}</b> / ${String(list.length).padStart(2,'0')} · ${esc(c.name)}`;
-  $('#barI').style.width=((i+1)/list.length*100)+'%';
-  $('#prev').disabled=i===0;$('#next').disabled=i===list.length-1;
-  setBg(img(c.photos[0][0],400));
-  history.replaceState(null,'',c.kind==='join'||i===0&&cat==='Все'?location.pathname:'#'+c.id);
-  // warm the next covers
-  [i+1,i+2].forEach(k=>{const n=list[k];if(n){const im=new Image();im.src=img(n.photos[0][0],900)}});
-}
-let bgFlip=0;
-function setBg(src){const [a,b]=document.querySelectorAll('#bg img'),on=bgFlip?a:b,off=bgFlip?b:a;bgFlip^=1;on.onload=()=>{on.classList.add('on');off.classList.remove('on')};on.src=src}
-function refreshStatus(){
-  paintClock();const m=minutesNow();
-  cards.forEach((el,i)=>{const s=openState(list[i],m),t=el.querySelector('[data-st]');t.className='tag st '+s.cls;t.lastElementChild.textContent=s.txt});
-}
-track.addEventListener('scroll',onScroll,{passive:true});
-addEventListener('resize',()=>go(idx,true));
-$('#prev').onclick=()=>go(idx-1);$('#next').onclick=()=>go(idx+1);
-// mouse wheel → one card per gesture
-let wheelLock=0;
-track.addEventListener('wheel',e=>{
-  if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return; // trackpad sideways: native
-  e.preventDefault();const now=performance.now();if(now<wheelLock||Math.abs(e.deltaY)<8)return;
-  wheelLock=now+520;go(idx+(e.deltaY>0?1:-1));
-},{passive:false});
-addEventListener('keydown',e=>{
-  if(sheetOn){if(e.key==='Escape')closeSheet();return}
-  if(e.key==='ArrowRight')go(idx+1);else if(e.key==='ArrowLeft')go(idx-1);
-  else if(e.key==='Enter')openSheet(list[idx],'about',0);
-});
-// mouse drag on desktop
-let drag=null,noClick=false;
-track.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button)return;drag={x:e.clientX,s:track.scrollLeft,i:idx,moved:false}});
-addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x;
-  if(!drag.moved&&Math.abs(dx)>6){drag.moved=true;track.style.scrollSnapType='none';track.style.cursor='grabbing'}
-  if(drag.moved)track.scrollLeft=drag.s-dx});
-addEventListener('pointerup',e=>{if(!drag)return;const d=drag;drag=null;if(!d.moved)return;
-  const dx=e.clientX-d.x;track.style.scrollSnapType='';track.style.cursor='';noClick=true;setTimeout(()=>noClick=false,50);
-  go(idx!==d.i?idx:Math.abs(dx)>60?d.i+(dx<0?1:-1):d.i)});
-track.addEventListener('click',e=>{if(noClick){e.stopPropagation();e.preventDefault()}},true);
-
-/* category chips */
-$('#cats').innerHTML=CATS.map(c=>`<button class="${c==='Все'?'on':''}">${c}</button>`).join('');
-$('#cats').querySelectorAll('button').forEach(b=>b.onclick=()=>{
-  if(b.textContent===cat)return;cat=b.textContent;
-  $('#cats').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  build();
-});
-
-/* ================= detail sheet ================= */
-const sheet=$('#sheet'),box=$('#box');let sheetOn=false,orderNo=2050;
-function closeSheet(){sheetOn=false;sheet.classList.remove('on');sheet.setAttribute('aria-hidden','true')}
-sheet.querySelector('.scrim').onclick=closeSheet;
-function openSheet(c,tab,ph){
-  const st=openState(c),act=TAB[c.kind](c);
-  box.innerHTML=`
-    <div class="gal">
-      <div class="gtrack" id="gt">${c.photos.map(([p,cap])=>`<figure><img src="${img(p,1600)}" alt="${esc(cap)}"></figure>`).join('')}</div>
-      <div class="gcap"><span class="tag" id="gcap"></span></div>
-      ${c.photos.length>1?`<div class="gdots" id="gd">${c.photos.map(()=>'<i></i>').join('')}</div><button class="gnav l" id="gl" aria-label="Предыдущее фото"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3L5 8l5 5"/></svg></button><button class="gnav r" id="gr" aria-label="Следующее фото"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3l5 5-5 5"/></svg></button>`:''}
-    </div>
-    <button class="x" id="sx" aria-label="Закрыть"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg></button>
-    <div class="info">
-      <div class="kick ${st.cls}"><i></i>${st.txt}${st.open===false?' · агент примет предзаказ':''}</div>
-      <h3>${esc(c.name)}</h3><div class="sub">${esc(c.line)}</div>
-      <div class="tabs"><button data-t="act">${act}</button><button data-t="about">О компании</button></div>
-      <div class="pane" id="pane"></div>
-      <div class="foot" id="foot" hidden></div>
-    </div>`;
-  $('#sx').onclick=closeSheet;
-  // gallery
-  const gt=$('#gt'),caps=c.photos.map(p=>p[1]);let gi=0;
-  const gset=()=>{gi=Math.round(gt.scrollLeft/gt.clientWidth);$('#gcap').textContent=`${caps[gi]} · ${gi+1}/${caps.length}`;document.querySelectorAll('#gd i').forEach((d,k)=>d.classList.toggle('on',k===gi))};
-  gt.addEventListener('scroll',()=>requestAnimationFrame(gset),{passive:true});
-  const gto=k=>gt.scrollTo({left:((k+caps.length)%caps.length)*gt.clientWidth,behavior:'smooth'});
-  $('#gl')&&($('#gl').onclick=()=>gto(gi-1),$('#gr').onclick=()=>gto(gi+1));
-  // tabs
-  const tabs=box.querySelectorAll('.tabs button');
-  const show=t=>{tabs.forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#foot').hidden=true;$('#foot').innerHTML='';$('#pane').scrollTop=0;t==='about'?paneAbout(c):PANES[c.kind](c)};
-  tabs.forEach(b=>b.onclick=()=>show(b.dataset.t));
-  show(tab);
-  sheetOn=true;sheet.setAttribute('aria-hidden','false');
-  requestAnimationFrame(()=>{gt.scrollLeft=ph*gt.clientWidth;gset();sheet.classList.add('on')});
-}
-function paneAbout(c){
-  const st=openState(c),h=c.hours?`${hhmm(c.hours[0])}–${hhmm(c.hours[1])}`:c.kind==='lease'||c.kind==='join'?'—':'круглосуточно';
-  const facts=[['Часы работы',h],['Где',c.city],['На связи',c.agent],[c.kind==='book'?'Запись':'Заказ',c.modes?c.modes.join(' · '):c.kind==='book'?'онлайн, 24/7':'через агента']].filter(f=>f[1]&&f[1]!=='—');
-  $('#pane').innerHTML=`<div class="about"><p>${esc(c.about)}</p><div class="facts">${facts.map(([k,v])=>`<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div></div>`;
-  const f=$('#foot');f.hidden=false;f.innerHTML=`<div class="tot"><small>${st.txt}</small></div><button class="pill solid" id="toact">${CTA[c.kind](c)}</button>`;
-  $('#toact').onclick=()=>box.querySelector('.tabs [data-t="act"]').click();
-}
-
-/* agent chat inside the pane */
-function chat(c,backTo){
-  const pane=$('#pane');$('#foot').hidden=true;
-  pane.innerHTML=`<button class="back" id="cb">← назад</button><div class="who"><div class="av">${esc(c.name.replace(/[«»"]/g,'').trim()[0])}</div><div>${esc(c.name)}<small>${esc(c.agent)}</small></div></div><div class="msgs" id="msgs"></div>`;
-  $('#cb').onclick=backTo;
-  const msgs=$('#msgs'),down=()=>pane.scrollTo({top:pane.scrollHeight,behavior:'smooth'});
-  return {
-    me(t){msgs.insertAdjacentHTML('beforeend',`<div class="b mine">${esc(t)}</div>`);down()},
-    async ai(t,chips){
-      const ty=document.createElement('div');ty.className='typing';ty.innerHTML='<i></i><i></i><i></i>';msgs.append(ty);down();
-      await sleep(1000);ty.remove();
-      msgs.insertAdjacentHTML('beforeend',`<div class="b ai">${t}${chips?`<div class="row">${chips.map(x=>`<button>${esc(x)}</button>`).join('')}</div>`:''}</div>`);down();
-      if(!chips)return null;
-      const row=msgs.lastElementChild.querySelector('.row');
-      return new Promise(r=>row.querySelectorAll('button').forEach(b=>b.onclick=()=>{row.remove();this.me(b.textContent);r(b.textContent)}));
+const hz=m=>440*Math.pow(2,(m-69)/12);
+function env(g,t,a,peak,d){g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d)}
+function kick(t){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(44,t+.11);g.gain.setValueAtTime(1.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.45);o.connect(g);g.connect(master);o.start(t);o.stop(t+.5);
+  padBus.gain.cancelScheduledValues(t);padBus.gain.setValueAtTime(.25,t);padBus.gain.linearRampToValueAtTime(1,t+.28)}
+function noise(t,type,f,q,v,d,dest=master){const s=ac.createBufferSource(),fl=ac.createBiquadFilter(),g=ac.createGain();s.buffer=NB;s.playbackRate.value=.8+Math.random()*.4;fl.type=type;fl.frequency.value=f;fl.Q.value=q;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);s.connect(fl);fl.connect(g);g.connect(dest);s.start(t,Math.random()*.5);s.stop(t+d+.02);return g}
+const hat=(t,v,open)=>noise(t,'highpass',open?7000:9000,.7,v,open?.2:.045);
+function clap(t){[0,.011,.023].forEach((o,i)=>{const g=noise(t+o,'bandpass',1500,1.2,i===2?.32:.18,i===2?.2:.03);if(i===2)g.connect(sendR)})}
+function perc(t,p){const o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(p*1.6,t);o.frequency.exponentialRampToValueAtTime(p,t+.04);env(g,t,.002,.32,.16);o.connect(g);g.connect(master);g.connect(sendR);o.start(t);o.stop(t+.2)}
+function bass(t,m,d,cut){const o=ac.createOscillator(),o2=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o2.type='sine';o.frequency.value=o2.frequency.value=hz(m);f.type='lowpass';f.Q.value=7;f.frequency.setValueAtTime(cut,t);f.frequency.exponentialRampToValueAtTime(140,t+d);env(g,t,.008,.3,d);o.connect(f);o2.connect(g);f.connect(g);g.connect(master);[o,o2].forEach(x=>{x.start(t);x.stop(t+d+.05)})}
+function pad(t,notes,d){notes.forEach(n=>[-8,0,9].forEach(det=>{const o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type='sawtooth';o.frequency.value=hz(n);o.detune.value=det;f.type='lowpass';f.frequency.setValueAtTime(500,t);f.frequency.linearRampToValueAtTime(1600,t+d*.5);f.frequency.linearRampToValueAtTime(600,t+d);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.018,t+d*.35);g.gain.linearRampToValueAtTime(.0001,t+d);o.connect(f);f.connect(g);g.connect(padBus);o.start(t);o.stop(t+d+.05)}))}
+function lead(t,m,d,kind){const o=ac.createOscillator(),f=ac.createBiquadFilter(),g=ac.createGain();o.type=kind==='arp'?'square':'triangle';o.frequency.value=hz(m);f.type='lowpass';f.frequency.setValueAtTime(kind==='arp'?2400:3200,t);f.frequency.exponentialRampToValueAtTime(400,t+d);env(g,t,.004,kind==='arp'?.07:.12,d);o.connect(f);f.connect(g);g.connect(master);g.connect(sendD);g.connect(sendR);o.start(t);o.stop(t+d+.05)}
+const PROG=[[0,3,7,10],[-4,0,3,7],[-2,2,5,9],[-5,-1,2,5]];
+const ARP=[0,7,12,3,10,7,15,12],PL=[0,3,6,10,13];
+function schedule(){
+  const m=MIXES[cur],S=m.st,sp=60/m.bpm/4;
+  while(nextT<ac.currentTime+.14){
+    const s=step%16,bar=Math.floor(step/16),ch=PROG[bar%4],r=m.root,phrase=Math.floor(bar/8)%4;
+    const t=nextT+(s%2?S.swing*sp:0);
+    const brk=phrase===3&&bar%8>=4; // every 32 bars: a 4-bar breakdown
+    if(!brk&&s%4===0)kick(t);
+    if(!brk&&(s===4||s===12))clap(t);
+    if(S.hat==='off'){if(s%4===2)hat(t,.14,true)}
+    else if(S.hat==='16')hat(t,s%4===2?.14:.05,s%4===2);
+    else if(s%3!==1)hat(t,s%4===2?.13:.06,s%8===6);
+    if(S.perc&&!brk&&[3,6,10,11,14].includes(s))perc(t,s%2?180:260);
+    if(!brk){
+      if(S.bass==='deep'&&[3,6,11,14].includes(s))bass(t,r+ch[0],sp*2.2,700);
+      else if(S.bass==='roll'&&s%4!==0)bass(t,r+ch[0]+(s%4===3?12:0),sp*.9,1100+600*Math.sin(bar/3));
+      else if(S.bass==='afro'&&[2,5,8,11,14].includes(s))bass(t,r+ch[0]+(s===8?7:0),sp*1.5,900);
     }
+    if(s===0)pad(t,ch.map(x=>r+24+x),sp*16);
+    if(S.lead==='arp'&&phrase>=1)lead(t,r+36+ch[0]+ARP[s%8],sp*.9,'arp');
+    if(S.lead==='pluck'&&phrase>=1&&PL.includes(s))lead(t,r+36+ch[[0,1,2,3,2][PL.indexOf(s)]]+(bar%2?12:0),sp*2,'pluck');
+    if(brk&&s===0&&bar%8===7)noise(t,'highpass',600,1,.12,sp*16,sendR); // riser into the drop
+    step++;nextT+=sp;
+  }
+}
+function play(i){
+  initAudio();ac.resume();
+  if(i===cur&&playing){pause();return}
+  if(i!==cur){cur=i;step=0;elapsed=0}
+  playing=true;nextT=ac.currentTime+.08;t0=ac.currentTime-elapsed;
+  clearInterval(timer);timer=setInterval(schedule,25);
+  ui();
+  if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:MIXES[cur].t,artist:'etb',album:MIXES[cur].g});
+}
+function pause(){if(!playing)return;playing=false;elapsed=ac.currentTime-t0;clearInterval(timer);ui()}
+const toggle=()=>playing?pause():play(cur<0?0:cur);
+const skip=d=>play(((cur<0?0:cur)+d+MIXES.length)%MIXES.length);
+function bands(){
+  if(!an)return [0,0,0];
+  an.getByteFrequencyData(fdata);const avg=(a,b)=>{let s=0;for(let i=a;i<b;i++)s+=fdata[i];return s/(b-a)/255};
+  return [avg(1,6),avg(6,40),avg(40,140)];
+}
+
+/* ================= the artist: audio-reactive orb ================= */
+const cv=$('#orb'),cx=cv.getContext('2d');
+let W,H,DPR;
+function size(){DPR=Math.min(devicePixelRatio,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;cx.setTransform(DPR,0,0,DPR,0,0)}
+size();addEventListener('resize',size);
+const N=MOBILE?1100:1900,P=[];
+for(let i=0;i<N;i++){const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),th=i*2.399963;P.push({x:Math.cos(th)*r,y,z:Math.sin(th)*r,b:Math.floor((y+1)/2*60),ph:Math.random()*6.28})}
+let rotY=0,rotX=.35,pulse=0,ocx=0,ocy=0,lv=[0,0,0],col=['#ffb86b','#b48cff'],ccol=[[255,184,107],[180,140,255]];
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function frame(t){
+  t/=1000;
+  const b=playing?bands():[0,0,0];
+  lv=lv.map((v,i)=>v+(b[i]-v)*(b[i]>v?.5:.12));
+  pulse=Math.max(pulse*.9,b[0]>.62?b[0]:0);
+  ccol=ccol.map((c,k)=>{const tg=hex(col[k]);return c.map((v,j)=>v+(tg[j]-v)*.03)});
+  const pOpen=document.body.classList.contains('pop');
+  const tx=pOpen&&!MOBILE?(W-430)/2+10:W/2,ty=pOpen&&MOBILE?H*.2:H*(MOBILE?.4:.45);
+  if(!ocx){ocx=tx;ocy=ty}ocx+=(tx-ocx)*.06;ocy+=(ty-ocy)*.06;
+  const R=Math.min(W,H)*(pOpen&&MOBILE?.15:MOBILE?.3:.26)*(1+lv[0]*.18+pulse*.06);
+  rotY+=.0025+lv[1]*.012;
+  cx.globalCompositeOperation='source-over';
+  cx.fillStyle='rgba(8,8,10,.34)';cx.fillRect(0,0,W,H);
+  const [r1,g1,b1]=ccol[0].map(Math.round),[r2,g2,b2]=ccol[1].map(Math.round);
+  const gl=cx.createRadialGradient(ocx,ocy,0,ocx,ocy,R*2.6);
+  gl.addColorStop(0,`rgba(${r1},${g1},${b1},${.1+lv[0]*.22})`);gl.addColorStop(.5,`rgba(${r2},${g2},${b2},${.04+lv[1]*.08})`);gl.addColorStop(1,'rgba(0,0,0,0)');
+  cx.fillStyle=gl;cx.fillRect(0,0,W,H);
+  cx.globalCompositeOperation='lighter';
+  const cy_=Math.cos(rotY),sy=Math.sin(rotY),cxr=Math.cos(rotX),sxr=Math.sin(rotX);
+  const spec=playing&&fdata?fdata:null;
+  for(const p of P){
+    const sv=spec?spec[2+p.b*2]/255:0;
+    const k=1+sv*.28+Math.sin(t*1.3+p.ph+p.y*4)*.025*(1+lv[2]*4);
+    const x=p.x*k,y=p.y*k,z=p.z*k;
+    const x1=x*cy_-z*sy,z1=x*sy+z*cy_;
+    const y2=y*cxr-z1*sxr,z2=y*sxr+z1*cxr;
+    const s=1/(1.9-z2*.6),px=ocx+x1*R*s*1.5,py=ocy+y2*R*s*1.5;
+    const a=(.18+(z2+1)*.32)*(.55+sv*.9),mx=(p.y+1)/2;
+    cx.fillStyle=`rgba(${r1+(r2-r1)*mx|0},${g1+(g2-g1)*mx|0},${b1+(b2-b1)*mx|0},${a})`;
+    const sz=(.7+(z2+1)*.7+sv*1.6)*(MOBILE?.9:1);
+    cx.fillRect(px-sz/2,py-sz/2,sz,sz);
+  }
+  if(playing&&fdata){document.querySelectorAll('#eq i').forEach((e,i)=>e.style.height=(4+fdata[3+i*14]/255*18)+'px');$('#tm').textContent=clock(ac.currentTime-t0)}
+  requestAnimationFrame(frame);
+}
+const clock=s=>{s=Math.max(0,s|0);const h=s/3600|0,m=(s%3600)/60|0,ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
+requestAnimationFrame(frame);
+
+/* ================= UI ================= */
+const PLAY='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9-5.5z"/></svg>',PAUSE='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5h3v11H3zM8 1.5h3v11H8z"/></svg>';
+function ui(){
+  $('#pp').innerHTML=playing?PAUSE:PLAY;$('#pp').setAttribute('aria-label',playing?'Пауза':'Играть');
+  $('#heroPlay').innerHTML=(playing?PAUSE:PLAY)+(playing?'Пауза':'Слушать');
+  if(cur>=0){const m=MIXES[cur];col=m.c;
+    $('#npT').textContent=m.t;$('#npS').textContent=`etb · ${m.g} · ${m.bpm} BPM`;
+    $('#ht').textContent=m.t;$('#hk').textContent=playing?'сейчас играет':'на паузе';$('#hk2').textContent=`${m.g} · ${m.bpm} BPM`;
+  }
+  document.querySelectorAll('.mix').forEach((el,i)=>{el.classList.toggle('on',i===cur&&playing);el.querySelector('.pl').innerHTML=i===cur&&playing?PAUSE:PLAY});
+  if(!playing)document.querySelectorAll('#eq i').forEach(e=>e.style.height='4px');
+}
+$('#pp').onclick=toggle;$('#heroPlay').onclick=toggle;$('#prev').onclick=()=>skip(-1);$('#next').onclick=()=>skip(1);
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.code==='Space'){e.preventDefault();toggle()}else if(e.key==='ArrowRight')skip(1);else if(e.key==='ArrowLeft')skip(-1);else if(e.key==='Escape')closePanel()});
+if('mediaSession' in navigator){navigator.mediaSession.setActionHandler('play',()=>play(cur<0?0:cur));navigator.mediaSession.setActionHandler('pause',pause);navigator.mediaSession.setActionHandler('nexttrack',()=>skip(1));navigator.mediaSession.setActionHandler('previoustrack',()=>skip(-1))}
+
+const panel=$('#panel');let open=null,timers=[];
+const later=(fn,ms)=>timers.push(setTimeout(fn,ms));
+const X='<button class="ic x" id="px" aria-label="Закрыть"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
+function openPanel(p){
+  if(open===p){closePanel();return}
+  timers.forEach(clearTimeout);timers=[];open=p;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  ({mixes:mixesPanel,party:partyPanel,book:bookPanel})[p]();
+  $('#px').onclick=closePanel;
+  document.body.classList.add('pop');history.replaceState(null,'','#'+p);
+}
+function closePanel(){open=null;timers.forEach(clearTimeout);timers=[];document.body.classList.remove('pop');document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('on'));history.replaceState(null,'',location.pathname)}
+document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openPanel(b.dataset.p));
+
+/* --- mixes --- */
+function mixesPanel(){
+  panel.innerHTML=`<div class="ph">${X}<h2>Миксы</h2><p>${MIXES.length} сетов · etb сводит в реальном времени</p></div>
+    <div class="pb"><div class="mixes">${MIXES.map((m,i)=>`<button class="mix" data-i="${i}"><div class="art" style="background:radial-gradient(circle at ${30+i*9}% ${70-i*7}%,${m.c[0]},transparent 60%),radial-gradient(circle at ${75-i*6}% ${25+i*8}%,${m.c[1]},transparent 62%),conic-gradient(from ${i*60}deg at 50% 50%,${m.c[1]},#0d0d12,${m.c[0]},#0d0d12,${m.c[1]})"></div><span class="n">${String(i+1).padStart(2,'0')}</span><span class="pl"></span><b>${m.t}</b><small>${m.g} · ${m.bpm}</small></button>`).join('')}</div></div>`;
+  panel.querySelectorAll('.mix').forEach(b=>b.onclick=()=>play(+b.dataset.i));
+  ui();
+}
+
+/* --- online party --- */
+const BISH=6*3600e3; // Bishkek: UTC+6 all year
+function partyState(){
+  const now=new Date(Date.now()+BISH),d=now.getUTCDay(),mins=now.getUTCHours()*60+now.getUTCMinutes();
+  const start=PARTY.hour*60,len=PARTY.dur*60;
+  const since=((d-PARTY.day+7)%7)*1440+mins-start;
+  if(since>=0&&since<len)return {live:true,left:(len-since)*60};
+  let until=((PARTY.day-d+7)%7)*1440+start-mins;if(until<=0)until+=7*1440;
+  return {live:false,until:until*60-now.getUTCSeconds()};
+}
+const FANS=[['Айбек','Бишкек','#ffb86b'],['Нурай','Каракол','#ff8fb1'],['dana.kz','Алматы','#9fd8ff'],['Тимур','Ош','#b9f27c'],['Салтанат','Бишкек','#d1a8ff'],['Эрлан','Чолпон-Ата','#ffd27a'],['aru','Ташкент','#7fe0d0'],['Мирлан','Москва','#ffa98a'],['Бекжан','Токмок','#a8c8ff'],['Айпери','Бишкек','#ffb3d9']];
+const LINES=['🔥🔥🔥','этот дроп 😮‍💨','привет из {c}!','etb, давай погромче','это правда ИИ играет?','под закат идеально','кто в пятницу на тусовке?','бас качает','сохранила сет','🙌🙌','каждый вечер тут','etb, когда в {c} приедешь?','музыка для дороги на Иссык-Куль','включила на работе 🤫','вайб 💜'];
+const ETB=['Рад всех видеть. Дальше — немного глубже.','Привет, {c}! Этот переход для вас.','Да, я ИИ. Но танцуете вы по-настоящему.','Следующий трек — заказ из чата.','Пятница, 22:00 — главная тусовка недели. Не пропустите.','Хотите меня живьём? Вкладка «Букинг».'];
+let listeners=280+Math.random()*120|0;
+function partyPanel(){
+  const st=partyState();
+  panel.innerHTML=`<div class="ph">${X}<h2>Онлайн-тусовка</h2><p><span id="lc">${listeners}</span> слушают · etb в эфире 24/7</p>${st.live?`<p style="color:var(--acc)">Идёт ${PARTY.name.toLowerCase()} · до конца ${clock(st.left)}</p>`:`<p style="margin-top:10px;color:#fff">${PARTY.name} — пятница, 22:00</p><div class="cd" id="cd"></div>`}</div>
+    <div class="pb" id="pb"><div class="chat" id="chat"><div class="m sys">Вы в эфире</div></div></div>
+    <div class="pf"><div class="reacts" id="rx">${['🔥','💜','🙌','🎧','😮‍💨'].map(e=>`<button>${e}</button>`).join('')}</div>
+      <form class="say" id="say"><input id="sin" placeholder="Написать в чат или заказать трек" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
+  if(!playing)play(cur<0?1:cur);
+  const chat=$('#chat'),pb=$('#pb');
+  const add=html=>{chat.insertAdjacentHTML('beforeend',html);while(chat.children.length>60)chat.firstElementChild.remove();pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
+  const fan=()=>{const [n,c,co]=FANS[Math.random()*FANS.length|0];add(`<div class="m" style="--c:${co}"><b>${n}</b>${esc(LINES[Math.random()*LINES.length|0].replace('{c}',c))}</div>`);return c};
+  const etb=t=>add(`<div class="m etb"><b>etb</b>${esc(t)}</div>`);
+  for(let i=0;i<5;i++)fan();
+  const loop=()=>{if(open!=='party')return;const c=fan();if(Math.random()<.18)later(()=>open==='party'&&etb(ETB[Math.random()*ETB.length|0].replace('{c}',c)),1400);
+    listeners=Math.max(150,listeners+(Math.random()*9-4|0));$('#lc').textContent=listeners;$('#lis').textContent=`в эфире · ${listeners}`;
+    if(Math.random()<.35)flyFrom(null,['🔥','💜','🙌'][Math.random()*3|0]);
+    later(loop,1400+Math.random()*2400)};
+  later(loop,900);
+  const tick=()=>{if(open!=='party'||!$('#cd'))return;const s=partyState();if(s.live)return;const u=s.until,d=u/86400|0,h=u%86400/3600|0,m=u%3600/60|0,ss=u%60|0;
+    $('#cd').innerHTML=[[d,'дн'],[h,'ч'],[m,'мин'],[ss,'сек']].map(([v,l])=>`<div><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`).join('');later(tick,1000)};
+  tick();
+  $('#rx').querySelectorAll('button').forEach(b=>b.onclick=()=>flyFrom(b,b.textContent));
+  $('#say').onsubmit=e=>{e.preventDefault();const v=$('#sin').value.trim();if(!v)return;$('#sin').value='';
+    add(`<div class="m me"><b>вы</b>${esc(v)}</div>`);
+    const low=v.toLowerCase();
+    later(()=>{
+      if(open!=='party')return;
+      if(/трек|постав|включи|заказ|песн/.test(low)){etb('Принял заказ 🎧 Сведу его в следующий переход.');later(()=>{if(open!=='party')return;skip(1);add(`<div class="m sys">etb сменил сет · ${MIXES[cur].t}</div>`)},3500)}
+      else if(/привет|салам|хай|hello|hi\b/.test(low))etb('Привет! Рад, что ты с нами. Откуда слушаешь?');
+      else if(/при[её]д|выступ|концерт|живь|брон|букинг/.test(low))etb('Приезжаю живьём по брони — открой вкладку «Букинг», менеджер ответит за час.');
+      else if(/\bии\b|\bai\b|робот|нейро/.test(low))etb('Да, я ИИ-артист. Сеты свожу сам, а на сцену выхожу вместе с командой.');
+      else etb(['Слышу тебя 🙌','Держи следующий дроп — для тебя.','Лучший чат в городе.','💜'][Math.random()*4|0]);
+    },1200+Math.random()*800);
+  };
+}
+function flyFrom(btn,e){
+  const pr=panel.getBoundingClientRect(),r=btn?btn.getBoundingClientRect():{left:pr.left+40+Math.random()*(pr.width-80),top:pr.bottom-130,width:0};
+  const el=document.createElement('div');el.className='fly';el.textContent=e;el.style.left=(r.left+r.width/2-13)+'px';el.style.top=r.top+'px';el.style.setProperty('--dx',(Math.random()*80-40)+'px');
+  document.body.append(el);setTimeout(()=>el.remove(),2300);
+}
+
+/* --- booking --- */
+let reqNo=1040;
+function bookPanel(){
+  const sel={f:'Клуб',c:'Бишкек'};
+  const opt=(k,arr)=>`<div class="opts" data-k="${k}">${arr.map(v=>`<button type="button" class="${sel[k]===v?'on':''}">${v}</button>`).join('')}</div>`;
+  const min=new Date(Date.now()+BISH+86400e3).toISOString().slice(0,10);
+  panel.innerHTML=`<div class="ph">${X}<h2>Пригласить etb</h2><p>Живой сет и ИИ-визуал на экранах. Приезжаем с командой.</p></div>
+    <div class="pb"><form id="bf">
+      <div class="what"><div><b>Сет</b>2–4 часа</div><div><b>Визуал</b>etb на экранах</div><div><b>Команда</b>диджей + техник</div></div>
+      <div class="lbl">Формат</div>${opt('f',['Клуб','Частное','Корпоратив','Фестиваль','Свадьба'])}
+      <div class="lbl">Город</div>${opt('c',['Бишкек','Иссык-Куль','Алматы','Ташкент','Другой'])}
+      <div class="lbl">Дата</div><input class="field" type="date" id="bd" min="${min}" required>
+      <div class="lbl">Как с вами связаться</div><input class="field" id="bc" placeholder="Telegram, WhatsApp или телефон" required autocomplete="off">
+      <button class="btn solid send" id="bs">Отправить заявку</button>
+    </form><div class="bub" id="bub"></div></div>`;
+  panel.querySelectorAll('.opts').forEach(o=>o.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel[o.dataset.k]=b.textContent;o.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))}));
+  $('#bf').onsubmit=async e=>{e.preventDefault();$('#bs').disabled=true;
+    const d=new Date($('#bd').value+'T12:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}),bub=$('#bub'),pb=panel.querySelector('.pb');
+    const say=async(t,cls='a')=>{if(cls==='a'){bub.insertAdjacentHTML('beforeend','<div class="a typing"><i></i><i></i><i></i></div>');pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'});await sleep(1100);bub.lastElementChild.remove()}
+      bub.insertAdjacentHTML('beforeend',`<div class="${cls}">${t}</div>`);pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
+    await say(esc(`${sel.f}, ${sel.c}, ${d}`),'u');
+    await say(`Менеджер etb на связи. ${d} — дата свободна ✓ Сколько будет гостей?<div class="opts" style="margin-top:10px" id="gq"><button>до 100</button><button>100–500</button><button>500+</button></div>`);
+    $('#gq').querySelectorAll('button').forEach(b=>b.onclick=async()=>{$('#gq').remove();await say(esc(b.textContent),'u');
+      await say(`Заявка №E-${++reqNo} принята ✓ Райдер, гонорар и варианты сета пришлю на ${esc($('#bc').value)} в течение часа.`)});
   };
 }
 
-const PANES={
-  order(c){
-    const st=openState(c);let md=c.modes[0];
-    const items=()=>c.menus?c.menus[md]:c.menu;let q=items().map(()=>0);
-    const ql=()=>c.qlabel?.[md]||'';
-    const total=()=>items().reduce((s,[,p],i)=>s+(p||0)*q[i],0),count=()=>q.reduce((a,b)=>a+b,0);
-    const pane=$('#pane'),foot=$('#foot');
-    function render(){
-      pane.innerHTML=`${c.modes.length>1?`<div class="seg">${c.modes.map(m=>`<button class="${m===md?'on':''}">${m}</button>`).join('')}</div>`:''}
-        <div>${items().map(([n,p],i)=>`<div class="it"><div><b>${esc(n)}</b><small>${p?fmt(p)+' сом':c.free||'цену назовёт продавец'}</small></div><div class="qty"><button data-i="${i}" data-d="-1" aria-label="Меньше">−</button><span>${q[i]}${q[i]&&ql()?' '+ql():''}</span><button data-i="${i}" data-d="1" aria-label="Больше">+</button></div></div>`).join('')}</div>`;
-      pane.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{md=b.textContent;q=items().map(()=>0);render()});
-      pane.querySelectorAll('.qty button').forEach(b=>b.onclick=()=>{const i=+b.dataset.i;q[i]=Math.max(0,q[i]+ +b.dataset.d);renderFoot();b.parentElement.querySelector('span').textContent=q[i]+(q[i]&&ql()?' '+ql():'')});
-      renderFoot();
-    }
-    function renderFoot(){
-      foot.hidden=false;
-      const lbl=md==='Бронь номера'?'Забронировать':md==='Блюда к заезду'?'Предзаказ':md==='Бронь'?'Забронировать':st.open?'Оформить':'Предзаказ';
-      foot.innerHTML=`<div class="tot">${count()?(total()?fmt(total())+' сом':count()+' '+(ql()||'шт')):'—'}<small>${count()?md.toLowerCase():'выберите позиции'}</small></div><button class="pill solid" id="co" ${count()?'':'disabled'}>${lbl}</button>`;
-      $('#co').onclick=checkout;
-    }
-    async function checkout(){
-      const no=++orderNo,what=items().map(([n],i)=>q[i]?`${n} × ${q[i]}${ql()?' '+ql():''}`:'').filter(Boolean).join(', ');
-      const sum=total()?` — ${fmt(total())} сом`:', цену подтвержу в сообщении';
-      const ch=chat(c,()=>{q=items().map(()=>0);render()});ch.me(`${what}, ${md.toLowerCase()}`);
-      if(md==='Бронь номера'){
-        const d=await ch.ai('Администратор на связи. На какие даты?',['Эти выходные','Следующие выходные','Другие даты']);
-        return ch.ai(`Бронь №${no} ✓ ${what}, ${d.toLowerCase()}. Цену и предоплату пришлю в Telegram. Блюда к заезду — во второй вкладке меню.`);
-      }
-      let r;
-      if(md==='Блюда к заезду')r=`Предзаказ №${no} ✓ ${what}. Кухня приготовит к вашему приезду, цену подтвержу в сообщении.`;
-      else if(md==='Примерка в магазине')r=`Отложил ✓ ${what}. Вещи ждут вас в примерочной 2 дня, размеры уточню в сообщении.`;
-      else if(!st.open)r=`Мы закрыты, но заказ №${no} записал ✓${sum}. Откроемся в ${st.opens} — ваш будет первым.`;
-      else if(md==='Доставка'){const a=await ch.ai('Куда доставить?',['Домой','На работу','Другой адрес']);r=`Заказ №${no} принят ✓${sum}. Курьер ${a==='Другой адрес'?'уточнит адрес и ':''}будет примерно через 40 минут, оплата по QR.`}
-      else if(md==='Бронь')r=`Бронь №${no} ✓ Столик ждёт вас. Напомню за час.`;
-      else r=`Заказ №${no} принят ✓${sum}. Будет готов через 15 минут — назовите номер на кассе.`;
-      ch.ai(r);
-    }
-    render();
-  },
-  book(c){
-    const st=openState(c);let sel=-1;const pane=$('#pane'),foot=$('#foot');
-    const render=()=>{
-      pane.innerHTML=c.svc.map(([n,d],i)=>`<div class="it pick${i===sel?' on':''}" data-i="${i}"><div><b>${esc(n)}</b><small>${esc(d)}</small></div><span class="ck">${i===sel?'✓':''}</span></div>`).join('');
-      pane.querySelectorAll('.pick').forEach(el=>el.onclick=()=>{sel=+el.dataset.i;render()});
-      foot.hidden=false;foot.innerHTML=`<div class="tot">${sel<0?'—':esc(c.svc[sel][0])}<small>${sel<0?'выберите услугу':st.open?'запись онлайн':'закрыто, но агент запишет'}</small></div><button class="pill solid" id="co" ${sel<0?'disabled':''}>${c.cta}</button>`;
-      $('#co').onclick=async()=>{
-        const no=++orderNo,sv=c.svc[sel][0],ch=chat(c,()=>{sel=-1;render()});ch.me(sv);
-        const t=await ch.ai(`${c.agent}${st.open?'':' (сейчас закрыто, но запись веду)'}. ${c.ask}`,c.slots);
-        ch.ai(c.done.replace('{n}',no).replace('{s}',sv).replace('{t}',t.toLowerCase()));
-      };
-    };
-    render();
-  },
-  corp(c){
-    const st=openState(c),pane=$('#pane'),foot=$('#foot');
-    const render=()=>{
-      pane.innerHTML=c.dirs.map(([n,d])=>`<div class="it"><div><b>${esc(n)}</b><small>${esc(d)}</small></div></div>`).join('');
-      foot.hidden=false;foot.innerHTML=`<div class="tot"><small>${st.txt}</small></div><button class="pill solid" id="co">Записаться на встречу</button>`;
-      $('#co').onclick=async()=>{
-        const ch=chat(c,render);ch.me('Хочу встречу в офисе');
-        const t=await ch.ai(`Координатор на связи${st.open?'':' (офис закрыт, но запись веду)'}. По какому вопросу?`,['Туризм','Патриотический лагерь','Партнёрство']);
-        ch.ai(`Записал: ${t.toLowerCase()} ✓ Ближайшее окно — завтра в 11:00. Пришлю точку на карте и напомню за час.`);
-      };
-    };
-    render();
-  },
-  lease(c){
-    const rent=c.deal==='rent',pane=$('#pane'),foot=$('#foot');
-    const render=()=>{
-      pane.innerHTML=`<div class="specs"><div><b>${c.area} м²</b><span>площадь</span></div><div><b>${c.front} м</b><span>витрина</span></div><div><b>${c.ceil} м</b><span>потолки</span></div><div><b>1</b><span>этаж, вход с улицы</span></div></div>`;
-      foot.hidden=false;foot.innerHTML=`<div class="tot">${rent?'Аренда':'Продажа'}<small>цену и условия назовёт агент</small></div><button class="pill solid" id="co">Записаться на показ</button>`;
-      $('#co').onclick=async()=>{
-        const ch=chat(c,render);ch.me(`Хочу посмотреть ${c.area} м²`);
-        const t=await ch.ai('Агент etb.biz на связи. Показ могу провести завтра — какое время удобнее?',['12:00','15:00','18:30']);
-        ch.ai(`Записал на завтра, ${t} ✓ Пришлю точку на карте и напомню за час. ${rent?'Условия аренды':'Цену и документы'} покажу на месте.`);
-      };
-    };
-    render();
-  },
-  meet(c){
-    const pane=$('#pane');
-    pane.innerHTML=`<p class="sub" style="margin:0 0 14px">Создайте личную ссылку для партнёра. Протоколист подключится к встрече и пришлёт итоги обеим сторонам.</p><form class="form" id="mf"><input id="pn" placeholder="Имя партнёра" autocomplete="off" required><button class="pill solid">Создать ссылку</button></form><div class="msgs" id="mm" style="margin-top:14px"></div>`;
-    const slug=s=>{const t={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sh',ы:'y',э:'e',ю:'yu',я:'ya',ү:'u',ө:'o',ң:'n'};return s.toLowerCase().split('').map(ch=>t[ch]??ch).join('').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'partner'};
-    $('#mf').onsubmit=async e=>{e.preventDefault();const n=$('#pn').value.trim(),url='etb.world/meet/'+slug(n)+'-'+Math.random().toString(36).slice(2,6);
-      navigator.clipboard?.writeText('https://'+url).catch(()=>{});
-      $('#mm').insertAdjacentHTML('beforeend',`<div class="b ai">Ссылка для ${esc(n)} готова и скопирована: <b>${url}</b></div>`)};
-  },
-  async office(c){
-    const pane=$('#pane'),m=minutesNow(),rows=[];
-    COMPANIES.filter(x=>x.kind==='order'||x.kind==='book').forEach((x,i)=>{const s=openState(x,m);rows.push([`${x.agent} · ${x.name}`,s.open?(x.kind==='book'?`записал клиента №${2040+i}`:`принял заказ №${2040+i}`):`записал предзаказ на ${s.opens}`])});
-    rows.push(['Агент etb.biz','записал показ помещения 86 м²'],['Маркетолог','ответил на заявку на размещение'],['Протоколист','итоги встречи отправлены обеим сторонам']);
-    pane.innerHTML='<div class="feed" id="fd"></div>';
-    for(const [i,[w,t]] of rows.entries()){
-      if(!$('#fd'))return;
-      $('#fd').insertAdjacentHTML('beforeend',`<div class="it" style="animation:pop .35s var(--ease)"><div><b>${esc(w)}</b><small>${esc(t)}</small></div><time>${hhmm(m-i*3)}</time></div>`);
-      await sleep(260);
-    }
-  },
-  join(c){
-    const pane=$('#pane');let what='Разместить компанию';
-    pane.innerHTML=`<div class="seg"><button class="on">Разместить компанию</button><button>Реклама</button></div>
-      <p class="sub" id="jd" style="margin:0 0 14px">Пришлите Instagram — агент соберёт карточку: фото, вид изнутри, меню или услуги.</p>
-      <form class="form" id="jf"><input placeholder="Компания или @instagram" required><button class="pill solid">Отправить</button></form><div class="msgs" id="jm" style="margin-top:14px"></div>`;
-    pane.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{what=b.textContent;pane.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x===b));
-      $('#jd').textContent=what==='Реклама'?'Карточка в начале ленты, баннер в категории или спецпроект. Охват и цену пришлёт маркетолог.':'Пришлите Instagram — агент соберёт карточку: фото, вид изнутри, меню или услуги.'});
-    $('#jf').onsubmit=async e=>{e.preventDefault();const b=e.target.querySelector('button');b.disabled=true;
-      $('#jm').innerHTML='<div class="typing"><i></i><i></i><i></i></div>';await sleep(1000);
-      $('#jm').innerHTML=`<div class="b ai">${what==='Реклама'?'Принято ✓ Маркетолог пришлёт свободные места, охват и цену в Telegram.':'Принято ✓ Соберу карточку из вашего Instagram и пришлю на проверку. Агента-продавца подключим следом.'}</div>`};
-  },
-};
-
-/* ================= boot ================= */
-build();
-const h=decodeURIComponent(location.hash.slice(1));
-if(h){const i=list.findIndex(c=>c.id===h);if(i>0)requestAnimationFrame(()=>go(i,true))}
-refreshStatus();setInterval(()=>{if(!lapse)refreshStatus()},20000);
-loadWeather();setInterval(loadWeather,10*60*1000);
-// first visit: a small nudge shows the cards move sideways
-if(!h)setTimeout(()=>{if(idx===0&&!sheetOn){track.style.scrollSnapType='none';track.scrollTo({left:70,behavior:'smooth'});setTimeout(()=>{track.scrollTo({left:0,behavior:'smooth'});setTimeout(()=>track.style.scrollSnapType='',600)},650)}},1600);
-window.__w={go,openSheet:(i,t)=>openSheet(list[i],t||'about',0),closeSheet,get idx(){return idx},list:()=>list};
+/* boot */
+ui();
+const h=location.hash.slice(1);if(['mixes','party','book'].includes(h))openPanel(h);
+$('#lis').textContent=`в эфире · ${listeners}`;
+window.__w={play,pause,openPanel,closePanel,get cur(){return cur},get playing(){return playing}};
 </script>
 </body>
 </html>
