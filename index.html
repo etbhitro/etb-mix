@@ -17,10 +17,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--
 body{font:400 16px/1.45 Onest,system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;height:100dvh}
 button,input,textarea{font:inherit;color:inherit;border:0;background:none;-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}
-/* the deck: a vinyl that spins with the music */
-#deck{--ds:min(80vh,56vw);--dx:54vw;--dy:47vh;position:fixed;z-index:1;width:var(--ds);height:var(--ds);left:var(--dx);top:var(--dy);transform:translate(-50%,-50%);transition:left 1s var(--ease),top 1s var(--ease),width 1s var(--ease),height 1s var(--ease)}
-body.pop #deck{--dx:calc((100vw - 430px)*.56)}
-#sh{position:absolute;inset:0;width:100%;height:100%;-webkit-mask:radial-gradient(closest-side,#000 30%,rgba(0,0,0,.6) 62%,transparent 100%);mask:radial-gradient(closest-side,#000 30%,rgba(0,0,0,.6) 62%,transparent 100%)}
+#sh{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
 .art{--ds:min(58vh,44vw);position:fixed;z-index:2;left:-5vw;bottom:150px;width:var(--ds);height:var(--ds);opacity:.6;pointer-events:none;transition:opacity 1s,transform 1.2s var(--ease)}
 body.playing .art{opacity:.72}
 .cov{position:absolute;inset:0;background:var(--lab,#222);-webkit-mask:radial-gradient(closest-side,#000 25%,rgba(0,0,0,.45) 60%,transparent 100%);mask:radial-gradient(closest-side,#000 25%,rgba(0,0,0,.45) 60%,transparent 100%)}
@@ -31,17 +28,6 @@ body.playing .art{opacity:.72}
 .covT{position:absolute;inset:0;padding:8%;display:flex;flex-direction:column;justify-content:flex-end;gap:3%;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.35))}
 .covT b{font:700 calc(var(--ds)*.1)/1 Unbounded,sans-serif;letter-spacing:-.05em}
 .covT span{font:600 calc(var(--ds)*.04)/1.15 Unbounded,sans-serif;text-transform:uppercase;letter-spacing:-.01em;max-width:85%}
-.glow{position:absolute;inset:-40%;border-radius:50%;background:radial-gradient(circle,var(--c1,#ffb86b) 0,var(--c2,#b48cff) 30%,transparent 62%);filter:blur(50px);opacity:.18}
-/* space fx: stars, slow orbits, grain */
-#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
-.orb{position:absolute;left:50%;top:50%;border-radius:50%;border:1px solid rgba(255,255,255,.07);transform:translate(-50%,-50%);pointer-events:none}
-.orb.o1{width:128%;height:128%;border-style:dashed;border-color:rgba(255,255,255,.06);animation:spin 160s linear infinite}
-.orb.o2{width:168%;height:168%;animation:spin 240s linear infinite reverse}
-.orb.o2::after{content:'';position:absolute;left:50%;top:-3px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--c1,#fff);box-shadow:0 0 12px var(--c1,#fff)}
-.orb.o3{width:96%;height:96%;border-color:rgba(255,255,255,.035);animation:spin 90s linear infinite}
-.orb.o3::after{content:'';position:absolute;right:14%;bottom:6%;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.6}
-@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
-body.playing .orb.o2::after{animation:blink 1.6s infinite}
 body::after{content:'';position:fixed;inset:-50%;z-index:13;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.2s steps(4) infinite}
 @keyframes grain{25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
 .glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
@@ -52,11 +38,12 @@ body::after{content:'';position:fixed;inset:-50%;z-index:13;pointer-events:none;
 .logo b{font:700 24px Unbounded,sans-serif;letter-spacing:-.05em}
 .logo b i{font-style:normal;color:var(--acc)}
 .logo span{font-size:13px;color:var(--mute)}
-.nav{display:flex;gap:4px;padding:4px;border-radius:99px;margin:0 auto}
+.nav{display:flex;gap:4px;padding:4px;border-radius:99px;position:absolute;left:50%;transform:translateX(-50%)}
 .nav button{padding:8px 16px;border-radius:99px;font-size:14px;color:rgba(255,255,255,.75);transition:.3s;white-space:nowrap}
 .nav button:hover{color:#fff}
 .nav button.on{background:#fff;color:#0a0a0c}
 .live{display:flex;align-items:center;gap:8px;font-size:13px;padding:8px 14px;border-radius:99px;white-space:nowrap}
+.wxc{margin-left:auto;color:rgba(255,255,255,.8)}.wxc+.live{margin-left:0}
 .live i{width:7px;height:7px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 12px #ff4d5e;animation:blink 1.4s infinite}
 @keyframes blink{50%{opacity:.3}}
 
@@ -172,15 +159,14 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
 .typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
 
 @media (max-width:760px){
-  #deck{--ds:80vw;--dx:47vw;--dy:40dvh}
-  body.pop #deck{--ds:44vw;--dx:50vw;--dy:21dvh}
   .art{--ds:72vw;left:-12vw;bottom:200px;opacity:.5}
   body.pop .art{opacity:0}
   .top{flex-wrap:wrap;gap:12px;padding:14px 16px 0;padding-top:max(14px,env(safe-area-inset-top))}
   .logo span{display:none}
-  .nav{order:3;margin:0;width:100%;justify-content:space-between}
+  .nav{order:3;margin:0;width:100%;justify-content:space-between;position:static;transform:none}
   .nav button{flex:1;padding:9px 6px;font-size:13.5px}
   .live{margin-left:auto}
+  .wxc span{display:none}.live{padding:8px 12px}
   .hero{left:16px;bottom:100px}
     .player{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));height:64px}
   .player .tm,.player .eq{display:none}
@@ -193,8 +179,7 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
 </style>
 </head>
 <body>
-<canvas id="fx"></canvas>
-<div id="deck"><div class="glow" id="glow"></div><i class="orb o3"></i><i class="orb o1"></i><i class="orb o2"></i><canvas id="sh"></canvas></div>
+<canvas id="sh"></canvas>
 <div class="art" id="art"><div class="covB" id="covB"></div><div class="cov" id="cov"><img id="covI" alt=""><div class="covT"><b id="lblA">etb</b><span id="lblT"></span></div></div></div>
 
 <header class="top">
@@ -204,6 +189,7 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
     <button data-p="lineup">Лайн-ап</button>
     <button data-p="contact">Связь</button>
   </nav>
+  <button class="live glass wxc" id="wx" title="Погода в Бишкеке">Бишкек</button>
   <button class="live glass" data-p="room"><i></i><span id="lis">live</span></button>
 </header>
 
@@ -350,84 +336,132 @@ function bands(){
   return [avg(1,6),avg(6,40),avg(40,140)];
 }
 
-/* ================= space fx: slow stars, rare meteor ================= */
-const fx=$('#fx'),fc=fx.getContext('2d');let FW,FH,STARS=[],met=null;
-function fxSize(){const r=Math.min(2,devicePixelRatio||1);FW=fx.width=innerWidth*r;FH=fx.height=innerHeight*r;
-  STARS=Array.from({length:Math.round(innerWidth*innerHeight/5200)},()=>({x:Math.random()*FW,y:Math.random()*FH,z:.2+Math.random()*.8,p:Math.random()*6.28}))}
-fxSize();addEventListener('resize',fxSize);
-function drawFx(dt,lv){
-  fc.clearRect(0,0,FW,FH);const r=FW/innerWidth,sp=(playing?7:3)*r*dt,t=performance.now()/1000;
-  for(const s of STARS){s.x-=sp*s.z;if(s.x<0)s.x+=FW;
-    const a=(.25+.5*s.z)*(.75+.25*Math.sin(t*1.3+s.p))+lv*.5*s.z;fc.fillStyle=`rgba(255,255,255,${Math.min(1,a).toFixed(3)})`;fc.fillRect(s.x,s.y,s.z*1.6*r,s.z*1.6*r)}
-  if(!met&&Math.random()<dt/14)met={x:Math.random()*FW,y:Math.random()*FH*.4,l:0};
-  if(met){met.l+=dt;const k=met.l/1.1,x=met.x-k*260*r,y=met.y+k*110*r,g=fc.createLinearGradient(x,y,x+90*r,y-38*r);
-    g.addColorStop(0,`rgba(255,255,255,${(.6*(1-k)).toFixed(3)})`);g.addColorStop(1,'rgba(255,255,255,0)');fc.strokeStyle=g;fc.lineWidth=r;fc.beginPath();fc.moveTo(x,y);fc.lineTo(x+90*r,y-38*r);fc.stroke();if(k>=1)met=null}
-}
-
-/* ================= centre: hypnotic tunnel (WebGL) ================= */
-const sh=$('#sh'),gl=sh.getContext('webgl',{premultipliedAlpha:false,antialias:false});let shC=[[.56,.77,1],[.36,.42,1]],shT=0,shU;
-// палитра центра: во время игры цвет сменяется каждые 32 удара (по bpm микса) со вспышкой, на паузе медленно перетекает
+/* ================= фон: горы, небо, молнии, погода Бишкека (WebGL) ================= */
+const sh=$('#sh'),gl=sh.getContext('webgl',{antialias:false});let shC=[[.56,.77,1],[.36,.42,1]],shT=0,shU;
+// палитра: во время игры цвет сменяется каждые 32 удара (по bpm микса) с молнией, на паузе медленно перетекает
 const PAL=[['#7fd8ff','#5b6cff'],['#b48cff','#ff4fd8'],['#ffb86b','#ff4d5e'],['#7dffb2','#2bd1ff'],['#ffffff','#8fa2ff'],['#ff7a3d','#b48cff']].map(p=>p.map(h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255)));
-let palI=0,palK=0,flash=0,lastPh=-1,playClk=0;
+let palI=0,palK=0,lastPh=-1,playClk=0;
+// погода: текущие значения плавно идут к целевым (wx), молния: bolt
+const WX={cl:.3,rn:0,sn:0,fg:0,st:0,day:0},wx={...WX};let bolt={k:0,x:.5,s:1},nextBolt=6;
 if(gl){
-  const src=(t,c)=>{const o=gl.createShader(t);gl.shaderSource(o,c);gl.compileShader(o);return o},pr=gl.createProgram();
+  const src=(t,c)=>{const o=gl.createShader(t);gl.shaderSource(o,c);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.log('shader',gl.getShaderInfoLog(o));return o},pr=gl.createProgram();
   gl.attachShader(pr,src(gl.VERTEX_SHADER,'attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}'));
-  gl.attachShader(pr,src(gl.FRAGMENT_SHADER,`precision highp float;uniform vec2 R;uniform float T,B;uniform vec3 A,C;
-  float tun(vec2 uv,float t){
-    float r=length(uv),a=atan(uv.y,uv.x);
-    float z=.32/max(r,.001)+t;                         // depth
-    float w=a/6.2832*12.+z*.35+sin(z*.5)*.6;           // twisting spokes
-    float ring=abs(fract(z*1.4)-.5),spoke=abs(fract(w)-.5);
-    float l=smoothstep(.03+B*.012,0.,ring*r*3.)*.9+smoothstep(.05,0.,spoke*r*2.6)*.35;
-    float pulse=smoothstep(.1,0.,abs(fract(z*.25)-.5)-.4)*B;   // every 4th ring flashes on the beat
-    return (l+pulse*.45)*smoothstep(.02,.3,r)*smoothstep(1.,.35,r);
-  }
+  gl.attachShader(pr,src(gl.FRAGMENT_SHADER,`precision highp float;
+  uniform vec2 R;uniform float T,L,LX,LS,CL,RN,SN,FG,DAY;uniform vec3 A,C;
+  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+  float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+1.),f.x),f.y);}
+  float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.03;a*=.5;}return v;}
+  float ridge(float x,float seed){float v=0.,a=.5,f=1.;for(int i=0;i<6;i++){v+=a*(1.-abs(n(vec2(x*f,seed))*2.-1.));f*=2.07;a*=.47;}return v;}
   void main(){
-    vec2 uv=(gl_FragCoord.xy-.5*R)/R.y;
-    uv*=mat2(cos(T*.05),-sin(T*.05),sin(T*.05),cos(T*.05));
-    float t=T*.55;float ab=.006+B*.02;                 // chromatic aberration
-    vec3 col=vec3(tun(uv*(1.+ab),t),tun(uv,t),tun(uv*(1.-ab),t));
-    float g=tun(uv,t);vec3 tint=mix(A,C,.5+.5*sin(T*.2+length(uv)*6.));
-    vec3 o=col*.55+g*tint*.9;
-    o+=tint*.1*smoothstep(.18,0.,length(uv))*(.3+B*.7);  // core glow
-    gl_FragColor=vec4(o,1.);
+    vec2 uv=gl_FragCoord.xy/R;float asp=R.x/R.y;vec2 p=vec2(uv.x*asp,uv.y);
+    vec3 tint=mix(A,C,uv.x);
+    // небо: тёмное сверху, подсвечено палитрой у горизонта; днём светлее
+    vec3 col=mix(tint*.32,vec3(.012,.014,.03),smoothstep(.15,.95,uv.y));
+    col=mix(col,mix(vec3(.16,.22,.36),tint*.45,.35),DAY*.55*smoothstep(1.,.2,uv.y));
+    // звёзды (гаснут за облаками и днём)
+    vec2 sc=floor(p*vec2(420.));float sh=h(sc);
+    col+=step(.9965,sh)*(.5+.5*sin(T*1.5+sh*60.))*(1.-CL)*(1.-DAY)*smoothstep(.35,.8,uv.y)*.9;
+    // облака
+    float cl=fbm(p*vec2(1.2,2.6)+vec2(T*.015,0.));
+    float cm=smoothstep(.75-CL*.45,1.05-CL*.35,cl+uv.y*.25)*smoothstep(.3,.75,uv.y);
+    vec3 cc=mix(vec3(.05,.055,.07),tint*.25,.3)+DAY*.18;
+    // молния: сначала вспышка в облаках, ствол от неба к хребту
+    float bx=LX+(fbm(vec2(uv.y*5.,LS))-.5)*.16+(n(vec2(uv.y*40.,LS))-.5)*.018;
+    float d=abs(uv.x-bx)*asp;
+    float gr=ridge(LX*asp*.9+3.,1.),ground=.26+.5*gr*gr*1.3;
+    float core=exp(-d*900.)*step(ground,uv.y)*L;
+    float halo=exp(-d*28.)*L*.45*step(ground-.02,uv.y);
+    col=mix(col,cc+L*.55*(tint*.6+.4)*smoothstep(.5,0.,abs(uv.x-LX)),cm*.92);
+    col+=L*.12*tint+halo*(tint*.5+.5);
+    // горы: три слоя, дальний в дымке, у гребня — подсветка цветом и молнией
+    float drift=T*.004;
+    for(int k=0;k<3;k++){
+      float fk=float(k);
+      float base=.26-fk*.11,amp=.5-fk*.12,sc2=.9+fk*.8,xx=p.x*sc2+drift*(1.+fk)+fk*7.3+3.;
+      float rg=ridge(xx,1.+fk*4.),y=base+amp*rg*rg*1.3;
+      if(uv.y<y){
+        float depth=1.-fk*.4;                                  // 1 = дальний
+        vec3 m=mix(vec3(.006,.007,.012),tint*.2,depth*.5);
+        float rk=1.-abs(fbm(vec2(p.x*5.+p.y*3.,p.y*4.-p.x*2.)+fk*5.)*2.-1.);
+        m+=tint*pow(rk,5.)*(.07+L*.35)*(.5+depth*.5)*smoothstep(.3,0.,y-uv.y);  // рёбра скал ловят свет
+        m*=.75+.5*fbm(p*vec2(7.,14.)+fk*11.);                   // текстура скал
+        m=mix(m,vec3(.75,.8,.9)*(.25+DAY*.4),smoothstep(.07,0.,y-uv.y)*step(.5,y)*(1.-fk*.5)*.5); // снег на вершинах
+        m+=tint*smoothstep(.008,0.,y-uv.y)*(.16+L*1.1)*depth;  // контур хребта
+        m+=L*.08*depth;
+        m=mix(m,col,depth*.35+FG*.5*depth);                    // воздушная перспектива
+        col=m;
+      }
+    }
+    col+=core*vec3(1.,1.,1.2);
+    // туман у подножия
+    col=mix(col,mix(vec3(.12,.13,.16),tint*.3,.4)+DAY*.15,FG*smoothstep(.55,0.,uv.y)*.8);
+    // дождь: косые штрихи
+    vec2 q=vec2(p.x*240.+p.y*30.,p.y*9.+T*16.);float rc=floor(q.x);
+    col+=RN*.07*step(.93,h(vec2(rc,floor(q.y+h(vec2(rc,3.))*9.))))*smoothstep(0.,.8,fract(q.y))*smoothstep(.5,.2,abs(fract(q.x)-.5))*(.6+tint*.4);
+    // снег: падающие хлопья
+    vec2 s=p*vec2(34.)+vec2(sin(T*.4+p.y*3.)*.6,T*2.2);vec2 si=floor(s),sf=fract(s)-.5;
+    col+=SN*.55*smoothstep(.09,0.,length(sf-vec2(h(si)-.5,h(si+7.)-.5)*.6))*step(.72,h(si+3.));
+    gl_FragColor=vec4(col,1.);
   }`));
-  gl.linkProgram(pr);if(!gl.getProgramParameter(pr,gl.LINK_STATUS))console.log('shader',gl.getProgramInfoLog(pr));gl.useProgram(pr);
+  gl.linkProgram(pr);gl.useProgram(pr);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
-  shU=['R','T','B','A','C'].reduce((o,k)=>(o[k]=gl.getUniformLocation(pr,k),o),{});
+  shU=['R','T','L','LX','LS','CL','RN','SN','FG','DAY','A','C'].reduce((o,k)=>(o[k]=gl.getUniformLocation(pr,k),o),{});
 }
+// молния: двойной/тройной разряд, как в жизни
+function strike(){bolt={k:1,x:.15+Math.random()*.7,s:Math.random()*99,t:0,flick:Math.random()<.6};nextBolt=wx.st>.5?2+Math.random()*5:wx.rn>.3||wx.cl>.7?10+Math.random()*14:18+Math.random()*22}
 function drawSh(dt,lv){
-  if(!gl)return;const r=Math.min(1.5,devicePixelRatio||1),w=sh.clientWidth*r|0,h=sh.clientHeight*r|0;
+  if(!gl)return;const r=Math.min(1.25,devicePixelRatio||1)*.8,w=sh.clientWidth*r|0,h=sh.clientHeight*r|0;
   if(sh.width!==w||sh.height!==h){sh.width=w;sh.height=h;gl.viewport(0,0,w,h)}
-  shT+=dt*(playing?1+lv*2.2:.35);           // drifts slowly on pause, rushes on the beat
+  shT+=dt*(playing?1+lv:.6);
   const M=cur>=0?MIXES[cur]:null;if(playing)playClk+=dt;const ph=M?Math.floor(playClk*M.bpm/60/32):-1;
-  if(playing&&ph!==lastPh&&lastPh>=0){palI=(palI+1)%PAL.length;palK=0;flash=1}   // новая фраза: смена цвета
+  if(playing&&ph!==lastPh&&lastPh>=0){palI=(palI+1)%PAL.length;palK=0;strike()}   // новая фраза: смена цвета + молния
   lastPh=ph;
   palK=Math.min(1,palK+dt/(playing?1.2:40));if(!playing&&palK>=1){palK=0;palI=(palI+1)%PAL.length}
   const a=PAL[(palI+PAL.length-1)%PAL.length],b=PAL[palI],e=palK*palK*(3-2*palK);
   shC=[0,1].map(j=>a[j].map((v,i)=>v+(b[j][i]-v)*e));
-  flash=Math.max(0,flash-dt*1.4);
-  gl.uniform2f(shU.R,w,h);gl.uniform1f(shU.T,shT);gl.uniform1f(shU.B,Math.min(1,Math.max(0,lv-.12)*1.8+flash*.8));gl.uniform3fv(shU.A,shC[0]);gl.uniform3fv(shU.C,shC[1]);
+  if((nextBolt-=dt)<=0)strike();
+  bolt.t=(bolt.t||0)+(window.__hold?0:dt);
+  // яркость разряда: вспышка, провал, повторная вспышка, затухание
+  const bt=bolt.t,L=bolt.k?Math.max(0,bt<.08?1:bt<.14?.15:bolt.flick&&bt<.22?.85:Math.exp(-(bt-.22)*7)*.8):0;
+  for(const k in WX)wx[k]+=(WX[k]-wx[k])*Math.min(1,dt*.5);
+  const U=shU,f=gl.uniform1f.bind(gl);
+  gl.uniform2f(U.R,w,h);f(U.T,shT);f(U.L,L);f(U.LX,bolt.x);f(U.LS,bolt.s);
+  f(U.CL,wx.cl);f(U.RN,wx.rn);f(U.SN,wx.sn);f(U.FG,wx.fg);f(U.DAY,wx.day);
+  gl.uniform3fv(U.A,shC[0]);gl.uniform3fv(U.C,shC[1]);
   gl.drawArrays(gl.TRIANGLES,0,3);
 }
+// погода Бишкека (Open-Meteo, без ключа), раз в 15 минут
+const WMO=c=>c>=95?['гроза','st']:c>=71&&c<=77||c===85||c===86?['снег','sn']:c>=51&&c<=67||c>=80&&c<=82?['дождь','rn']:c===45||c===48?['туман','fg']:c>=2?['облачно','cl']:['ясно',''];
+function setWx(code,cover,isDay,temp){
+  const [name,k]=WMO(code);
+  Object.assign(WX,{cl:Math.max(cover/100,k&&k!=='fg'?.75:0),rn:k==='rn'||k==='st'?1:0,sn:k==='sn'?1:0,fg:k==='fg'?1:0,st:k==='st'?1:0,day:isDay?1:0});
+  if(k==='st')nextBolt=Math.min(nextBolt,1.5);
+  $('#wx').innerHTML=`<span>Бишкек </span>${temp==null?'':Math.round(temp)+'° · '}${name}`;
+}
+async function loadWx(){
+  try{const j=await (await fetch('https://api.open-meteo.com/v1/forecast?latitude=42.87&longitude=74.59&current=weather_code,cloud_cover,is_day,temperature_2m&timezone=Asia%2FBishkek')).json(),c=j.current;
+    wxLive=[c.weather_code,c.cloud_cover,c.is_day,c.temperature_2m];setWx(...wxLive)}catch(e){}
+}
+let wxLive=[1,20,0,null],wxDemo=-1;loadWx();setInterval(loadWx,15*60e3);
+// тап по погоде — показать другую погоду (для демо), по кругу и обратно к реальной
+$('#wx').onclick=()=>{const D=[[0,0],[3,90],[63,100],[73,100],[45,60],[95,100]];wxDemo++;if(wxDemo>=D.length){wxDemo=-1;setWx(...wxLive)}else setWx(D[wxDemo][0],D[wxDemo][1],wxLive[2],wxLive[3])};
 
 /* ================= the deck ================= */
-const cov=$('#cov'),covI=$('#covI'),glow=$('#glow'),deck=$('#deck');
+const cov=$('#cov'),covI=$('#covI');
 let last=0,lv=0;
 function frame(t){
   const dt=Math.min(.05,(t-last)/1000||0);last=t;
   
   const M=cur>=0?MIXES[cur]:null;
   let b=playing?bands():[0,0,0];
-  // Mixcloud audio is cross-origin (no analyser): pulse the deck on the beat instead
+  // Mixcloud audio is cross-origin (no analyser): fake a beat pulse from the bpm
   if(playing&&M&&M.mc){const ph=(mcPos*M.bpm/60)%1,k=Math.pow(1-ph,6);b=[.18+.32*k,.2,.1];if(fdata)for(let i=0;i<fdata.length;i++)fdata[i]=(110+120*k*Math.random())|0}
   lv+=(b[0]-lv)*(b[0]>lv?.5:.1);
-  glow.style.opacity=(.1+lv*.28).toFixed(3);deck.style.scale=(1+lv*.012).toFixed(4);
   if(playing&&fdata){document.querySelectorAll('#eq i').forEach((e,i)=>e.style.height=(4+fdata[3+i*14]/255*18)+'px');const m=M;
     if(m.mc){$('#tm').textContent=clock(mcPos)+' / '+clock(mcDur);$('#prog i').style.width=(mcPos/mcDur*100)+'%'}
     else if(m.src){const d=el.duration||m.dur;$('#tm').textContent=clock(el.currentTime)+' / '+clock(d);$('#prog i').style.width=(el.currentTime/d*100)+'%'}else $('#tm').textContent=clock(ac.currentTime-t0)}
-  drawFx(dt,lv);drawSh(dt,lv);
+  drawSh(dt,lv);
   requestAnimationFrame(frame);
 }
 const clock=s=>{s=Math.max(0,s|0);const h=s/3600|0,m=(s%3600)/60|0,ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
@@ -435,7 +469,7 @@ requestAnimationFrame(frame);
 function paintDeck(m){
   $('#art').style.setProperty('--lab',`radial-gradient(circle at 25% 20%,${m.c[0]},transparent 60%),radial-gradient(circle at 80% 85%,${m.c[1]},transparent 62%),#101016`);
   cov.classList.toggle('has',!!m.img);document.body.classList.toggle('img',!!m.img);if(m.img&&covI.getAttribute('src')!==m.img){covI.src=m.img;$('#covB').style.setProperty('--img',`url(${m.img})`)}covI.alt=m.t;
-  deck.style.setProperty('--c1',m.c[0]);deck.style.setProperty('--c2',m.c[1]);document.body.style.setProperty('--c1',m.c[0]);$('#lblT').textContent=m.t;$('#lblA').textContent=m.a||'etb';
+  document.body.style.setProperty('--c1',m.c[0]);$('#lblT').textContent=m.t;$('#lblA').textContent=m.a||'etb';
 }
 paintDeck(MIXES[0]);$('#npS').textContent=MIXES.length===1?MIXES[0].g:MIXES.length+' миксов';if(MIXES.length<2)['#prev','#next'].forEach(q=>$(q).style.display='none');
 
