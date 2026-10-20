@@ -206,13 +206,6 @@ const MIXES=[
   // mc: микс с Mixcloud (ключ из ссылки) — играет через их плеер; img: обложка
   // src + dur (сек): микс файлом; остальные сводит движок в браузере
   {t:'ORBITA podcast-show 01',a:'naiq',g:'melodic house · deep techno',bpm:124,c:['#8fc4ff','#5b6cff'],mc:'/etbworld/orbita-podcast-show-mixed-by-naiq/',img:'mixes/orbita-01.jpg',dur:4527},
-  {t:'Wings of a Butterfly',a:'naiq',g:'melodic techno · extended mix',bpm:126,c:['#9fd8ff','#b07cff'],src:'mixes/naiq-wings-of-a-butterfly-extended.mp3',dur:480},
-  {t:'Issyk-Kul Sunset',g:'deep house',bpm:118,root:45,c:['#ff8a5b','#b48cff'],st:{hat:'off',bass:'deep',lead:'pluck',perc:0,swing:.08}},
-  {t:'Bishkek Night Drive',g:'melodic techno',bpm:124,root:43,c:['#5b6cff','#ff5fa2'],st:{hat:'16',bass:'roll',lead:'arp',perc:0,swing:0}},
-  {t:'Tunduk Afterhours',g:'afro house',bpm:121,root:47,c:['#ffb86b','#2fc3a0'],st:{hat:'shuffle',bass:'afro',lead:'pluck',perc:1,swing:.12}},
-  {t:'Ala-Too Sunrise',g:'progressive',bpm:122,root:44,c:['#ffd27a','#ff6b6b'],st:{hat:'16',bass:'roll',lead:'arp',perc:0,swing:.03}},
-  {t:'Chunkurchak Echo',g:'organic house',bpm:114,root:46,c:['#7fd18b','#3a6bd9'],st:{hat:'off',bass:'deep',lead:'pluck',perc:1,swing:.1}},
-  {t:'Karakol Snow',g:'minimal',bpm:126,root:42,c:['#cfe3ff','#6c7bff'],st:{hat:'shuffle',bass:'afro',lead:null,perc:1,swing:.06}},
 ];
 // Пятничная онлайн-тусовка: день недели (5 = пятница), час по Бишкеку, длительность в часах
 const PARTY={day:5,hour:22,dur:4};
@@ -310,7 +303,7 @@ function pause(){if(!playing)return;playing=false;const m=MIXES[cur];if(m.mc){if
 $('#prog').onclick=e=>{const m=MIXES[cur];if(!m||!(m.src||m.mc))return;const r=e.currentTarget.getBoundingClientRect(),k=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
   if(m.mc){if(mcW)mcW.seek(k*mcDur)}else el.currentTime=k*(el.duration||m.dur)};
 const toggle=()=>playing?pause():play(cur<0?0:cur);
-const skip=d=>play(((cur<0?0:cur)+d+MIXES.length)%MIXES.length);
+const skip=d=>{if(MIXES.length<2)return;play(((cur<0?0:cur)+d+MIXES.length)%MIXES.length)};
 function bands(){
   if(!an)return [0,0,0];
   an.getByteFrequencyData(fdata);const avg=(a,b)=>{let s=0;for(let i=a;i<b;i++)s+=fdata[i];return s/(b-a)/255};
@@ -341,7 +334,7 @@ function paintDeck(m){
   cov.classList.toggle('has',!!m.img);document.body.classList.toggle('img',!!m.img);if(m.img&&covI.getAttribute('src')!==m.img)covI.src=m.img;covI.alt=m.t;
   deck.style.setProperty('--c1',m.c[0]);deck.style.setProperty('--c2',m.c[1]);document.body.style.setProperty('--c1',m.c[0]);$('#lblT').textContent=m.t;$('#lblA').textContent=m.a||'etb';
 }
-paintDeck(MIXES[0]);$('#npS').textContent=MIXES.length+' миксов';
+paintDeck(MIXES[0]);$('#npS').textContent=MIXES.length===1?MIXES[0].g:MIXES.length+' миксов';if(MIXES.length<2)['#prev','#next'].forEach(q=>$(q).style.display='none');
 
 /* ================= UI ================= */
 const PLAY='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9-5.5z"/></svg>',PAUSE='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5h3v11H3zM8 1.5h3v11H8z"/></svg>';
@@ -422,7 +415,7 @@ function partyPanel(){
     const low=v.toLowerCase();
     later(()=>{
       if(open!=='party')return;
-      if(/трек|постав|включи|заказ|песн/.test(low)){etb('Принял заказ 🎧 Сведу его в следующий переход.');later(()=>{if(open!=='party')return;skip(1);add(`<div class="m sys">etb сменил сет · ${MIXES[cur].t}</div>`)},3500)}
+      if(/трек|постав|включи|заказ|песн/.test(low)){etb('Принял заказ 🎧 Сведу его в следующий переход.');later(()=>{if(open!=='party'||MIXES.length<2)return;skip(1);add(`<div class="m sys">etb сменил сет · ${MIXES[cur].t}</div>`)},3500)}
       else if(/привет|салам|хай|hello|hi\b/.test(low))etb('Привет! Рад, что ты с нами. Откуда слушаешь?');
       else if(/при[её]д|выступ|концерт|живь|брон|букинг/.test(low))etb('Живьём — через «Букинг», отвечу за час.');
       else etb(['Слышу тебя 🙌','Держи следующий дроп — для тебя.','Лучший чат в городе.','💜'][Math.random()*4|0]);
