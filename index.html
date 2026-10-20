@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#08080a">
-<title>etb</title>
-<meta name="description" content="etb — миксы, онлайн-тусовки, букинг.">
+<title>etb.mix</title>
+<meta name="description" content="etb.mix — эфир, лайн-ап, миксы.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500&display=swap" rel="stylesheet">
@@ -15,18 +15,32 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;overscroll-behavior:none;background:var(--bg)}
 body{font:400 16px/1.45 Onest,system-ui,sans-serif;color:#fff;-webkit-font-smoothing:antialiased;height:100dvh}
-button,input{font:inherit;color:inherit;border:0;background:none;-webkit-tap-highlight-color:transparent}
+button,input,textarea{font:inherit;color:inherit;border:0;background:none;-webkit-tap-highlight-color:transparent}
 button{cursor:pointer}
 /* the deck: a vinyl that spins with the music */
 #deck{--ds:min(74vh,50vw);--dx:66vw;--dy:47vh;position:fixed;z-index:1;width:var(--ds);height:var(--ds);left:var(--dx);top:var(--dy);transform:translate(-50%,-50%);transition:left 1s var(--ease),top 1s var(--ease),width 1s var(--ease),height 1s var(--ease)}
 body.pop #deck{--dx:calc((100vw - 430px)*.62)}
-.cov{position:absolute;inset:0;border-radius:22px;overflow:hidden;background:var(--lab,#222);box-shadow:0 50px 120px -30px rgba(0,0,0,.95),0 0 0 1px rgba(255,255,255,.06)}
+.cov{position:absolute;inset:0;background:var(--lab,#222);-webkit-mask:radial-gradient(closest-side,#000 42%,rgba(0,0,0,.55) 68%,transparent 100%);mask:radial-gradient(closest-side,#000 42%,rgba(0,0,0,.55) 68%,transparent 100%)}
+.covB{position:absolute;inset:-35%;background:var(--img) center/cover;filter:blur(70px) saturate(1.3);opacity:.45;-webkit-mask:radial-gradient(closest-side,#000,transparent);mask:radial-gradient(closest-side,#000,transparent);pointer-events:none}
+.cov.has{background:transparent}
 .cov img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
 .cov.has img{display:block}body.img .hero h1{display:none}.cov.has .covT{display:none}
 .covT{position:absolute;inset:0;padding:8%;display:flex;flex-direction:column;justify-content:flex-end;gap:3%;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.35))}
 .covT b{font:700 calc(var(--ds)*.1)/1 Unbounded,sans-serif;letter-spacing:-.05em}
 .covT span{font:600 calc(var(--ds)*.04)/1.15 Unbounded,sans-serif;text-transform:uppercase;letter-spacing:-.01em;max-width:85%}
-.glow{position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,var(--c1,#ffb86b) 0,var(--c2,#b48cff) 30%,transparent 62%);filter:blur(50px);opacity:.18}
+.glow{position:absolute;inset:-40%;border-radius:50%;background:radial-gradient(circle,var(--c1,#ffb86b) 0,var(--c2,#b48cff) 30%,transparent 62%);filter:blur(50px);opacity:.18}
+/* space fx: stars, slow orbits, grain */
+#fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+.orb{position:absolute;left:50%;top:50%;border-radius:50%;border:1px solid rgba(255,255,255,.07);transform:translate(-50%,-50%);pointer-events:none}
+.orb.o1{width:128%;height:128%;border-style:dashed;border-color:rgba(255,255,255,.06);animation:spin 160s linear infinite}
+.orb.o2{width:168%;height:168%;animation:spin 240s linear infinite reverse}
+.orb.o2::after{content:'';position:absolute;left:50%;top:-3px;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--c1,#fff);box-shadow:0 0 12px var(--c1,#fff)}
+.orb.o3{width:96%;height:96%;border-color:rgba(255,255,255,.035);animation:spin 90s linear infinite}
+.orb.o3::after{content:'';position:absolute;right:14%;bottom:6%;width:3px;height:3px;border-radius:50%;background:#fff;opacity:.6}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+body.playing .orb.o2::after{animation:blink 1.6s infinite}
+body::after{content:'';position:fixed;inset:-50%;z-index:13;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 1.2s steps(4) infinite}
+@keyframes grain{25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}}
 .glass{background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2)}
 
 /* top */
@@ -121,7 +135,19 @@ body.pop .panel{opacity:1;transform:none;pointer-events:auto}
 .fly{position:fixed;z-index:30;pointer-events:none;font-size:26px;animation:fly 2.2s ease-out forwards}
 @keyframes fly{to{transform:translate(var(--dx),-340px) scale(1.3);opacity:0}}
 
-/* booking */
+/* lineup + contact */
+.now{margin-top:14px;display:grid;gap:6px;font-size:14px}
+.now div{display:flex;gap:10px;align-items:baseline}
+.now span{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;width:58px;flex:none}
+.now b{font-weight:500}.now p{color:rgba(255,255,255,.8)}
+.tag{font-style:normal;font-size:11px;font-weight:400;padding:2px 8px;border-radius:99px;border:1px solid var(--acc);color:var(--acc);white-space:nowrap;vertical-align:1px}
+.lu{display:flex;flex-direction:column;gap:8px}
+.slot{border:1px solid var(--line);border-radius:18px;padding:12px 14px;display:grid;grid-template-columns:76px 1fr;gap:2px 12px;align-items:baseline}
+.slot .d{font:600 13px Unbounded,sans-serif;grid-row:span 2;text-transform:uppercase;letter-spacing:-.02em}
+.slot .d small{display:block;font:400 12px Onest,sans-serif;color:var(--mute);margin-top:3px;text-transform:none}
+.slot b{font-weight:500}.slot p{font-size:13px;color:var(--mute)}
+.slot.on{border-color:var(--acc);background:rgba(255,184,107,.08)}
+textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
 .lbl{font-size:12px;color:var(--mute);margin:14px 0 8px}
 .opts{display:flex;flex-wrap:wrap;gap:6px}
 .opts button{padding:8px 14px;border-radius:99px;border:1px solid var(--line);font-size:14px;transition:.25s}
@@ -162,16 +188,17 @@ body.pop .panel{opacity:1;transform:none;pointer-events:auto}
 </style>
 </head>
 <body>
-<div id="deck"><div class="glow" id="glow"></div><div class="cov" id="cov"><img id="covI" alt=""><div class="covT"><b id="lblA">etb</b><span id="lblT"></span></div></div></div>
+<canvas id="fx"></canvas>
+<div id="deck"><div class="glow" id="glow"></div><div class="covB" id="covB"></div><i class="orb o3"></i><i class="orb o1"></i><i class="orb o2"></i><div class="cov" id="cov"><img id="covI" alt=""><div class="covT"><b id="lblA">etb</b><span id="lblT"></span></div></div></div>
 
 <header class="top">
-  <a class="logo" href="#"><b>etb<i>.</i></b></a>
+  <a class="logo" href="#"><b>etb<i>.</i>mix</b></a>
   <nav class="nav glass" id="nav">
-    <button data-p="mixes">Миксы</button>
-    <button data-p="party">Тусовка</button>
-    <button data-p="book">Букинг</button>
+    <button data-p="room">Эфир</button>
+    <button data-p="lineup">Лайн-ап</button>
+    <button data-p="contact">Связь</button>
   </nav>
-  <button class="live glass" data-p="party"><i></i><span id="lis">live</span></button>
+  <button class="live glass" data-p="room"><i></i><span id="lis">live</span></button>
 </header>
 
 <section class="hero" id="hero">
@@ -207,8 +234,15 @@ const MIXES=[
   // src + dur (сек): микс файлом; остальные сводит движок в браузере
   {t:'ORBITA podcast-show 01',a:'naiq',g:'melodic house · deep techno',bpm:124,c:['#8fc4ff','#5b6cff'],mc:'/etbworld/orbita-podcast-show-mixed-by-naiq/',img:'mixes/orbita-01.jpg',dur:4527},
 ];
-// Пятничная онлайн-тусовка: день недели (5 = пятница), час по Бишкеку, длительность в часах
-const PARTY={day:5,hour:22,dur:4};
+/* ЛАЙН-АП: кто когда играет. day: 1=Пн … 7=Вс, время Бишкека (to раньше from = до утра).
+   mix — индекс в MIXES, что звучит в этот слот (пока везде ORBITA). tag: 'эксклюзив', 'премьера' или ''. */
+const LINEUP=[
+  {day:3,from:'21:00',to:'23:00',who:'naiq',what:'ORBITA podcast-show 02',tag:'премьера',mix:0},
+  {day:5,from:'22:00',to:'02:00',who:'etb',what:'live из студии',tag:'эксклюзив',mix:0},
+  {day:7,from:'19:00',to:'21:00',who:'etb',what:'закатный сет',tag:'',mix:0},
+];
+// в остальное время в эфире
+const ROTATION={who:'naiq',what:'ORBITA podcast-show 01',mix:0};
 
 /* ================= audio engine ================= */
 let el,ac,master,an,fdata,timer,step=0,nextT=0,cur=-1,playing=false,t0=0,elapsed=0,NB,padBus,sendR,sendD;
@@ -310,6 +344,20 @@ function bands(){
   return [avg(1,6),avg(6,40),avg(40,140)];
 }
 
+/* ================= space fx: slow stars, rare meteor ================= */
+const fx=$('#fx'),fc=fx.getContext('2d');let FW,FH,STARS=[],met=null;
+function fxSize(){const r=Math.min(2,devicePixelRatio||1);FW=fx.width=innerWidth*r;FH=fx.height=innerHeight*r;
+  STARS=Array.from({length:Math.round(innerWidth*innerHeight/5200)},()=>({x:Math.random()*FW,y:Math.random()*FH,z:.2+Math.random()*.8,p:Math.random()*6.28}))}
+fxSize();addEventListener('resize',fxSize);
+function drawFx(dt,lv){
+  fc.clearRect(0,0,FW,FH);const r=FW/innerWidth,sp=(playing?7:3)*r*dt,t=performance.now()/1000;
+  for(const s of STARS){s.x-=sp*s.z;if(s.x<0)s.x+=FW;
+    const a=(.25+.5*s.z)*(.75+.25*Math.sin(t*1.3+s.p))+lv*.5*s.z;fc.fillStyle=`rgba(255,255,255,${Math.min(1,a).toFixed(3)})`;fc.fillRect(s.x,s.y,s.z*1.6*r,s.z*1.6*r)}
+  if(!met&&Math.random()<dt/14)met={x:Math.random()*FW,y:Math.random()*FH*.4,l:0};
+  if(met){met.l+=dt;const k=met.l/1.1,x=met.x-k*260*r,y=met.y+k*110*r,g=fc.createLinearGradient(x,y,x+90*r,y-38*r);
+    g.addColorStop(0,`rgba(255,255,255,${(.6*(1-k)).toFixed(3)})`);g.addColorStop(1,'rgba(255,255,255,0)');fc.strokeStyle=g;fc.lineWidth=r;fc.beginPath();fc.moveTo(x,y);fc.lineTo(x+90*r,y-38*r);fc.stroke();if(k>=1)met=null}
+}
+
 /* ================= the deck ================= */
 const cov=$('#cov'),covI=$('#covI'),glow=$('#glow'),deck=$('#deck');
 let last=0,lv=0;
@@ -321,17 +369,18 @@ function frame(t){
   // Mixcloud audio is cross-origin (no analyser): pulse the deck on the beat instead
   if(playing&&M&&M.mc){const ph=(mcPos*M.bpm/60)%1,k=Math.pow(1-ph,6);b=[.18+.32*k,.2,.1];if(fdata)for(let i=0;i<fdata.length;i++)fdata[i]=(110+120*k*Math.random())|0}
   lv+=(b[0]-lv)*(b[0]>lv?.5:.1);
-  glow.style.opacity=(.14+lv*.5).toFixed(3);deck.style.scale=(1+lv*.012).toFixed(4);
+  glow.style.opacity=(.1+lv*.28).toFixed(3);deck.style.scale=(1+lv*.012).toFixed(4);
   if(playing&&fdata){document.querySelectorAll('#eq i').forEach((e,i)=>e.style.height=(4+fdata[3+i*14]/255*18)+'px');const m=M;
     if(m.mc){$('#tm').textContent=clock(mcPos)+' / '+clock(mcDur);$('#prog i').style.width=(mcPos/mcDur*100)+'%'}
     else if(m.src){const d=el.duration||m.dur;$('#tm').textContent=clock(el.currentTime)+' / '+clock(d);$('#prog i').style.width=(el.currentTime/d*100)+'%'}else $('#tm').textContent=clock(ac.currentTime-t0)}
+  drawFx(dt,lv);
   requestAnimationFrame(frame);
 }
 const clock=s=>{s=Math.max(0,s|0);const h=s/3600|0,m=(s%3600)/60|0,ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
 requestAnimationFrame(frame);
 function paintDeck(m){
   deck.style.setProperty('--lab',`radial-gradient(circle at 25% 20%,${m.c[0]},transparent 60%),radial-gradient(circle at 80% 85%,${m.c[1]},transparent 62%),#101016`);
-  cov.classList.toggle('has',!!m.img);document.body.classList.toggle('img',!!m.img);if(m.img&&covI.getAttribute('src')!==m.img)covI.src=m.img;covI.alt=m.t;
+  cov.classList.toggle('has',!!m.img);document.body.classList.toggle('img',!!m.img);if(m.img&&covI.getAttribute('src')!==m.img){covI.src=m.img;$('#covB').style.setProperty('--img',`url(${m.img})`)}covI.alt=m.t;
   deck.style.setProperty('--c1',m.c[0]);deck.style.setProperty('--c2',m.c[1]);document.body.style.setProperty('--c1',m.c[0]);$('#lblT').textContent=m.t;$('#lblA').textContent=m.a||'etb';
 }
 paintDeck(MIXES[0]);$('#npS').textContent=MIXES.length===1?MIXES[0].g:MIXES.length+' миксов';if(MIXES.length<2)['#prev','#next'].forEach(q=>$(q).style.display='none');
@@ -350,75 +399,75 @@ function ui(){
   if(!playing)document.querySelectorAll('#eq i').forEach(e=>e.style.height='4px');
 }
 $('#pp').onclick=toggle;$('#heroPlay').onclick=toggle;$('#prev').onclick=()=>skip(-1);$('#next').onclick=()=>skip(1);
-addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.code==='Space'){e.preventDefault();toggle()}else if(e.key==='ArrowRight')skip(1);else if(e.key==='ArrowLeft')skip(-1);else if(e.key==='Escape')closePanel()});
+addEventListener('keydown',e=>{if(/INPUT|TEXTAREA/.test(e.target.tagName))return;if(e.code==='Space'){e.preventDefault();toggle()}else if(e.key==='ArrowRight')skip(1);else if(e.key==='ArrowLeft')skip(-1);else if(e.key==='Escape')closePanel()});
 if('mediaSession' in navigator){navigator.mediaSession.setActionHandler('play',()=>play(cur<0?0:cur));navigator.mediaSession.setActionHandler('pause',pause);navigator.mediaSession.setActionHandler('nexttrack',()=>skip(1));navigator.mediaSession.setActionHandler('previoustrack',()=>skip(-1))}
 
 const panel=$('#panel');let open=null,timers=[];
 const later=(fn,ms)=>timers.push(setTimeout(fn,ms));
 const X='<button class="ic x" id="px" aria-label="Закрыть"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
-function openPanel(p){
+function openPanel(p,auto){
   if(open===p){closePanel();return}
   timers.forEach(clearTimeout);timers=[];open=p;
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
-  ({mixes:mixesPanel,party:partyPanel,book:bookPanel})[p]();
+  ({room:()=>roomPanel(!auto),lineup:lineupPanel,contact:contactPanel})[p]();
   $('#px').onclick=closePanel;
   document.body.classList.add('pop');history.replaceState(null,'','#'+p);
 }
 function closePanel(){open=null;timers.forEach(clearTimeout);timers=[];document.body.classList.remove('pop');document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('on'));history.replaceState(null,'',location.pathname)}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openPanel(b.dataset.p));
 
-/* --- mixes --- */
-function mixesPanel(){
-  panel.innerHTML=`<div class="ph">${X}<h2>Миксы</h2></div>
-    <div class="pb"><div class="mixes">${MIXES.map((m,i)=>`<button class="mix" data-i="${i}"><div class="art" style="background:${m.img?`linear-gradient(180deg,rgba(8,9,14,.15) 0%,rgba(8,9,14,.35) 45%,rgba(8,9,14,.92) 100%),url(${m.img}) center/cover`:`radial-gradient(circle at ${30+i*9}% ${70-i*7}%,${m.c[0]},transparent 60%),radial-gradient(circle at ${75-i*6}% ${25+i*8}%,${m.c[1]},transparent 62%),conic-gradient(from ${i*60}deg at 50% 50%,${m.c[1]},#0d0d12,${m.c[0]},#0d0d12,${m.c[1]})`}"></div><span class="n">${String(i+1).padStart(2,'0')}</span><span class="pl"></span><b>${m.t}</b><small>${m.a?m.a+' · ':''}${m.g} · ${m.bpm}${m.dur?' · '+Math.round(m.dur/60)+' мин':''}${m.mc?' · Mixcloud':''}</small></button>`).join('')}</div></div>`;
-  panel.querySelectorAll('.mix').forEach(b=>b.onclick=()=>play(+b.dataset.i));
-  ui();
-}
-
-/* --- online party --- */
+/* --- эфир: лайн-ап (время Бишкека) --- */
 const BISH=6*3600e3; // Bishkek: UTC+6 all year
-function partyState(){
-  const now=new Date(Date.now()+BISH),d=now.getUTCDay(),mins=now.getUTCHours()*60+now.getUTCMinutes();
-  const start=PARTY.hour*60,len=PARTY.dur*60;
-  const since=((d-PARTY.day+7)%7)*1440+mins-start;
-  if(since>=0&&since<len)return {live:true,left:(len-since)*60};
-  let until=((PARTY.day-d+7)%7)*1440+start-mins;if(until<=0)until+=7*1440;
-  return {live:false,until:until*60-now.getUTCSeconds()};
-}
+const DAYS=['','Пн','Вт','Ср','Чт','Пт','Сб','Вс'],WEEK=10080;
+const hm=s=>{const [h,m]=s.split(':');return h*60+ +m};
+function nowWk(){const n=new Date(Date.now()+BISH);return ((n.getUTCDay()+6)%7)*1440+n.getUTCHours()*60+n.getUTCMinutes()+n.getUTCSeconds()/60}
+// слоты недели по порядку: сначала тот, что идёт, потом ближайшие
+function slots(){const w=nowWk();return LINEUP.map(s=>{const st=(s.day-1)*1440+hm(s.from),len=((hm(s.to)-hm(s.from)+1440)%1440)||1440,since=(w-st+WEEK)%WEEK;
+  return {...s,live:since<len,left:(len-since)*60,until:((st-w+WEEK)%WEEK)*60}}).sort((a,b)=>(a.live?-1:a.until)-(b.live?-1:b.until))}
+function onAir(){const s=slots(),live=s.find(x=>x.live);return {now:live||ROTATION,live:!!live,next:s.find(x=>!x.live)}}
+const whenS=s=>{const dd=Math.floor(((nowWk()%1440)*60+s.until)/86400);return (dd===0?'сегодня':dd===1?'завтра':DAYS[s.day])+' '+s.from};
+
+/* --- комната: эфир + чат --- */
 const FANS=[['Айбек','Бишкек','#ffb86b'],['Нурай','Каракол','#ff8fb1'],['dana.kz','Алматы','#9fd8ff'],['Тимур','Ош','#b9f27c'],['Салтанат','Бишкек','#d1a8ff'],['Эрлан','Чолпон-Ата','#ffd27a'],['aru','Ташкент','#7fe0d0'],['Мирлан','Москва','#ffa98a'],['Бекжан','Токмок','#a8c8ff'],['Айпери','Бишкек','#ffb3d9']];
-const LINES=['🔥🔥🔥','этот дроп 😮‍💨','привет из {c}!','etb, давай погромче','под закат идеально','кто в пятницу на тусовке?','бас качает','сохранила сет','🙌🙌','каждый вечер тут','etb, когда в {c} приедешь?','музыка для дороги на Иссык-Куль','включила на работе 🤫','вайб 💜'];
-const ETB=['Рад всех видеть. Дальше — немного глубже.','Привет, {c}! Этот переход для вас.','Танцуем до утра.','Следующий трек — заказ из чата.','Пятница, 22:00. Не пропустите.','Живьём — через «Букинг».'];
-let listeners=280+Math.random()*120|0;
-function partyPanel(){
-  const st=partyState();
-  panel.innerHTML=`<div class="ph">${X}<h2>Тусовка</h2><p><span id="lc">${listeners}</span> слушают</p>${st.live?`<p style="color:var(--acc)">Пятница идёт · ещё ${clock(st.left)}</p>`:`<p style="margin-top:10px;color:#fff">Пятница, 22:00</p><div class="cd" id="cd"></div>`}</div>
+const LINES=['{c} на связи 👋','{who} 🔥','что за трек сейчас?','сохранила сет','под закат идеально','кто будет {next}?','включила на работе 🤫','вайб 💜'];
+const LIVE_LINES=['🔥🔥🔥','этот дроп 😮‍💨','{who}, давай ещё','{c} на связи 🙌','🙌🙌','бас качает'];
+let listeners=0;
+function roomPanel(start){
+  const A=onAir(),N=A.now,nx=A.next;
+  listeners=listeners||(A.live?260:40)+Math.random()*60|0;
+  panel.innerHTML=`<div class="ph">${X}<h2>Эфир</h2><p><span id="lc">${listeners}</span> слушают</p>
+    <div class="now"><div><span>${A.live?'live':'сейчас'}</span><b>${esc(N.who)} — ${esc(N.what)}${A.live&&N.tag?` <i class="tag">${N.tag}</i>`:''}</b></div>
+    ${nx?`<div><span>дальше</span><p>${whenS(nx)} · ${esc(nx.who)}${nx.tag?` <i class="tag">${nx.tag}</i>`:''}</p></div>`:''}</div></div>
     <div class="pb" id="pb"><div class="chat" id="chat"></div></div>
     <div class="pf"><div class="reacts" id="rx">${['🔥','💜','🙌','🎧','😮‍💨'].map(e=>`<button>${e}</button>`).join('')}</div>
-      <form class="say" id="say"><input id="sin" placeholder="Сообщение или трек" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
-  if(!playing)play(cur<0?1:cur);
+      <form class="say" id="say"><input id="sin" placeholder="Сообщение" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
+  if(start&&!playing)play(N.mix||0);
   const chat=$('#chat'),pb=$('#pb');
-  const add=html=>{chat.insertAdjacentHTML('beforeend',html);while(chat.children.length>60)chat.firstElementChild.remove();pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
-  const fan=()=>{const [n,c,co]=FANS[Math.random()*FANS.length|0];add(`<div class="m" style="--c:${co}"><b>${n}</b>${esc(LINES[Math.random()*LINES.length|0].replace('{c}',c))}</div>`);return c};
+  const add=html=>{chat.insertAdjacentHTML('beforeend',html);while(chat.children.length>40)chat.firstElementChild.remove();pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
+  const fan=()=>{const [n,c,co]=FANS[Math.random()*FANS.length|0],L=A.live?LIVE_LINES:LINES;
+    add(`<div class="m" style="--c:${co}"><b>${n}</b>${esc(L[Math.random()*L.length|0].replace('{c}',c).replace('{who}',N.who).replace('{next}',nx?whenS(nx):'в пятницу'))}</div>`)};
   const etb=t=>add(`<div class="m etb"><b>etb</b>${esc(t)}</div>`);
-  for(let i=0;i<5;i++)fan();
-  const loop=()=>{if(open!=='party')return;const c=fan();if(Math.random()<.18)later(()=>open==='party'&&etb(ETB[Math.random()*ETB.length|0].replace('{c}',c)),1400);
-    listeners=Math.max(150,listeners+(Math.random()*9-4|0));$('#lc').textContent=listeners;$('#lis').textContent=`live · ${listeners}`;
-    if(Math.random()<.35)flyFrom(null,['🔥','💜','🙌'][Math.random()*3|0]);
-    later(loop,1400+Math.random()*2400)};
-  later(loop,900);
-  const tick=()=>{if(open!=='party'||!$('#cd'))return;const s=partyState();if(s.live)return;const u=s.until,d=u/86400|0,h=u%86400/3600|0,m=u%3600/60|0,ss=u%60|0;
-    $('#cd').innerHTML=[[d,'дн'],[h,'ч'],[m,'мин'],[ss,'сек']].map(([v,l])=>`<div><b>${String(v).padStart(2,'0')}</b><span>${l}</span></div>`).join('');later(tick,1000)};
-  tick();
+  for(let i=0;i<3;i++)fan();
+  add(`<div class="m sys">вы в эфире · ${esc(N.who)} — ${esc(N.what)}</div>`);
+  // чат живой, но спокойный: вне live — редкие сообщения, раз в несколько минут напоминание о следующем слоте
+  let n=0;
+  const loop=()=>{if(open!=='room')return;n++;
+    if(nx&&n%8===0)add(`<div class="m sys">${whenS(nx)} · ${esc(nx.who)} — ${esc(nx.what)}${nx.tag?' · '+nx.tag:''}</div>`);else fan();
+    listeners=Math.max(A.live?150:20,listeners+(Math.random()*5-2|0));$('#lc').textContent=listeners;$('#lis').textContent=`${A.live?'live':'эфир'} · ${listeners}`;
+    if(A.live&&Math.random()<.3)flyFrom(null,['🔥','💜','🙌'][Math.random()*3|0]);
+    later(loop,A.live?5000+Math.random()*6000:15000+Math.random()*15000)};
+  later(loop,A.live?4000:12000);
   $('#rx').querySelectorAll('button').forEach(b=>b.onclick=()=>flyFrom(b,b.textContent));
   $('#say').onsubmit=e=>{e.preventDefault();const v=$('#sin').value.trim();if(!v)return;$('#sin').value='';
     add(`<div class="m me"><b>вы</b>${esc(v)}</div>`);
     const low=v.toLowerCase();
     later(()=>{
-      if(open!=='party')return;
-      if(/трек|постав|включи|заказ|песн/.test(low)){etb('Принял заказ 🎧 Сведу его в следующий переход.');later(()=>{if(open!=='party'||MIXES.length<2)return;skip(1);add(`<div class="m sys">etb сменил сет · ${MIXES[cur].t}</div>`)},3500)}
-      else if(/привет|салам|хай|hello|hi\b/.test(low))etb('Привет! Рад, что ты с нами. Откуда слушаешь?');
-      else if(/при[её]д|выступ|концерт|живь|брон|букинг/.test(low))etb('Живьём — через «Букинг», отвечу за час.');
-      else etb(['Слышу тебя 🙌','Держи следующий дроп — для тебя.','Лучший чат в городе.','💜'][Math.random()*4|0]);
+      if(open!=='room')return;
+      if(/кто|когда|лайн|распис|следующ/.test(low))etb(nx?`Дальше — ${whenS(nx)}, ${nx.who}${nx.tag?' ('+nx.tag+')':''}. Всё расписание — в «Лайн-ап».`:'Расписание — в «Лайн-ап».');
+      else if(/трек|постав|включи|заказ|песн/.test(low))etb('Принял 🎧 Если будет в сете — услышишь.');
+      else if(/привет|салам|хай|hello|hi\b/.test(low))etb('Привет! Откуда слушаешь?');
+      else if(/при[её]д|выступ|концерт|живь|брон|букинг/.test(low))etb('Напиши в «Связь» — отвечу лично.');
+      else etb(['Слышу тебя 🙌','💜','Спасибо, что с нами.'][Math.random()*3|0]);
     },1200+Math.random()*800);
   };
 }
@@ -428,36 +477,39 @@ function flyFrom(btn,e){
   document.body.append(el);setTimeout(()=>el.remove(),2300);
 }
 
-/* --- booking --- */
-let reqNo=1040;
-function bookPanel(){
-  const sel={f:'Клуб',c:'Бишкек'};
-  const opt=(k,arr)=>`<div class="opts" data-k="${k}">${arr.map(v=>`<button type="button" class="${sel[k]===v?'on':''}">${v}</button>`).join('')}</div>`;
-  const min=new Date(Date.now()+BISH+86400e3).toISOString().slice(0,10);
-  panel.innerHTML=`<div class="ph">${X}<h2>Букинг</h2></div>
+/* --- лайн-ап --- */
+function lineupPanel(){
+  const A=onAir();
+  panel.innerHTML=`<div class="ph">${X}<h2>Лайн-ап</h2><p>время Бишкека</p></div>
+    <div class="pb"><div class="lu">${slots().map(s=>`<div class="slot${s.live?' on':''}"><div class="d">${s.live?'сейчас':whenS(s).split(' ')[0]}<small>${s.from}–${s.to}</small></div><b>${esc(s.who)}${s.tag?` <i class="tag">${s.tag}</i>`:''}</b><p>${esc(s.what)}</p></div>`).join('')}
+      <div class="slot${A.live?'':' on'}"><div class="d">24/7<small>${A.live?'эфир':'сейчас'}</small></div><b>${esc(ROTATION.who)}</b><p>${esc(ROTATION.what)}</p></div></div></div>`;
+  panel.querySelectorAll('.slot.on').forEach(s=>{s.style.cursor='pointer';s.onclick=()=>openPanel('room')});
+}
+
+/* --- связь --- */
+function contactPanel(){
+  panel.innerHTML=`<div class="ph">${X}<h2>Связь</h2></div>
     <div class="pb"><form id="bf">
-      <div class="lbl">Формат</div>${opt('f',['Клуб','Частное','Корпоратив','Фестиваль','Свадьба'])}
-      <div class="lbl">Город</div>${opt('c',['Бишкек','Иссык-Куль','Алматы','Ташкент','Другой'])}
-      <div class="lbl">Дата</div><input class="field" type="date" id="bd" min="${min}" required>
-      <div class="lbl">Контакт</div><input class="field" id="bc" placeholder="Telegram или телефон" required autocomplete="off">
+      <div class="lbl">Город</div><input class="field" id="bcity" placeholder="Ваш город" required autocomplete="off" maxlength="60">
+      <div class="lbl">Вопрос</div><textarea class="field" id="bq" placeholder="Ваш вопрос" required maxlength="600"></textarea>
+      <div class="lbl">Контакт</div><input class="field" id="bc" placeholder="Telegram или телефон" required autocomplete="off" maxlength="60">
       <button class="btn solid send" id="bs">Отправить</button>
     </form><div class="bub" id="bub"></div></div>`;
-  panel.querySelectorAll('.opts').forEach(o=>o.querySelectorAll('button').forEach(b=>b.onclick=()=>{sel[o.dataset.k]=b.textContent;o.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))}));
   $('#bf').onsubmit=async e=>{e.preventDefault();$('#bs').disabled=true;
-    const d=new Date($('#bd').value+'T12:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}),bub=$('#bub'),pb=panel.querySelector('.pb');
+    const bub=$('#bub'),pb=panel.querySelector('.pb');
     const say=async(t,cls='a')=>{if(cls==='a'){bub.insertAdjacentHTML('beforeend','<div class="a typing"><i></i><i></i><i></i></div>');pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'});await sleep(1100);bub.lastElementChild.remove()}
       bub.insertAdjacentHTML('beforeend',`<div class="${cls}">${t}</div>`);pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
-    await say(esc(`${sel.f}, ${sel.c}, ${d}`),'u');
-    await say(`${d} — свободно ✓ Сколько гостей?<div class="opts" style="margin-top:10px" id="gq"><button>до 100</button><button>100–500</button><button>500+</button></div>`);
-    $('#gq').querySelectorAll('button').forEach(b=>b.onclick=async()=>{$('#gq').remove();await say(esc(b.textContent),'u');
-      await say(`Заявка №E-${++reqNo} ✓ Райдер и гонорар пришлю на ${esc($('#bc').value)} в течение часа.`)});
+    await say(esc(`${$('#bcity').value.trim()}: ${$('#bq').value.trim()}`),'u');
+    await say(`Получил ✓ Отвечу лично на ${esc($('#bc').value.trim())}.`);
   };
 }
 
 /* boot */
 ui();
-const h=location.hash.slice(1);if(['mixes','party','book'].includes(h))openPanel(h);
-$('#lis').textContent=`live · ${listeners}`;
+// сразу в комнату; старые ссылки #party/#book/#mixes ведут куда надо
+const h=({party:'room',mixes:'room',book:'contact'})[location.hash.slice(1)]||location.hash.slice(1);
+openPanel(['room','lineup','contact'].includes(h)?h:'room',true);
+$('#lis').textContent=`${onAir().live?'live':'эфир'} · ${listeners}`;$('#npT').textContent=(MIXES[0].a?MIXES[0].a+' — ':'')+MIXES[0].t;
 window.__w={play,pause,openPanel,closePanel,get cur(){return cur},get playing(){return playing}};
 </script>
 </body>
