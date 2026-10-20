@@ -60,6 +60,7 @@ body.pop .hero{opacity:0;transform:translateY(20px)}
 @media (min-width:1100px){body.pop .hero{opacity:1;transform:none;max-width:calc(100vw - var(--pw) - 90px)}body.pop .hero .cta{display:none}}
 
 /* player */
+#mcf{position:fixed;left:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none}
 .prog{position:absolute;left:64px;right:96px;bottom:7px;height:3px;border-radius:2px;background:rgba(255,255,255,.12);cursor:pointer;display:none}.prog::before{content:'';position:absolute;inset:-8px 0}.prog i{display:block;height:100%;width:0;border-radius:2px;background:var(--c1,#fff)}body.file .prog{display:block}
 .player{position:fixed;left:22px;right:22px;bottom:22px;bottom:max(22px,env(safe-area-inset-bottom));z-index:12;height:68px;border-radius:99px;display:flex;align-items:center;gap:14px;padding:0 10px 0 9px}
 .pp{width:50px;height:50px;border-radius:50%;background:#fff;color:#0a0a0c;display:grid;place-items:center;flex:none;transition:transform .2s}
@@ -186,7 +187,7 @@ body.pop .panel{opacity:1;transform:none;pointer-events:auto}
 
 <footer class="player glass">
   <button class="pp" id="pp" aria-label="Играть"></button>
-  <div class="np"><b id="npT">etb</b><small id="npS">7 миксов</small></div>
+  <div class="np"><b id="npT">etb</b><small id="npS">миксы</small></div>
   <div class="eq" id="eq"><i></i><i></i><i></i><i></i><i></i></div>
   <div class="tm" id="tm">0:00</div>
   <button class="ic" id="prev" aria-label="Предыдущий"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h2v12H3zM14 2v12L6 8z"/></svg></button>
@@ -205,7 +206,9 @@ const MOBILE=matchMedia('(max-width:760px)').matches;
    по параметрам ниже). Настоящие миксы подключим сюда же.
    ==================================================================== */
 const MIXES=[
-  // настоящий микс файлом: src + dur (сек); остальные сводит движок в браузере
+  // mc: микс с Mixcloud (ключ из ссылки) — играет через их плеер; img: обложка
+  // src + dur (сек): микс файлом; остальные сводит движок в браузере
+  {t:'ORBITA podcast-show 01',a:'naiq',g:'melodic house · deep techno',bpm:124,c:['#8fc4ff','#5b6cff'],mc:'/etbworld/orbita-podcast-show-mixed-by-naiq/',img:'mixes/orbita-01.jpg',dur:4527},
   {t:'Wings of a Butterfly',a:'naiq',g:'melodic techno · extended mix',bpm:126,c:['#9fd8ff','#b07cff'],src:'mixes/naiq-wings-of-a-butterfly-extended.mp3',dur:480},
   {t:'Issyk-Kul Sunset',g:'deep house',bpm:118,root:45,c:['#ff8a5b','#b48cff'],st:{hat:'off',bass:'deep',lead:'pluck',perc:0,swing:.08}},
   {t:'Bishkek Night Drive',g:'melodic techno',bpm:124,root:43,c:['#5b6cff','#ff5fa2'],st:{hat:'16',bass:'roll',lead:'arp',perc:0,swing:0}},
@@ -279,19 +282,36 @@ function schedule(){
     step++;nextT+=sp;
   }
 }
+/* Mixcloud: their widget plays the audio, our player drives it through the Widget API */
+let mcW=null,mcKey='',mcReady=null,mcPos=0,mcDur=0;
+const mcApi=()=>window.Mixcloud?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://widget.mixcloud.com/media/js/widgetApi.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+function mcLoad(m){
+  if(mcKey===m.mc)return mcReady;
+  mcKey=m.mc;mcPos=0;mcDur=m.dur;
+  let f=$('#mcf');if(!f){f=document.createElement('iframe');f.id='mcf';f.allow='autoplay';f.title='Mixcloud';document.body.appendChild(f)}
+  f.src='https://player-widget.mixcloud.com/widget/iframe/?hide_cover=1&mini=1&hide_artwork=1&autoplay=1&feed='+encodeURIComponent(m.mc);
+  return mcReady=mcApi().then(()=>{mcW=Mixcloud.PlayerWidget(f);return mcW.ready}).then(()=>{
+    mcW.events.progress.on((p,d)=>{mcPos=p;if(d)mcDur=d});
+    mcW.events.ended.on(()=>skip(1));
+    mcW.events.pause.on(()=>{if(playing&&MIXES[cur].mc){playing=false;ui()}});
+    mcW.events.play.on(()=>{if(!playing&&MIXES[cur].mc){playing=true;ui()}});
+  });
+}
 function play(i){
   initAudio();ac.resume();
   if(i===cur&&playing){pause();return}
-  if(i!==cur){cur=i;step=0;elapsed=0;el.pause();if(MIXES[i].src){el.src=MIXES[i].src}}
+  if(i!==cur){if(cur>=0&&MIXES[cur].mc&&mcW)mcW.pause();cur=i;step=0;elapsed=0;el.pause();if(MIXES[i].src){el.src=MIXES[i].src}}
   const m=MIXES[cur];playing=true;clearInterval(timer);
-  if(m.src)el.play();
+  if(m.mc)mcLoad(m).then(()=>mcW.play());
+  else if(m.src)el.play();
   else{nextT=ac.currentTime+.08;t0=ac.currentTime-elapsed;timer=setInterval(schedule,25)}
-  document.body.classList.toggle('file',!!m.src);
+  document.body.classList.toggle('file',!!(m.src||m.mc));
   ui();
   if('mediaSession' in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:m.t,artist:m.a||'etb',album:m.g});
 }
-function pause(){if(!playing)return;playing=false;if(MIXES[cur].src)el.pause();else{elapsed=ac.currentTime-t0;clearInterval(timer)}ui()}
-$('#prog').onclick=e=>{const m=MIXES[cur];if(!m||!m.src)return;const r=e.currentTarget.getBoundingClientRect();el.currentTime=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*(el.duration||m.dur)};
+function pause(){if(!playing)return;playing=false;const m=MIXES[cur];if(m.mc){if(mcW)mcW.pause()}else if(m.src)el.pause();else{elapsed=ac.currentTime-t0;clearInterval(timer)}ui()}
+$('#prog').onclick=e=>{const m=MIXES[cur];if(!m||!(m.src||m.mc))return;const r=e.currentTarget.getBoundingClientRect(),k=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
+  if(m.mc){if(mcW)mcW.seek(k*mcDur)}else el.currentTime=k*(el.duration||m.dur)};
 const toggle=()=>playing?pause():play(cur<0?0:cur);
 const skip=d=>play(((cur<0?0:cur)+d+MIXES.length)%MIXES.length);
 function bands(){
@@ -307,9 +327,15 @@ function frame(t){
   const dt=Math.min(.05,(t-last)/1000||0);last=t;
   spd+=((playing?200:0)-spd)*Math.min(1,dt*(playing?1.6:2.4)); // 33⅓ rpm ≈ 200°/s; spins up and slows down like a real deck
   ang=(ang+spd*dt)%360;disc.style.transform=`rotate(${ang}deg)`;
-  const b=playing?bands():[0,0,0];lv+=(b[0]-lv)*(b[0]>lv?.5:.1);
+  const M=cur>=0?MIXES[cur]:null;
+  let b=playing?bands():[0,0,0];
+  // Mixcloud audio is cross-origin (no analyser): pulse the deck on the beat instead
+  if(playing&&M&&M.mc){const ph=(mcPos*M.bpm/60)%1,k=Math.pow(1-ph,6);b=[.18+.32*k,.2,.1];if(fdata)for(let i=0;i<fdata.length;i++)fdata[i]=(110+120*k*Math.random())|0}
+  lv+=(b[0]-lv)*(b[0]>lv?.5:.1);
   glow.style.opacity=(.14+lv*.5).toFixed(3);deck.style.scale=(1+lv*.012).toFixed(4);
-  if(playing&&fdata){document.querySelectorAll('#eq i').forEach((e,i)=>e.style.height=(4+fdata[3+i*14]/255*18)+'px');const m=MIXES[cur];if(m.src){const d=el.duration||m.dur;$('#tm').textContent=clock(el.currentTime)+' / '+clock(d);$('#prog i').style.width=(el.currentTime/d*100)+'%'}else $('#tm').textContent=clock(ac.currentTime-t0)}
+  if(playing&&fdata){document.querySelectorAll('#eq i').forEach((e,i)=>e.style.height=(4+fdata[3+i*14]/255*18)+'px');const m=M;
+    if(m.mc){$('#tm').textContent=clock(mcPos)+' / '+clock(mcDur);$('#prog i').style.width=(mcPos/mcDur*100)+'%'}
+    else if(m.src){const d=el.duration||m.dur;$('#tm').textContent=clock(el.currentTime)+' / '+clock(d);$('#prog i').style.width=(el.currentTime/d*100)+'%'}else $('#tm').textContent=clock(ac.currentTime-t0)}
   requestAnimationFrame(frame);
 }
 const clock=s=>{s=Math.max(0,s|0);const h=s/3600|0,m=(s%3600)/60|0,ss=String(s%60).padStart(2,'0');return h?`${h}:${String(m).padStart(2,'0')}:${ss}`:`${m}:${ss}`};
@@ -318,7 +344,7 @@ function paintDeck(m){
   deck.style.setProperty('--lab',`radial-gradient(circle at 30% 25%,${m.c[0]},${m.c[1]} 75%)`);
   deck.style.setProperty('--c1',m.c[0]);deck.style.setProperty('--c2',m.c[1]);document.body.style.setProperty('--c1',m.c[0]);$('#lblT').textContent=m.t;$('#lblA').textContent=m.a||'etb';
 }
-paintDeck(MIXES[0]);
+paintDeck(MIXES[0]);$('#npS').textContent=MIXES.length+' миксов';
 
 /* ================= UI ================= */
 const PLAY='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5v11l9-5.5z"/></svg>',PAUSE='<svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor"><path d="M3 1.5h3v11H3zM8 1.5h3v11H8z"/></svg>';
@@ -354,7 +380,7 @@ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openPanel(b.datas
 /* --- mixes --- */
 function mixesPanel(){
   panel.innerHTML=`<div class="ph">${X}<h2>Миксы</h2></div>
-    <div class="pb"><div class="mixes">${MIXES.map((m,i)=>`<button class="mix" data-i="${i}"><div class="art" style="background:radial-gradient(circle at ${30+i*9}% ${70-i*7}%,${m.c[0]},transparent 60%),radial-gradient(circle at ${75-i*6}% ${25+i*8}%,${m.c[1]},transparent 62%),conic-gradient(from ${i*60}deg at 50% 50%,${m.c[1]},#0d0d12,${m.c[0]},#0d0d12,${m.c[1]})"></div><span class="n">${String(i+1).padStart(2,'0')}</span><span class="pl"></span><b>${m.t}</b><small>${m.a?m.a+' · ':''}${m.g} · ${m.bpm}${m.dur?' · '+Math.round(m.dur/60)+' мин':''}</small></button>`).join('')}</div></div>`;
+    <div class="pb"><div class="mixes">${MIXES.map((m,i)=>`<button class="mix" data-i="${i}"><div class="art" style="background:${m.img?`linear-gradient(180deg,rgba(8,9,14,.15) 0%,rgba(8,9,14,.35) 45%,rgba(8,9,14,.92) 100%),url(${m.img}) center/cover`:`radial-gradient(circle at ${30+i*9}% ${70-i*7}%,${m.c[0]},transparent 60%),radial-gradient(circle at ${75-i*6}% ${25+i*8}%,${m.c[1]},transparent 62%),conic-gradient(from ${i*60}deg at 50% 50%,${m.c[1]},#0d0d12,${m.c[0]},#0d0d12,${m.c[1]})`}"></div><span class="n">${String(i+1).padStart(2,'0')}</span><span class="pl"></span><b>${m.t}</b><small>${m.a?m.a+' · ':''}${m.g} · ${m.bpm}${m.dur?' · '+Math.round(m.dur/60)+' мин':''}${m.mc?' · Mixcloud':''}</small></button>`).join('')}</div></div>`;
   panel.querySelectorAll('.mix').forEach(b=>b.onclick=()=>play(+b.dataset.i));
   ui();
 }
