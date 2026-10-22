@@ -188,9 +188,9 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
   .hero{left:16px;bottom:100px}
     .player{left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));height:64px}
   .player .tm,.player .eq{display:none}
-  .panel{left:0;right:0;top:auto;bottom:0;width:auto;height:66dvh;border-radius:26px 26px 0 0;transform:translateY(40px);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .panel{left:0;right:0;top:var(--hb,118px);bottom:0;width:auto;height:auto;border-radius:26px 26px 0 0;transform:translateY(40px);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
   .panel .pf{padding-bottom:6px}
-  .ph{padding:18px 18px 0}.pb{padding:12px 18px 16px}
+  .ph{padding:16px 18px 0}.ph h2{font-size:22px}.pb{padding:12px 18px 16px}
   .cd{gap:6px;margin-top:8px}.cd div{padding:6px 8px;border-radius:12px;display:flex;align-items:baseline;gap:4px}.cd b{font-size:15px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
@@ -655,6 +655,9 @@ function contactPanel(){
   };
 }
 
+/* мобилка: панель от низа меню до низа экрана */
+const fitPanel=()=>document.documentElement.style.setProperty('--hb',Math.round(document.querySelector('.top').getBoundingClientRect().bottom+10)+'px');
+fitPanel();addEventListener('resize',fitPanel);addEventListener('orientationchange',()=>setTimeout(fitPanel,300));
 /* boot */
 ui();
 // сразу в комнату; старые ссылки #party/#book/#mixes ведут куда надо
