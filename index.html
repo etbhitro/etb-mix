@@ -83,6 +83,14 @@ body.pop .panel{opacity:1;transform:none;pointer-events:auto}
 .ph h2{font:600 24px Unbounded,sans-serif;letter-spacing:-.04em;text-transform:uppercase}
 .ph p{color:var(--mute);font-size:14px;margin-top:4px}
 .ph .x{position:absolute;right:14px;top:14px}
+.ph{position:relative}
+#px svg{transition:transform .3s var(--ease)}
+.panel.room #px svg{transform:rotate(180deg)}
+.panel.min{bottom:auto;height:auto;opacity:1;transform:none;pointer-events:auto}
+.panel.min .now,.panel.min .pb,.panel.min .pf{display:none}
+.panel.min .ph{padding-bottom:18px;cursor:pointer}
+.panel.min #px svg{transform:none}
+@media (min-width:761px){#nav button[data-p=room]{display:none}}
 .pb{flex:1;min-height:0;overflow:auto;padding:16px 22px 22px;scrollbar-width:none}
 .pb::-webkit-scrollbar{display:none}
 
@@ -190,7 +198,11 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
   .player .tm,.player .eq{display:none}
   .panel{left:0;right:0;top:var(--hb,118px);bottom:0;width:auto;height:auto;border-radius:26px 26px 0 0;transform:translateY(40px);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
   .panel .pf{padding-bottom:6px}
-  .ph{padding:16px 18px 0}.ph h2{font-size:22px}.pb{padding:12px 18px 16px}
+  .ph{padding:16px 18px 0}.ph h2{font-size:22px}
+  .panel.room #px svg{transform:none}
+  .panel.min{top:auto;bottom:calc(86px + env(safe-area-inset-bottom));left:12px;right:12px;border-radius:22px;padding-bottom:0}
+  .panel.min .ph{padding:12px 16px}.panel.min .ph h2{font-size:18px}.panel.min .ph .x{top:8px;right:8px}
+  .panel.min #px svg{transform:rotate(180deg)}.pb{padding:12px 18px 16px}
   .cd{gap:6px;margin-top:8px}.cd div{padding:6px 8px;border-radius:12px;display:flex;align-items:baseline;gap:4px}.cd b{font-size:15px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
@@ -203,7 +215,7 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
 <header class="top">
   <a class="logo" href="#"><b>etb<i>.</i>mix</b></a>
   <nav class="nav glass" id="nav">
-    <button data-p="room">Эфир</button>
+    <button data-p="room">Чат</button>
     <button data-p="lineup">Лайн-ап</button>
     <button data-p="contact">Связь</button>
   </nav>
@@ -512,16 +524,25 @@ if('mediaSession' in navigator){navigator.mediaSession.setActionHandler('play',(
 
 const panel=$('#panel');let open=null,timers=[];
 const later=(fn,ms)=>timers.push(setTimeout(fn,ms));
+const MINB='<button class="ic x" id="px" aria-label="Свернуть"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l5 5 5-5"/></svg></button>';
 const X='<button class="ic x" id="px" aria-label="Закрыть"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6"><path d="M2 2l10 10M12 2L2 12"/></svg></button>';
+let chatMin=false;
+function setMin(v){chatMin=v;panel.classList.toggle('min',v&&open==='room');document.body.classList.toggle('pop',!(v&&open==='room'));
+  const b=$('#px');if(b)b.setAttribute('aria-label',v?'Развернуть':'Свернуть');
+  if(!v&&open==='room'){const pb=$('#pb');if(pb)pb.scrollTo({top:pb.scrollHeight})}}
 function openPanel(p,auto){
   if(open===p){closePanel();return}
   timers.forEach(clearTimeout);timers=[];open=p;
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   ({room:()=>roomPanel(!auto),lineup:lineupPanel,contact:contactPanel})[p]();
-  $('#px').onclick=closePanel;
-  document.body.classList.add('pop');history.replaceState(null,'','#'+p);
+  panel.classList.toggle('room',p==='room');
+  $('#px').onclick=e=>{e.stopPropagation();closePanel()};
+  panel.querySelector('.ph').onclick=()=>{if(chatMin&&open==='room')setMin(false)};
+  history.replaceState(null,'','#'+p);
+  setMin(p==='room'?chatMin:false);
 }
-function closePanel(){open=null;timers.forEach(clearTimeout);timers=[];document.body.classList.remove('pop');document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('on'));history.replaceState(null,'',location.pathname)}
+// чат не закрывается — сворачивается; лайн-ап и связь при закрытии возвращают в чат
+function closePanel(){if(open==='room'){setMin(!chatMin);return}chatMin=false;openPanel('room',true)}
 document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>openPanel(b.dataset.p));
 
 /* --- эфир: лайн-ап (время Бишкека) --- */
@@ -574,7 +595,7 @@ function regSheet(done){
 function roomPanel(start){
   const A=onAir(),N=A.now,nx=A.next;
   listeners=listeners||(A.live?260:40)+Math.random()*60|0;
-  panel.innerHTML=`<div class="ph">${X}<h2>Эфир</h2><p><span id="lc">${listeners}</span> слушают</p>
+  panel.innerHTML=`<div class="ph">${MINB}<h2>Чат</h2><p><span id="lc">${listeners}</span> слушают</p>
     <div class="now"><div><span>${A.live?'live':'сейчас'}</span><b>${esc(N.who)} — ${esc(N.what)}${A.live&&N.tag?` <i class="tag">${N.tag}</i>`:''}</b></div>
     ${nx?`<div><span>дальше</span><p>${whenS(nx)} · ${esc(nx.who)}${nx.tag?` <i class="tag">${nx.tag}</i>`:''}</p></div>`:''}</div></div>
     <div class="pb" id="pb"><div class="chat" id="chat"></div></div>
@@ -641,7 +662,7 @@ function lineupPanel(){
 function contactPanel(){
   panel.innerHTML=`<div class="ph">${X}<h2>Связь</h2></div>
     <div class="pb"><form id="bf">
-      <div class="lbl">Город</div><input class="field" id="bcity" placeholder="Ваш город" required autocomplete="off" maxlength="60">
+      <div class="lbl">Имя</div><input class="field" id="bcity" placeholder="Ваше имя" required autocomplete="name" maxlength="60" value="${esc(ME&&ME.name||'')}">
       <div class="lbl">Вопрос</div><textarea class="field" id="bq" placeholder="Ваш вопрос" required maxlength="600"></textarea>
       <div class="lbl">Контакт</div><input class="field" id="bc" placeholder="Telegram или телефон" required autocomplete="off" maxlength="60">
       <button class="btn solid send" id="bs">Отправить</button>
