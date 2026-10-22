@@ -540,6 +540,15 @@ const FANS=[['Айбек','Бишкек','#ffb86b'],['Нурай','Карако�
 const LINES=['{c} на связи 👋','{who} 🔥','что за трек сейчас?','сохранила сет','под закат идеально','кто будет {next}?','включила на работе 🤫','вайб 💜'];
 const LIVE_LINES=['🔥🔥🔥','этот дроп 😮‍💨','{who}, давай ещё','{c} на связи 🙌','🙌🙌','бас качает'];
 let listeners=0;
+/* --- живой чат: Supabase (таблица mix_chat, realtime) --- */
+const SB_URL='https://wkcuunsiproqrhhnwdhf.supabase.co',SB_KEY='sb_publishable_zz2BxFpjdwW8NGrQlYCdAw_BX8z8Sgj';
+let sb=null,chatSink=null;const pendingMine=[];
+const sbLib=()=>window.supabase?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';s.onload=ok;s.onerror=no;document.head.appendChild(s)});
+const sbReady=sbLib().then(()=>{sb=supabase.createClient(SB_URL,SB_KEY);
+  sb.channel('mix_chat').on('postgres_changes',{event:'INSERT',schema:'public',table:'mix_chat'},({new:r})=>{
+    const i=pendingMine.findIndex(x=>x.name===r.name&&x.body===r.body);if(i>=0){pendingMine.splice(i,1);return}
+    chatSink&&chatSink(r)}).subscribe()}).catch(()=>{});
+const realMsg=r=>`<div class="m" style="--c:#ffd27a">${avatar(r.name,'#ffd27a',r.avatar)}<b>${esc(r.name)}</b>${esc(r.body)}</div>`;
 /* --- профиль слушателя: имя + фото, хранится в браузере --- */
 let ME=null;try{ME=JSON.parse(localStorage.getItem('etb.me'))}catch(e){}
 const saveMe=()=>{try{localStorage.setItem('etb.me',JSON.stringify(ME))}catch(e){}};
@@ -550,7 +559,7 @@ function shrink(file){return new Promise((ok,no)=>{const r=new FileReader();r.on
 function regSheet(done){
   if(panel.querySelector('.reg'))return;
   let img=ME&&ME.img||'';
-  panel.insertAdjacentHTML('beforeend',`<form class="reg" id="reg"><h3>Кто ты?</h3><p>фото и имя — чтобы писать в чат</p>
+  panel.insertAdjacentHTML('beforeend',`<form class="reg" id="reg">
     <label>${img?`<img src="${img}">`:'+ фото'}<input type="file" accept="image/*" id="rf" hidden></label>
     <input class="field" id="rn" placeholder="Имя" maxlength="24" autocomplete="nickname" value="${esc(ME&&ME.name||'')}">
     <button class="btn solid" id="rb">Готово</button><button type="button" class="cancel" id="rc">не сейчас</button></form>`);
@@ -579,6 +588,10 @@ function roomPanel(start){
   const etb=t=>add(`<div class="m etb"><b>etb</b>${esc(t)}</div>`);
   for(let i=0;i<3;i++)fan();
   add(`<div class="m sys">вы в эфире · ${esc(N.who)} — ${esc(N.what)}</div>`);
+  chatSink=r=>{if(open==='room')add(realMsg(r))};
+  sbReady.then(()=>sb&&sb.from('mix_chat').select('name,avatar,body').order('created_at',{ascending:false}).limit(20)).then(res=>{
+    if(!res||res.error||open!=='room')return;const rows=res.data.reverse();if(!rows.length)return;
+    const sys=chat.querySelector('.m.sys:last-child');const h=rows.map(realMsg).join('');sys?sys.insertAdjacentHTML('beforebegin',h):chat.insertAdjacentHTML('beforeend',h);pb.scrollTo({top:pb.scrollHeight})});
   // чат живой, но спокойный: вне live — редкие сообщения, раз в несколько минут напоминание о следующем слоте
   let n=0;
   const loop=()=>{if(open!=='room')return;n++;
@@ -594,6 +607,8 @@ function roomPanel(start){
   $('#say').onsubmit=e=>{e.preventDefault();if(!ME){regSheet(()=>{meAv();$('#say').requestSubmit()});return}
     const v=$('#sin').value.trim();if(!v)return;$('#sin').value='';
     add(`<div class="m me">${avatar(ME.name,'#9fd8ff',ME.img)}<b>${esc(ME.name)}</b>${esc(v)}</div>`);
+    pendingMine.push({name:ME.name,body:v});
+    sbReady.then(()=>sb&&sb.from('mix_chat').insert({name:ME.name,avatar:ME.img||null,body:v})).then(r=>{if(r&&r.error)console.warn('chat',r.error.message)});
     const low=v.toLowerCase();
     later(()=>{
       if(open!=='room')return;
