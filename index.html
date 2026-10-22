@@ -606,9 +606,11 @@ function roomPanel(start){
   $('#sin').onfocus=()=>{if(!ME){$('#sin').blur();regSheet(()=>{meAv();$('#sin').focus()})}};
   $('#say').onsubmit=e=>{e.preventDefault();if(!ME){regSheet(()=>{meAv();$('#say').requestSubmit()});return}
     const v=$('#sin').value.trim();if(!v)return;$('#sin').value='';
-    add(`<div class="m me">${avatar(ME.name,'#9fd8ff',ME.img)}<b>${esc(ME.name)}</b>${esc(v)}</div>`);
+    add(`<div class="m me">${avatar(ME.name,'#9fd8ff',ME.img)}<b>${esc(ME.name)}</b>${esc(v)}</div>`);const mine=chat.lastElementChild;
     pendingMine.push({name:ME.name,body:v});
-    sbReady.then(()=>sb&&sb.from('mix_chat').insert({name:ME.name,avatar:ME.img||null,body:v})).then(r=>{if(r&&r.error)console.warn('chat',r.error.message)});
+    sbReady.then(()=>sb&&sb.from('mix_chat').insert({name:ME.name,avatar:ME.img||null,body:v})).then(r=>{if(!r||!r.error)return;
+      const k=(r.error.message||'').trim(),why={mat:'без мата 🙏',link:'ссылки в чате нельзя',flood:'без флуда',slow:'не так быстро — подожди пару секунд',dup:'это уже было'}[k]||'не отправилось, попробуй ещё раз';
+      mine.style.opacity='.35';mine.title='не отправлено';add(`<div class="m sys">${why}</div>`)});
     const low=v.toLowerCase();
     later(()=>{
       if(open!=='room')return;
