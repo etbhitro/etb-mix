@@ -122,6 +122,24 @@ body.pop .panel{opacity:1;transform:none;pointer-events:auto}
 .say input{flex:1;min-width:0;height:44px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.05);padding:0 16px;outline:none}
 .say input:focus{border-color:rgba(255,255,255,.4)}
 .say button{width:44px;height:44px;border-radius:50%;background:#fff;color:#0a0a0c;display:grid;place-items:center;flex:none}
+.gate{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(5,5,8,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;transition:opacity .6s var(--ease)}
+.gate.off{opacity:0;pointer-events:none}
+.gate>div{text-align:center;display:flex;flex-direction:column;align-items:center;gap:18px}
+.gate b{font:700 clamp(40px,8vw,72px)/1 Unbounded,sans-serif;letter-spacing:-.05em}.gate b i{font-style:normal;color:var(--acc)}
+.gate small{color:var(--mute);font-size:13px}
+.av{width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:-6px;margin-right:7px;display:inline-grid;place-items:center;font:600 11px/22px Onest,sans-serif;color:#0a0a0c;background:var(--c,#fff);text-align:center}
+.me-av{width:44px;height:44px;border-radius:50%;flex:none;overflow:hidden;border:1px solid var(--line);display:grid;place-items:center}
+.me-av img{width:100%;height:100%;object-fit:cover}
+.reg{position:absolute;inset:0;z-index:5;background:rgba(10,10,14,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;animation:pop .35s var(--ease)}
+.reg h3{font:600 20px Unbounded,sans-serif;letter-spacing:-.03em}
+.reg p{color:var(--mute);font-size:13px;text-align:center;margin-top:-6px}
+.reg label{width:104px;height:104px;border-radius:50%;border:1px dashed rgba(255,255,255,.35);display:grid;place-items:center;cursor:pointer;overflow:hidden;color:var(--mute);font-size:12px;text-align:center;line-height:1.3}
+.reg label img{width:100%;height:100%;object-fit:cover}
+.reg .field{text-align:center;max-width:260px}
+.reg .btn{width:100%;max-width:260px;justify-content:center}
+.reg .btn:disabled{opacity:.4}
+.reg .cancel{color:var(--mute);font-size:13px}
+.say button.me-av{background:rgba(255,255,255,.06);color:var(--mute);border:1px solid var(--line);overflow:hidden}
 .fly{position:fixed;z-index:30;pointer-events:none;font-size:26px;animation:fly 2.2s ease-out forwards}
 @keyframes fly{to{transform:translate(var(--dx),-340px) scale(1.3);opacity:0}}
 
@@ -200,6 +218,8 @@ textarea.field{height:96px;padding:12px 14px;resize:none;line-height:1.4}
 </section>
 
 <aside class="panel glass" id="panel"></aside>
+
+<div class="gate" id="gate"><div><b>etb<i>.</i>mix</b><button class="btn solid" id="gateB">▶ Войти в эфир</button><small>нажми в любом месте</small></div></div>
 
 <footer class="player glass">
   <button class="pp" id="pp" aria-label="Играть"></button>
@@ -520,6 +540,28 @@ const FANS=[['Айбек','Бишкек','#ffb86b'],['Нурай','Карако�
 const LINES=['{c} на связи 👋','{who} 🔥','что за трек сейчас?','сохранила сет','под закат идеально','кто будет {next}?','включила на работе 🤫','вайб 💜'];
 const LIVE_LINES=['🔥🔥🔥','этот дроп 😮‍💨','{who}, давай ещё','{c} на связи 🙌','🙌🙌','бас качает'];
 let listeners=0;
+/* --- профиль слушателя: имя + фото, хранится в браузере --- */
+let ME=null;try{ME=JSON.parse(localStorage.getItem('etb.me'))}catch(e){}
+const saveMe=()=>{try{localStorage.setItem('etb.me',JSON.stringify(ME))}catch(e){}};
+const avatar=(name,co,img)=>img?`<img class="av" src="${img}" alt="">`:`<span class="av" style="--c:${co}">${esc((name||'?')[0].toUpperCase())}</span>`;
+function shrink(file){return new Promise((ok,no)=>{const r=new FileReader();r.onerror=no;r.onload=()=>{const im=new Image();im.onerror=no;im.onload=()=>{
+  const S=160,c=document.createElement('canvas');c.width=c.height=S;const k=Math.min(im.width,im.height);
+  c.getContext('2d').drawImage(im,(im.width-k)/2,(im.height-k)/2,k,k,0,0,S,S);ok(c.toDataURL('image/jpeg',.82))};im.src=r.result};r.readAsDataURL(file)})}
+function regSheet(done){
+  if(panel.querySelector('.reg'))return;
+  let img=ME&&ME.img||'';
+  panel.insertAdjacentHTML('beforeend',`<form class="reg" id="reg"><h3>Кто ты?</h3><p>фото и имя — чтобы писать в чат</p>
+    <label>${img?`<img src="${img}">`:'+ фото'}<input type="file" accept="image/*" id="rf" hidden></label>
+    <input class="field" id="rn" placeholder="Имя" maxlength="24" autocomplete="nickname" value="${esc(ME&&ME.name||'')}">
+    <button class="btn solid" id="rb">Готово</button><button type="button" class="cancel" id="rc">не сейчас</button></form>`);
+  const f=$('#reg'),chk=()=>$('#rb').disabled=!($('#rn').value.trim()&&img);chk();
+  $('#rn').oninput=chk;
+  f.addEventListener('change',async e=>{if(e.target.id!=='rf')return;const fl=e.target.files[0];if(!fl)return;
+    try{img=await shrink(fl);const l=f.querySelector('label'),inp=$('#rf');l.innerHTML=`<img src="${img}">`;l.append(inp)}catch(_){}chk()});
+  $('#rc').onclick=()=>f.remove();
+  f.onsubmit=e=>{e.preventDefault();const n=$('#rn').value.trim();if(!n||!img)return;ME={name:n,img};saveMe();f.remove();done&&done()};
+  if(!MOBILE)setTimeout(()=>$('#rn').focus(),50);
+}
 function roomPanel(start){
   const A=onAir(),N=A.now,nx=A.next;
   listeners=listeners||(A.live?260:40)+Math.random()*60|0;
@@ -528,12 +570,12 @@ function roomPanel(start){
     ${nx?`<div><span>дальше</span><p>${whenS(nx)} · ${esc(nx.who)}${nx.tag?` <i class="tag">${nx.tag}</i>`:''}</p></div>`:''}</div></div>
     <div class="pb" id="pb"><div class="chat" id="chat"></div></div>
     <div class="pf"><div class="reacts" id="rx">${['🔥','💜','🙌','🎧','😮‍💨'].map(e=>`<button>${e}</button>`).join('')}</div>
-      <form class="say" id="say"><input id="sin" placeholder="Сообщение" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
+      <form class="say" id="say"><button type="button" class="me-av" id="meav" aria-label="Профиль"></button><input id="sin" placeholder="Сообщение" autocomplete="off" maxlength="140"><button aria-label="Отправить"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l14-6-5 14-2-6z"/></svg></button></form></div>`;
   if(start&&!playing)play(N.mix||0);
   const chat=$('#chat'),pb=$('#pb');
   const add=html=>{chat.insertAdjacentHTML('beforeend',html);while(chat.children.length>40)chat.firstElementChild.remove();pb.scrollTo({top:pb.scrollHeight,behavior:'smooth'})};
   const fan=()=>{const [n,c,co]=FANS[Math.random()*FANS.length|0],L=A.live?LIVE_LINES:LINES;
-    add(`<div class="m" style="--c:${co}"><b>${n}</b>${esc(L[Math.random()*L.length|0].replace('{c}',c).replace('{who}',N.who).replace('{next}',nx?whenS(nx):'в пятницу'))}</div>`)};
+    add(`<div class="m" style="--c:${co}">${avatar(n,co)}<b>${n}</b>${esc(L[Math.random()*L.length|0].replace('{c}',c).replace('{who}',N.who).replace('{next}',nx?whenS(nx):'в пятницу'))}</div>`)};
   const etb=t=>add(`<div class="m etb"><b>etb</b>${esc(t)}</div>`);
   for(let i=0;i<3;i++)fan();
   add(`<div class="m sys">вы в эфире · ${esc(N.who)} — ${esc(N.what)}</div>`);
@@ -546,8 +588,12 @@ function roomPanel(start){
     later(loop,A.live?5000+Math.random()*6000:15000+Math.random()*15000)};
   later(loop,A.live?4000:12000);
   $('#rx').querySelectorAll('button').forEach(b=>b.onclick=()=>flyFrom(b,b.textContent));
-  $('#say').onsubmit=e=>{e.preventDefault();const v=$('#sin').value.trim();if(!v)return;$('#sin').value='';
-    add(`<div class="m me"><b>вы</b>${esc(v)}</div>`);
+  const meAv=()=>{$('#meav').innerHTML=ME?`<img src="${ME.img}" alt="">`:'<svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="5.5" r="3"/><path d="M2 15c0-3.3 2.7-5 6-5s6 1.7 6 5z"/></svg>'};meAv();
+  $('#meav').onclick=()=>regSheet(meAv);
+  $('#sin').onfocus=()=>{if(!ME){$('#sin').blur();regSheet(()=>{meAv();$('#sin').focus()})}};
+  $('#say').onsubmit=e=>{e.preventDefault();if(!ME){regSheet(()=>{meAv();$('#say').requestSubmit()});return}
+    const v=$('#sin').value.trim();if(!v)return;$('#sin').value='';
+    add(`<div class="m me">${avatar(ME.name,'#9fd8ff',ME.img)}<b>${esc(ME.name)}</b>${esc(v)}</div>`);
     const low=v.toLowerCase();
     later(()=>{
       if(open!=='room')return;
@@ -598,6 +644,14 @@ ui();
 const h=({party:'room',mixes:'room',book:'contact'})[location.hash.slice(1)]||location.hash.slice(1);
 openPanel(['room','lineup','contact'].includes(h)?h:'room',true);
 $('#lis').textContent=`${onAir().live?'live':'эфир'} · ${listeners}`;$('#npT').textContent=(MIXES[0].a?MIXES[0].a+' — ':'')+MIXES[0].t;$('#ht').textContent=MIXES[0].t;
+/* --- музыка сразу при входе: пробуем автоплей, если браузер блокирует — первый тап в любом месте запускает эфир --- */
+const gate=$('#gate'),A0=onAir().now.mix||0;
+const enter=e=>{if(gate.classList.contains('off'))return;if(e&&e.type==='keydown')e.stopPropagation();gate.classList.add('off');if(!playing)play(A0);
+  ['pointerdown','keydown','touchstart'].forEach(t=>removeEventListener(t,enter,true))};
+['pointerdown','keydown','touchstart'].forEach(t=>addEventListener(t,enter,true));
+gate.onclick=e=>e.stopPropagation();
+if(MIXES[A0].mc){mcLoad(MIXES[A0]).then(()=>{cur=A0;mcW.play();return sleep(1500)}).then(()=>mcW.getIsPaused()).then(paused=>{
+  if(!paused){playing=true;document.body.classList.add('file');ui();gate.classList.add('off')}}).catch(()=>{})}
 window.__w={play,pause,openPanel,closePanel,get cur(){return cur},get playing(){return playing}};
 </script>
 </body>
